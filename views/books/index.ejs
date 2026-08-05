@@ -1,0 +1,45 @@
+<% layout("layouts/boilerplate") %>
+
+<%- include("./includes/hero") %>
+
+<section class="container mt-5 mb-5">
+
+  <div class="row">
+
+    <!-- Sidebar -->
+
+    <div class="col-lg-3">
+
+      <%- include("./includes/filters") %>
+
+    </div>
+
+    <!-- Books -->
+
+    <div class="col-lg-9">
+
+      <% if(books.length===0){ %>
+
+      <%- include("./includes/emptyState") %>
+
+      <% } else { %>
+
+      <div class="row">
+
+        <% books.forEach(book=>{ %>
+
+        <%- include("./includes/bookCard",{book}) %>
+
+        <% }) %>
+
+      </div>
+
+      <% } %>
+
+      <%- include("../includes/pagination") %>
+
+    </div>
+
+  </div>
+
+</section>

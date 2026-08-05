@@ -1,0 +1,90 @@
+<div class="seller-card">
+
+    <div class="row align-items-center">
+
+        <!-- Avatar -->
+
+        <div class="col-md-2 text-center">
+
+            <div class="seller-avatar">
+
+                <i class="bi bi-person-fill"></i>
+
+            </div>
+
+        </div>
+
+        <!-- Seller Info -->
+
+        <div class="col-md-7">
+
+            <h3 class="fw-bold">
+
+                Seller Information
+
+            </h3>
+
+            <h5 class="mb-2">
+
+              
+                <a
+
+href="/users/<%= book.owner._id %>"
+
+class="text-decoration-none fw-bold">
+
+  <%= book.owner ? book.owner.username : "Unknown Seller" %>
+
+</a>
+
+            </h5>
+
+            <p class="text-secondary mb-2">
+
+                <i class="bi bi-patch-check-fill text-primary me-2"></i>
+
+                Verified BookLoop Seller
+
+            </p>
+
+            <p class="text-secondary mb-0">
+
+                <i class="bi bi-book me-2"></i>
+
+                Student Marketplace Member
+
+            </p>
+
+        </div>
+
+        <!-- Action Buttons -->
+
+        <div class="col-md-3 text-md-end mt-4 mt-md-0">
+
+            <% if(currentUser && book.owner && !currentUser._id.equals(book.owner._id)){ %>
+
+                <button class="btn btn-success w-100 mb-2">
+
+                    <i class="bi bi-chat-dots-fill me-2"></i>
+
+                    Contact Seller
+
+                </button>
+
+            <% } %>
+
+            <button class="btn btn-primary w-100 mb-2">
+                <a                  href="/users/<%= book.owner._id %>"
+>
+
+<i class="bi bi-person-lines-fill me-2"></i>
+view profile
+</a>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,413 @@
+.market-header{
+
+padding:60px 0;
+
+background:linear-gradient(135deg,#2563EB,#60A5FA);
+
+color:white;
+
+border-radius:25px;
+
+margin-top:25px;
+
+}
+
+.market-header h1{
+
+font-size:3rem;
+
+font-weight:700;
+
+}
+
+.market-header p{
+
+font-size:1.1rem;
+
+opacity:.9;
+
+}
+
+.empty-state{
+
+text-align:center;
+
+padding:100px 0;
+
+}
+
+.empty-state i{
+
+font-size:5rem;
+
+color:#2563EB;
+
+margin-bottom:20px;
+
+}
+
+
+
+
+/* ================= HERO ================= */
+
+.market-hero{
+
+    background:linear-gradient(135deg,#2563EB,#60A5FA);
+
+    border-radius:25px;
+
+    padding:80px 60px;
+
+    color:white;
+
+    margin-top:30px;
+
+    overflow:hidden;
+
+}
+
+.market-hero h1{
+
+    font-weight:700;
+
+}
+
+.market-hero p{
+
+    opacity:.9;
+
+}
+
+.hero-image{
+
+    width:320px;
+
+    height:320px;
+
+    background:rgba(255,255,255,.15);
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:auto;
+
+    backdrop-filter:blur(10px);
+
+}
+
+.hero-image i{
+
+    font-size:15rem !important;
+
+}
+
+.market-hero .btn{
+
+    border-radius:50px;
+
+    padding:12px 25px;
+
+}
+
+.market-hero .btn-light:hover{
+
+    transform:translateY(-3px);
+
+}
+
+.market-hero .btn-outline-light:hover{
+
+    transform:translateY(-3px);
+
+}
+
+
+
+
+/* ================= FILTER ================= */
+
+.filter-card{
+
+    background:var(--bs-body-bg);
+
+    border-radius:20px;
+
+    padding:25px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.filter-card h4{
+
+    margin-bottom:25px;
+
+}
+
+.filter-card .form-label{
+
+    font-weight:600;
+
+}
+
+.filter-card .form-control,
+
+.filter-card .form-select{
+
+    border-radius:12px;
+
+}
+
+.filter-card .btn{
+
+    border-radius:12px;
+
+}
+
+.sticky-top{
+
+    top:90px;
+
+}
+
+
+
+/* ================= BOOK CARD ================= */
+
+.marketplace-card{
+
+    border:none;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    transition:.35s;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.marketplace-card:hover{
+
+    transform:translateY(-10px);
+
+    box-shadow:0 15px 35px rgba(0,0,0,.15);
+
+}
+
+.book-image{
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.book-image img{
+
+    width:100%;
+
+    height:320px;
+
+    object-fit:cover;
+
+    transition:.4s;
+
+}
+
+.marketplace-card:hover img{
+
+    transform:scale(1.06);
+
+}
+
+.category-badge{
+
+    position:absolute;
+
+    left:15px;
+
+    top:15px;
+
+}
+
+.wishlist-btn{
+
+    position:absolute;
+
+    right:15px;
+
+    top:15px;
+
+    width:45px;
+
+    height:45px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:white;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+
+    transition:.3s;
+
+}
+
+.wishlist-btn:hover{
+
+    color:red;
+
+    transform:scale(1.1);
+
+}
+
+.book-title{
+
+    font-weight:700;
+
+    min-height:55px;
+
+}
+
+.book-description{
+
+    color:#64748B;
+
+    font-size:.95rem;
+
+    min-height:70px;
+
+}
+
+.price{
+
+    color:#2563EB;
+
+    font-weight:700;
+
+}
+
+.seller{
+
+    color:#64748B;
+
+    font-size:.95rem;
+
+}
+
+
+
+
+
+
+/* ================= EMPTY STATE ================= */
+
+.empty-state{
+
+    text-align:center;
+
+    padding:80px 20px;
+
+}
+
+.empty-icon{
+
+    width:130px;
+
+    height:130px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:#EFF6FF;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+.empty-icon i{
+
+    font-size:4rem;
+
+    color:#2563EB;
+
+}
+
+.empty-state h2{
+
+    font-weight:700;
+
+}
+
+.empty-state p{
+
+    max-width:500px;
+
+    margin:auto;
+
+}
+
+
+
+
+
+
+/* ================= PAGINATION ================= */
+
+.pagination{
+
+    margin-top:60px;
+
+}
+
+.page-link{
+
+    border:none;
+
+    width:45px;
+
+    height:45px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:0 6px;
+
+    border-radius:50%!important;
+
+    color:#2563EB;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+}
+
+.page-item.active .page-link{
+
+    background:#2563EB;
+
+}
+
+.page-link:hover{
+
+    background:#2563EB;
+
+    color:white;
+
+}

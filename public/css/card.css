@@ -1,0 +1,39 @@
+.marketplace-card{
+
+border:none;
+
+border-radius:20px;
+
+overflow:hidden;
+
+transition:.35s;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.marketplace-card:hover{
+
+transform:translateY(-10px);
+
+}
+
+.marketplace-card img{
+
+height:280px;
+
+object-fit:cover;
+
+}
+
+.marketplace-card .card-body{
+
+padding:25px;
+
+}
+
+.marketplace-card h5{
+
+font-weight:700;
+
+}

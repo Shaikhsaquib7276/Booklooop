@@ -1,0 +1,265 @@
+<div class="filter-card sticky-top">
+
+    <h4 class="fw-bold mb-4">
+
+        <i class="bi bi-funnel-fill text-primary"></i>
+
+        Filters
+
+    </h4>
+
+    <form action="/books" method="GET">
+
+        <!-- Search -->
+
+        <div class="mb-4">
+
+            <label class="form-label">
+
+                Search
+
+            </label>
+
+            <input
+
+                type="text"
+
+                class="form-control"
+
+                name="q"
+
+                value="<%= q || '' %>"
+
+                placeholder="Book title or author"
+
+            >
+
+        </div>
+
+        <!-- Category -->
+
+        <div class="mb-4">
+
+            <label class="form-label">
+
+                Category
+
+            </label>
+
+            <select
+
+                class="form-select"
+
+                name="category">
+
+                <option value="">All Categories</option>
+
+                <option value="Engineering" <%= category==="Engineering"?"selected":"" %>>
+
+                    Engineering
+
+                </option>
+
+                <option value="Programming" <%= category==="Programming"?"selected":"" %>>
+
+                    Programming
+
+                </option>
+
+                <option value="Medical" <%= category==="Medical"?"selected":"" %>>
+
+                    Medical
+
+                </option>
+
+                <option value="School" <%= category==="School"?"selected":"" %>>
+
+                    School
+
+                </option>
+
+                <option value="Novel" <%= category==="Novel"?"selected":"" %>>
+
+                    Novel
+
+                </option>
+
+                <option value="Competitive" <%= category==="Competitive"?"selected":"" %>>
+
+                    Competitive
+
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Condition -->
+
+        <div class="mb-4">
+
+            <label class="form-label">
+
+                Condition
+
+            </label>
+
+            <select
+
+                class="form-select"
+
+                name="condition">
+
+                <option value="">All</option>
+
+                <option value="New" <%= condition==="New"?"selected":"" %>>
+
+                    New
+
+                </option>
+
+                <option value="Like New" <%= condition==="Like New"?"selected":"" %>>
+
+                    Like New
+
+                </option>
+
+                <option value="Good" <%= condition==="Good"?"selected":"" %>>
+
+                    Good
+
+                </option>
+
+                <option value="Fair" <%= condition==="Fair"?"selected":"" %>>
+
+                    Fair
+
+                </option>
+
+                <option value="Poor" <%= condition==="Poor"?"selected":"" %>>
+
+                    Poor
+
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Price -->
+
+        <div class="row mb-4">
+
+            <div class="col">
+
+                <label class="form-label">
+
+                    Min
+
+                </label>
+
+                <input
+
+                    type="number"
+
+                    class="form-control"
+
+                    name="minPrice"
+
+                    value="<%= minPrice || '' %>"
+
+                    placeholder="0">
+
+            </div>
+
+            <div class="col">
+
+                <label class="form-label">
+
+                    Max
+
+                </label>
+
+                <input
+
+                    type="number"
+
+                    class="form-control"
+
+                    name="maxPrice"
+
+                    value="<%= maxPrice || '' %>"
+
+                    placeholder="5000">
+
+            </div>
+
+        </div>
+
+        <!-- Sort -->
+
+        <div class="mb-4">
+
+            <label class="form-label">
+
+                Sort By
+
+            </label>
+
+            <select
+
+                class="form-select"
+
+                name="sort">
+
+                <option value="">Newest</option>
+
+                <option value="priceLow" <%= sort==="priceLow"?"selected":"" %>>
+
+                    Price Low → High
+
+                </option>
+
+                <option value="priceHigh" <%= sort==="priceHigh"?"selected":"" %>>
+
+                    Price High → Low
+
+                </option>
+
+                <option value="az" <%= sort==="az"?"selected":"" %>>
+
+                    A → Z
+
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Buttons -->
+
+        <div class="d-grid gap-2">
+
+            <button class="btn btn-primary">
+
+                <i class="bi bi-search me-2"></i>
+
+                Apply Filters
+
+            </button>
+
+            <a
+
+                href="/books"
+
+                class="btn btn-outline-secondary">
+
+                Reset Filters
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>

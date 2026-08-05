@@ -1,0 +1,58 @@
+<% if(totalPages > 1){ %>
+
+<nav class="mt-5">
+
+<ul class="pagination justify-content-center">
+
+    <!-- Previous -->
+
+    <li class="page-item <%= currentPage==1 ? "disabled" : "" %>">
+
+        <a
+        class="page-link"
+
+        href="?page=<%= currentPage-1 %>&q=<%= q %>&category=<%= category %>&condition=<%= condition %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">
+
+            Previous
+
+        </a>
+
+    </li>
+
+    <% for(let i=1;i<=totalPages;i++){ %>
+
+        <li class="page-item <%= currentPage==i ? "active" : "" %>">
+
+            <a
+            class="page-link"
+
+            href="?page=<%= i %>&q=<%= q %>&category=<%= category %>&condition=<%= condition %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">
+
+                <%= i %>
+
+            </a>
+
+        </li>
+
+    <% } %>
+
+    <!-- Next -->
+
+    <li class="page-item <%= currentPage==totalPages ? "disabled" : "" %>">
+
+        <a
+        class="page-link"
+
+        href="?page=<%= currentPage+1 %>&q=<%= q %>&category=<%= category %>&condition=<%= condition %>&sort=<%= sort %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>">
+
+            Next
+
+        </a>
+
+    </li>
+
+</ul>
+
+</nav>
+
+<% } %>

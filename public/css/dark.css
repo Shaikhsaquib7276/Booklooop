@@ -1,0 +1,57 @@
+body.dark{
+
+    --background:#0F172A;
+
+    --card:#1E293B;
+
+    --text:#F8FAFC;
+
+    --text-light:#CBD5E1;
+
+    --border:#334155;
+
+}
+
+body.dark .navbar{
+
+    background: #020617 !important;;
+
+}
+
+body.dark .card{
+
+background: var(--card);
+
+    color: var(--text);
+}
+
+body.dark .nav-link{
+
+    color:white!important;
+
+}
+
+body.dark .navbar-brand{
+
+    color:#60A5FA!important;
+
+}
+body.dark .form-control,
+body.dark .form-select{
+
+    background:#1E293B;
+
+    color:white;
+
+    border:1px solid #334155;
+
+}
+
+body.dark .form-control:focus,
+body.dark .form-select:focus{
+
+    background:#1E293B;
+
+    color:white;
+
+}

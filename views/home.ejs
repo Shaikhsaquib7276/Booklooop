@@ -1,0 +1,179 @@
+<% layout("layouts/boilerplate") %>
+
+    <!-- HERO -->
+
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <span class="badge bg-light text-primary px-3 py-2 mb-3">
+                        Student Marketplace
+                    </span>
+                    <h1>
+                        Buy & Sell
+                        <span class="text-warning">
+                            Second-Hand Books
+                        </span>
+                    </h1>
+                    <p>
+                        Save money, reduce waste and help fellow students by
+                        buying and selling quality second-hand books.
+                    </p>
+                    <div class="mt-4">
+                        <a href="/books" class="btn btn-light btn-lg me-2">
+                            Browse Books
+                        </a>
+                        <% if(currentUser){ %>
+                            <a href="/books/new" class="btn btn-outline-light btn-lg">
+                                Sell Book
+                            </a>
+                            <% } %>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <i class="bi bi-book-half hero-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- CATEGORIES -->
+    <section>
+        <div class="container">
+            <h2 class="section-title text-center">
+                Browse Categories
+            </h2>
+            <div class="row g-4">
+                <% const categories=[ ["Engineering","bi-cpu"], ["Medical","bi-heart-pulse"],
+                    ["Programming","bi-code-slash"], ["School","bi-pencil-square"], ["Competitive","bi-trophy"],
+                    ["Novel","bi-book"] ];
+                     categories.forEach(cat=>{
+                    %>
+                    <div class="col-md-4 col-lg-2">
+                        <div class="category-card">
+                            <i class="bi <%= cat[1] %>"></i>
+                            <h6 class="mt-3">
+                                <%= cat[0] %>
+                            </h6>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+    </section>
+  
+    <section>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">
+                    Latest Books
+                </h2>
+                <a href="/books" class="btn btn-outline-primary">
+                    View All
+                </a>
+            </div>
+            <div class="row">
+                <% latestBooks.forEach(book=>{ %>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card book-card h-100">
+                            <img src="<%= book.image.url %>" class="card-img-top">
+                            <span>
+                                        <%- include("./includes/wishlistButton",{book}) %></span>
+                            <div class="card-body">
+                                <h5>
+                                    <%= book.title %>
+                                </h5>
+                                <p class="text-secondary">
+                                    <%= book.author %>
+                                </p>
+                                <div class="d-flex justify-content-sm-evenly">
+                                    <strong>
+                                        ₹<%= book.price %>
+                                    </strong>
+                                    
+                                    <% if(book.status==="Available"){ %>
+
+<span class="badge bg-success">
+
+🟢 Available
+
+</span>
+
+<% } %>
+
+<% if(book.status==="Reserved"){ %>
+
+<span class="badge bg-warning text-dark">
+
+🟡 Reserved
+
+</span>
+
+<% } %>
+
+<% if(book.status==="Sold"){ %>
+
+<span class="badge bg-danger">
+
+🔴 Sold
+
+</span>
+
+<% } %>
+                                    <span class="badge bg-primary">
+                                        <%= book.condition %>
+                                    </span>
+                                    
+                                </div>
+                                <a href="/books/<%= book._id %>" class="btn btn-primary w-100 mt-3">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+    </section>
+    <!-- WHY -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">
+                Why Choose BookLoop?
+            </h2>
+            <div class="row g-4 mt-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="bi bi-cash-stack"></i>
+                        <h4>
+                            Affordable
+                        </h4>
+                        <p>
+                            Buy books at lower prices.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="bi bi-recycle"></i>
+                        <h4>
+                            Eco Friendly
+                        </h4>
+                        <p>
+                            Reuse books and reduce waste.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="bi bi-people"></i>
+                        <h4>
+                            Community
+                        </h4>
+                        <p>
+                            Connect with students nearby.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>

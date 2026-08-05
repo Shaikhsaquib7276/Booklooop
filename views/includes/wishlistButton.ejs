@@ -1,0 +1,25 @@
+<% if(currentUser){ %>
+
+<form
+    action="/wishlist/toggle/<%= book._id %>"
+    method="POST"
+    class="d-inline">
+
+    <button
+        class="btn btn-light rounded-circle shadow-sm border-0">
+
+        <% if(wishlist.includes(book._id.toString())){ %>
+
+            <i class="bi bi-heart-fill text-danger"></i>
+
+        <% } else { %>
+
+            <i class="bi bi-heart"></i>
+
+        <% } %>
+
+    </button>
+
+</form>
+
+<% } %>

@@ -1,0 +1,174 @@
+<!-- Book Title -->
+
+<h1 class="fw-bold display-5">
+
+    <%= book.title %>
+
+</h1>
+
+<!-- Author -->
+
+<p class="fs-5 text-secondary mb-3">
+
+    <i class="bi bi-person-fill me-2"></i>
+
+    <%= book.author %>
+
+</p>
+
+<!-- Badges -->
+
+<div class="mb-4">
+
+    <span class="badge bg-primary fs-6 me-2 px-3 py-2">
+
+        <i class="bi bi-bookmark-fill"></i>
+
+        <%= book.category %>
+
+    </span>
+
+    <span class="badge bg-success fs-6 px-3 py-2">
+
+        <i class="bi bi-patch-check-fill"></i>
+
+        <%= book.condition %>
+
+    </span>
+     <% if(book.status==="Available"){ %>
+
+<span class="badge bg-success fs-6 me-2 px-3 py-2">
+
+🟢 Available
+
+</span>
+
+<% } %>
+
+<% if(book.status==="Reserved"){ %>
+
+<span class="badge bg-warning text-dark fs-6 me-2 px-3 py-2">
+
+🟡 Reserved
+
+</span>
+
+<% } %>
+
+<% if(book.status==="Sold"){ %>
+
+<span class="badge bg-danger fs-6 me-2 px-3 py-2">
+
+🔴 Sold
+
+</span>
+
+<% } %>
+
+</div>
+
+<!-- Price -->
+
+<div class="price-box mb-4">
+
+    ₹<%= book.price %>
+
+</div>
+
+<!-- Description -->
+
+<h4 class="fw-bold">
+
+    Description
+
+</h4>
+
+<p class="book-description">
+
+    <%= book.description %>
+
+</p>
+
+<hr>
+
+<!-- Buttons -->
+
+<div class="d-flex flex-wrap gap-3 mt-4">
+
+
+
+         <% if(currentUser){ %>
+            <div>
+    
+    <% if(currentUser){ %>
+        <%- include("../../includes/wishlistButton", { book }) %>
+        <% } %>
+    </div>
+
+    <% } %>
+
+
+
+    <button class="btn btn-outline-primary">
+
+        <i class="bi bi-share-fill me-2"></i>
+
+        Share
+
+    </button>
+
+    <button class="btn btn-success">
+
+        <i class="bi bi-chat-dots-fill me-2"></i>
+
+        Contact Seller
+
+    </button>
+
+</div>
+
+<!-- Owner Controls -->
+
+<% if(currentUser && book.owner && currentUser._id.equals(book.owner._id)){ %>
+
+<hr class="my-3">
+
+<h5 class="fw-bold mb-3">
+
+    Owner Actions
+
+</h5>
+
+<div class="d-flex gap-3">
+
+    <a
+
+        href="/books/<%= book._id %>/edit"
+
+        class="btn btn-warning">
+
+        <i class="bi bi-pencil-square me-2"></i>
+
+        Edit
+
+    </a>
+
+    <form
+
+        action="/books/<%= book._id %>?_method=DELETE"
+
+        method="POST">
+
+        <button class="btn btn-danger">
+
+            <i class="bi bi-trash-fill me-2"></i>
+
+            Delete
+
+        </button>
+
+    </form>
+
+</div>
+
+<% } %>

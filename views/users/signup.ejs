@@ -1,0 +1,101 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <h2 class="mb-4">Create Account</h2>
+
+    <form action="/signup" method="POST" novalidate class="needs-validation">
+      <!-- <input
+        type="hidden"
+        id="phoneVerified"
+        name="phoneVerified"
+        value="false"
+      /> -->
+      <div id="otpSection">
+        <div class="mb-3">
+          <label class="form-label"> Phone Number </label>
+
+          <div class="input-group">
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              class="form-control"
+              placeholder="+91XXXXXXXXXX"
+              required
+              value="+91"
+            />
+
+            <button type="button" id="sendOTP" class="btn btn-outline-primary">
+              Send OTP
+            </button>
+          </div>
+          <!-- captcha  -->
+          <div id="recaptcha-container" class="mt-3"></div>
+          <!-- captcha end  -->
+          <!-- enter otp  -->
+
+          <div class="mb-3">
+            <label class="form-label"> OTP </label>
+
+            <div class="input-group">
+              <input
+                type="text"
+                id="otp"
+                class="form-control"
+                placeholder="Enter OTP"
+                disabled
+              />
+
+              <button
+                type="button"
+                id="verifyOTP"
+                class="btn btn-outline-success"
+                disabled
+              >
+                Verify
+              </button>
+            </div>
+          </div>
+          <!-- enter otp end  -->
+          <!-- otp status -->
+          <div id="otpStatus"></div>
+          <!-- otp status end  -->
+        </div>
+      </div>
+      <div id="signupSection" class="d-none">
+        <div class="mb-3">
+          <label>Username</label>
+
+          <input name="username" class="form-control" required />
+          <div class="invalid-feedback">Please Enter username</div>
+        </div>
+
+        <div class="mb-3">
+          <label>Email</label>
+
+          <input type="email" name="email" class="form-control" required />
+          <div class="invalid-feedback">Please Enter Email id</div>
+        </div>
+        <!--  -->
+        <!--  -->
+        <div class="mb-3">
+          <label>Password</label>
+
+          <input
+            id="password"
+            type="password"
+            name="password"
+            class="form-control"
+            required
+            disabled
+          />
+          <div class="invalid-feedback">Please Enter password</div>
+        </div>
+        <button id="createAccount" class="btn btn-primary w-100" disabled>
+          Create Account
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

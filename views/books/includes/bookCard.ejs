@@ -1,0 +1,142 @@
+<div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+
+    <div class="card marketplace-card h-100">
+
+        <!-- Book Image -->
+
+        <div class="book-image">
+
+            <img src="<%= book.image.url %>" alt="<%= book.title %>">
+
+            <!-- Wishlist -->
+<div>
+    
+    <% if(currentUser){ %>
+        <%- include("../../includes/wishlistButton", { book }) %>
+        <% } %>
+    </div>
+
+                    <!-- Category -->
+
+                    
+                    <span class="badge bg-primary category-badge">
+ 
+                         <%= book.category %>
+ 
+                     </span>
+        </div>
+
+        <!-- Body -->
+
+        <div class="card-body d-flex flex-column">
+
+            <!-- Title -->
+
+            <h5 class="book-title">
+
+                <%= book.title %>
+
+            </h5>
+
+            <!-- Author -->
+
+            <p class="text-secondary mb-2">
+
+                <i class="bi bi-person-fill me-1"></i>
+
+                <%= book.author %>
+
+            </p>
+
+            <!-- Description -->
+
+            <p class="book-description">
+
+                <%= book.description.substring(0,90) %>...
+
+            </p>
+
+            <!-- Condition -->
+
+            <div class="mb-3">
+
+                <span class="badge bg-success">
+
+                    <%= book.condition %>
+
+                </span>
+               
+                    <% if(book.status==="Available"){ %>
+
+<span class="badge bg-success">
+
+🟢 Available
+
+</span>
+
+<% } %>
+
+<% if(book.status==="Reserved"){ %>
+
+<span class="badge bg-warning text-dark">
+
+🟡 Reserved
+
+</span>
+
+<% } %>
+
+<% if(book.status==="Sold"){ %>
+
+<span class="badge bg-danger">
+
+🔴 Sold
+
+</span>
+
+<% } %>
+               
+
+            </div>
+
+            <!-- Price -->
+
+            <h3 class="price mb-3">
+
+                ₹<%= book.price %>
+
+            </h3>
+
+            <!-- Seller -->
+
+            <div class="seller mb-3">
+
+                <i class="bi bi-person-circle"></i>
+
+                <strong>
+
+                    <%= book.owner ? book.owner.username : "Unknown Seller" %>
+
+                </strong>
+
+            </div>
+
+            <!-- Buttons -->
+
+            <div class="mt-auto">
+
+                <a href="/books/<%= book._id %>" class="btn btn-primary w-100">
+
+                    <i class="bi bi-eye-fill me-2"></i>
+
+                    View Details
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

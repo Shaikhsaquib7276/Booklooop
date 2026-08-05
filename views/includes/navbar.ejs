@@ -1,0 +1,184 @@
+<nav class="navbar navbar-expand-lg sticky-top">
+
+  <div class="container">
+
+    <!-- Logo -->
+
+    <a class="navbar-brand d-flex align-items-center" href="/">
+
+      <i class="bi bi-book-half fs-2 me-2"></i>
+
+      <span>BookLoop</span>
+
+    </a>
+
+    <!-- Mobile -->
+
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar">
+
+      <span class="navbar-toggler-icon"></span>
+
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbar">
+
+      <!-- Center Search -->
+
+      <form class="d-flex mx-auto search-form">
+
+        <div class="input-group">
+
+          <span class="input-group-text">
+
+            <i class="bi bi-search"></i>
+
+          </span>
+
+          <input class="form-control" placeholder="Search books...">
+
+        </div>
+
+      </form>
+
+      <!-- Right Menu -->
+
+      <ul class="navbar-nav align-items-center">
+
+        <li class="nav-item">
+
+          <a class="nav-link" href="/">
+
+            Home
+
+          </a>
+
+        </li>
+
+        <li class="nav-item">
+
+          <a class="nav-link" href="/books">
+
+            Browse
+
+          </a>
+
+        </li>
+
+        <% if(currentUser){ %>
+
+        <li class="nav-item">
+
+          <a class="nav-link" href="/books/new">
+
+            Sell Book
+
+          </a>
+
+        </li>
+
+        <li class="nav-item">
+
+    <a
+        href="/wishlist"
+        class="nav-link position-relative">
+
+        <i class="bi bi-heart-fill text-danger"></i>
+
+        Wishlist
+
+        <% if(currentUser){ %>
+
+        <span
+        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+
+            <%= wishlistCount %>
+
+        </span>
+
+        <% } %>
+
+    </a>
+
+</li>
+
+        <li class="nav-item dropdown">
+
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+
+            <i class="bi bi-person-circle"></i>
+
+            <%= currentUser.username %>
+
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end">
+
+            <li>
+
+              <a class="dropdown-item" href="/dashboard">
+
+                Dashboard
+
+              </a>
+
+            </li>
+
+            <li>
+
+              <a class="dropdown-item" href="/logout">
+
+                Logout
+
+              </a>
+
+            </li>
+
+          </ul>
+
+        </li>
+
+        <% }else{ %>
+
+
+
+        <li class="nav-item">
+
+          <a class="nav-link" href="/login">
+
+            Login
+
+          </a>
+
+        </li>
+
+        <li class="nav-item">
+
+          <a class="btn btn-primary ms-2" href="/signup">
+
+            Sign Up
+
+          </a>
+
+        </li>
+
+        <% } %>
+
+        <!-- Theme -->
+
+        <li class="nav-item ms-3">
+
+          <button id="themeToggle" class="btn btn-outline-primary rounded-circle">
+
+            <i class="bi bi-moon-stars-fill"></i>
+
+          </button>
+
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+
+</nav>

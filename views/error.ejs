@@ -1,0 +1,7 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="text-center mt-5">
+  <h1 class="display-1"><%= typeof statusCode !== 'undefined' ? statusCode : 500 %></h1>
+  <p><%= message %></p>
+  <a href="/" class="btn btn-primary"> Back Home </a>
+</div>

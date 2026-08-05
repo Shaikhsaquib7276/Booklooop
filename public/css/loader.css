@@ -1,0 +1,158 @@
+.loader-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:rgba(10,10,10,.75);
+
+    backdrop-filter:blur(12px);
+
+    z-index:9999;
+
+    opacity:0;
+
+    visibility:hidden;
+
+    transition:.35s;
+}
+
+.loader-overlay.active{
+
+    opacity:1;
+
+    visibility:visible;
+
+}
+
+/* -------------------------- */
+
+.loader-card{
+
+    width:370px;
+
+    padding:40px;
+
+    border-radius:22px;
+
+    background:rgba(30,30,30,.75);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    text-align:center;
+
+    color:white;
+
+    animation:pop .35s ease;
+
+    box-shadow:
+
+    0 25px 80px rgba(0,0,0,.45);
+
+}
+
+/* -------------------------- */
+
+.loader-icon{
+
+    font-size:60px;
+
+    margin-bottom:18px;
+
+    animation:float 2s ease infinite;
+
+}
+
+#loaderTitle{
+
+    font-weight:700;
+
+    margin-bottom:12px;
+
+}
+
+#loaderMessage{
+
+    color:#c8c8c8;
+
+    font-size:15px;
+
+    margin-bottom:25px;
+
+}
+
+/* -------------------------- */
+
+.loader-spinner{
+
+    width:55px;
+
+    height:55px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    border:5px solid rgba(255,255,255,.15);
+
+    border-top:5px solid #4f8cff;
+
+    animation:spin .8s linear infinite;
+
+}
+
+/* -------------------------- */
+
+@keyframes spin{
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+@keyframes pop{
+
+    from{
+
+        opacity:0;
+
+        transform:scale(.85);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
+
+@keyframes float{
+
+    0%,100%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-8px);
+
+    }
+
+}

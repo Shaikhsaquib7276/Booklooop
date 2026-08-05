@@ -1,0 +1,49 @@
+<div class="empty-state">
+
+    <div class="empty-icon">
+
+        <i class="bi bi-journal-x"></i>
+
+    </div>
+
+    <h2 class="mt-4">
+
+        No Books Found
+
+    </h2>
+
+    <p class="text-secondary">
+
+        We couldn't find any books matching your search or filters.
+
+    </p>
+
+    <div class="mt-4">
+
+        <a
+            href="/books"
+            class="btn btn-outline-primary me-2">
+
+            <i class="bi bi-arrow-repeat"></i>
+
+            Reset Filters
+
+        </a>
+
+        <% if(currentUser){ %>
+
+            <a
+                href="/books/new"
+                class="btn btn-primary">
+
+                <i class="bi bi-plus-circle"></i>
+
+                Sell Your Book
+
+            </a>
+
+        <% } %>
+
+    </div>
+
+</div>

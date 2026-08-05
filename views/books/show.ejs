@@ -1,0 +1,71 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container py-5">
+
+    <!-- Back Button -->
+
+    <div class="mb-4">
+
+        <a
+            href="/books"
+            class="btn btn-outline-primary">
+
+            <i class="bi bi-arrow-left"></i>
+
+            Back to Books
+
+        </a>
+
+    </div>
+
+    <!-- Main Content -->
+
+    <div class="row g-5">
+
+        <!-- Left -->
+
+        <div class="col-lg-5">
+
+            <div class="book-image-card">
+
+                <img
+
+                    src="<%= book.image.url %>"
+
+                    alt="<%= book.title %>"
+
+                    class="img-fluid rounded-4"
+
+                >
+
+            </div>
+
+        </div>
+
+        <!-- Right -->
+
+        <div class="col-lg-7">
+
+            <%- include("./includes/bookInfo") %>
+
+        </div>
+
+    </div>
+
+    <!-- Seller -->
+
+    <div class="mt-5">
+
+        <%- include("./includes/sellerCard") %>
+
+    </div>
+
+    <!-- Related Books -->
+
+    <div class="mt-5">
+
+        <%- include("./includes/relatedBooks") %>
+
+    </div>
+
+</div>
