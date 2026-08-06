@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const bookController = require("../controller/bookController");
-const dashboardController = require("../controller/dashboardController")
 const isLoggedIn = require("../middleware/isLoggedIn");
 const validateBook = require("../middleware/validateBook");
 const wrapAsync = require("../utils/wrapAsync");
@@ -10,7 +9,19 @@ const multer = require("multer");
 const { storage } = require("../cloudConfig/cloudinary");
 
 const upload = multer({
-    storage
+    storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    },
+    fileFilter: (req, file, callback) => {
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            return callback(null, true);
+        }
+
+        callback(new Error("Only JPG, PNG, and WebP image files are allowed."));
+    }
 });
 // const multer = require("multer");
 // const upload = multer({
@@ -31,7 +42,7 @@ router.route("/books")
 
 router.get(
     "/books/new",
-    
+    isLoggedIn,
     bookController.renderNewForm
 );
 
@@ -40,6 +51,7 @@ router.get(
 router.get(
     "/books/:id/edit",
     isLoggedIn,
+    isOwned,
     bookController.renderEditForm
 );
 

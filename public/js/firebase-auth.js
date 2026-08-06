@@ -16,30 +16,30 @@ const firebaseConfig = {
     measurementId: "G-4V1WBF9SM4"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const phoneInput = document.getElementById("phone");
+const sendOtpButton = document.getElementById("sendOTP");
+const verifyOtpButton = document.getElementById("verifyOTP");
+const recaptchaContainer = document.getElementById("recaptcha-container");
 
-// ===========================
-// Setup Recaptcha
-// ===========================
+if (phoneInput && sendOtpButton && verifyOtpButton && recaptchaContainer) {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-window.recaptchaVerifier = new RecaptchaVerifier(
-    auth,
-    "recaptcha-container",
-    {
-        size: "normal"
-    }
-);
+    window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+            size: "normal"
+        }
+    );
 
-await window.recaptchaVerifier.render();
+    await window.recaptchaVerifier.render();
 
 // ===========================
 // Send OTP
 // ===========================
 
-document
-.getElementById("sendOTP")
-.addEventListener("click", sendOTP);
+    sendOtpButton.addEventListener("click", sendOTP);
 
 async function sendOTP() {
 
@@ -117,9 +117,7 @@ async function sendOTP() {
 // Verify OTP
 // ===========================
 
-document
-.getElementById("verifyOTP")
-.addEventListener("click", verifyOTP);
+    verifyOtpButton.addEventListener("click", verifyOTP);
 
 async function verifyOTP(){
 
@@ -197,5 +195,7 @@ async function verifyOTP(){
         `;
 
     }
+
+}
 
 }

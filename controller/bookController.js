@@ -1,5 +1,6 @@
 const path = require("path");
 const Book = require("../models/Book");
+const Reservation = require("../models/Reservation");
 
 
 
@@ -24,7 +25,11 @@ module.exports.index = async (req, res) => {
         page = 1
     } = req.query;
 
-page = parseInt(page);
+    page = Number.parseInt(page, 10);
+
+    if (!Number.isFinite(page) || page < 1) {
+        page = 1;
+    }
 
 const limit = 8;
 const skip = (page - 1) * limit;
@@ -62,31 +67,33 @@ const skip = (page - 1) * limit;
             filter.price.$lte = Number(maxPrice);
         }
     }
-const totalBooks = await Book.countDocuments(filter);
-let query = Book.find(filter);
-
-const books = await query
-    .skip(skip)
-    .limit(limit)
-    .populate("owner");
+    let sortOption;
     switch (sort) {
 
         case "priceLow":
-            query = query.sort({ price: 1 });
+            sortOption = { price: 1 };
             break;
 
         case "priceHigh":
-            query = query.sort({ price: -1 });
+            sortOption = { price: -1 };
             break;
 
         case "az":
-            query = query.sort({ title: 1 });
+            sortOption = { title: 1 };
             break;
 
         default:
-            query = query.sort({ createdAt: -1 });
+            sortOption = { createdAt: -1 };
     }
 
+    const [totalBooks, books] = await Promise.all([
+        Book.countDocuments(filter),
+        Book.find(filter)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .populate("owner")
+    ]);
 
    res.render("books/index", {
 
@@ -94,7 +101,7 @@ const books = await query
 
     currentPage: page,
 
-    totalPages: Math.ceil(totalBooks / limit),
+    totalPages: Math.max(1, Math.ceil(totalBooks / limit)),
 
     totalBooks,
 
@@ -135,11 +142,22 @@ module.exports.showBook = async (req,res)=>{
 
     }).limit(4);
 
+    let reservation = null;
+
+    if (req.user && book.owner && !book.owner._id.equals(req.user._id)) {
+        reservation = await Reservation.findOne({
+            book: book._id,
+            buyer: req.user._id
+        });
+    }
+
     res.render("books/show",{
 
         book,
 
         relatedBooks,
+
+        reservation,
 
         title:book.title
 
@@ -190,6 +208,7 @@ module.exports.renderNewForm = (req, res) => {
 module.exports.deleteBook = async (req, res) => {
     const { id } = req.params;
     await Book.findByIdAndDelete(id);
+    await Reservation.deleteMany({ book: id });
     req.flash("success", "Book deleted successfully.");
     res.redirect("/books");
 };

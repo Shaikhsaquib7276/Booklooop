@@ -97,14 +97,26 @@
 
 
 
-         <% if(currentUser){ %>
-            <div>
-    
+    <% if (currentUser && book.owner && !currentUser._id.equals(book.owner._id)) { %>
+        <% if (reservation) { %>
+            <span class="btn btn-outline-secondary disabled">
+                Request <%= reservation.status %>
+            </span>
+        <% } else if (book.status === "Available") { %>
+            <form action="/reservations" method="POST">
+                <input type="hidden" name="bookId" value="<%= book._id %>">
+                <button class="btn btn-success">
+                    <i class="bi bi-bookmark-check-fill me-2"></i>
+                    Request to Reserve
+                </button>
+            </form>
+        <% } %>
+    <% } else if (!currentUser) { %>
+        <a href="/login" class="btn btn-success">Login to Request</a>
+    <% } %>
+
     <% if(currentUser){ %>
         <%- include("../../includes/wishlistButton", { book }) %>
-        <% } %>
-    </div>
-
     <% } %>
 
 
@@ -114,14 +126,6 @@
         <i class="bi bi-share-fill me-2"></i>
 
         Share
-
-    </button>
-
-    <button class="btn btn-success">
-
-        <i class="bi bi-chat-dots-fill me-2"></i>
-
-        Contact Seller
 
     </button>
 

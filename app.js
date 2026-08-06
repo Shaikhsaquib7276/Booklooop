@@ -50,6 +50,7 @@ const bookRoutes = require("./routes/books");
 const dashboardRoute = require("./routes/dashboard");
 const profileRoute=require("./routes/profile");
 const wishlistRoute=require("./routes/wishlist");
+const reservationRoute = require("./routes/reservations");
 
 
 
@@ -75,6 +76,7 @@ app.use(bookRoutes);
 app.use("/", dashboardRoute);
 app.use("/",profileRoute);
 app.use("/",wishlistRoute);
+app.use("/", reservationRoute);
 
 
 // Home Route

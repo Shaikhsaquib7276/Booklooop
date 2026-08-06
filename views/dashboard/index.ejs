@@ -31,7 +31,7 @@
                     <i class="bi bi-book display-5 text-primary"></i>
 
                     <h2>
-                        <%= totalBooks %>
+                        <%= availableBooks %>
                     </h2>
 
                     <p>Total Books</p>
@@ -77,7 +77,7 @@
 
                     <i class="bi bi-heart-fill display-5 text-danger"></i>
 
-                    <h2>0</h2>
+                    <h2><%= wishlistCount %></h2>
 
                     <p>Wishlist</p>
 
@@ -203,5 +203,43 @@
                 </div>
 
                 <% } %>
+
+        <hr class="my-5">
+
+        <h2 class="fw-bold mb-4">Pending Reservation Requests</h2>
+
+        <% if (pendingReservations.length === 0) { %>
+            <div class="alert alert-light border">There are no pending reservation requests for your listings.</div>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Book</th>
+                            <th>Buyer</th>
+                            <th>Requested</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% pendingReservations.forEach((reservation) => { %>
+                            <tr>
+                                <td><%= reservation.book ? reservation.book.title : "Deleted listing" %></td>
+                                <td><%= reservation.buyer ? reservation.buyer.username : "Deleted user" %></td>
+                                <td><%= new Date(reservation.createdAt).toLocaleDateString() %></td>
+                                <td class="text-end">
+                                    <form action="/reservations/<%= reservation._id %>/accept" method="POST" class="d-inline">
+                                        <button class="btn btn-success btn-sm">Accept</button>
+                                    </form>
+                                    <form action="/reservations/<%= reservation._id %>/reject" method="POST" class="d-inline">
+                                        <button class="btn btn-outline-danger btn-sm">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
 
     </div>
