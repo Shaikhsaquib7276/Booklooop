@@ -1,83 +1,55 @@
 <% layout("layouts/boilerplate") %>
 
-<div class="container py-5">
-
-  <div class="text-center">
-
-    <img src="<%= seller.profileImage.url %>" class="rounded-circle" width="150">
-
-    <h2 class="mt-3">
-
-      <%= seller.username %>
-
-    </h2>
-
-    <p>
-
-      📍 <%= seller.city || "City not added" %>
-
-    </p>
-
-    <p>
-
-      🏫 <%= seller.college || "College not added" %>
-
-    </p>
-
-    <p>
-
-      📞 <%= seller.phone || "Phone not added" %>
-
-    </p>
-
-  </div>
-
-  <hr>
-
-  <h3>
-
-    Books Listed
-
-  </h3>
-
-  <div class="row">
-
-    <% books.forEach(book=>{ %>
-
-    <div class="col-md-4 mb-4">
-
-      <div class="card h-100">
-
-        <img src="<%= book.image.url %>" class="card-img-top" style="height:220px;object-fit:cover;">
-
-        <div class="card-body">
-
-          <h5>
-
-            <%= book.title %>
-
-          </h5>
-
-          <p>
-
-            ₹<%= book.price %>
-
-          </p>
-
-          <a href="/books/<%= book._id %>" class="btn btn-primary">
-
-            View Book
-
-          </a>
-
-        </div>
-
+<div class="container py-4 py-md-5 profile-page">
+  <section class="profile-hero">
+    <img src="<%= seller.profileImage.url %>" class="profile-avatar" alt="<%= seller.username %> profile">
+    <div>
+      <span class="user-eyebrow">Seller profile</span>
+      <h1 class="profile-name"><%= seller.username %></h1>
+      <p class="profile-subtitle">Books listed on BookLoop</p>
+      <div class="profile-meta">
+        <span class="profile-meta-item"><i class="bi bi-geo-alt-fill"></i><%= seller.city || "City not added" %></span>
+        <span class="profile-meta-item"><i class="bi bi-mortarboard-fill"></i><%= seller.college || "College not added" %></span>
+        <span class="profile-meta-item"><i class="bi bi-telephone-fill"></i><%= seller.phone || "Phone not added" %></span>
       </div>
+    </div>
+  </section>
 
+  <section class="profile-books-section">
+    <div class="profile-section-heading">
+      <div>
+        <span class="user-eyebrow">Marketplace listings</span>
+        <h2>Books Listed</h2>
+      </div>
+      <span class="profile-count"><%= books.length %> <%= books.length === 1 ? 'book' : 'books' %></span>
     </div>
 
-    <% }) %>
-
-  </div>
-
+    <% if (books.length === 0) { %>
+      <div class="profile-empty">
+        <i class="bi bi-book"></i>
+        <h4>No books listed</h4>
+        <p class="mb-0">This seller doesn't have any active listings yet.</p>
+      </div>
+    <% } else { %>
+      <div class="row g-3 g-md-4">
+        <% books.forEach(book=>{ %>
+          <div class="col-lg-4 col-md-6">
+            <article class="profile-book-card">
+              <div class="profile-book-image">
+                <img src="<%= book.image.url %>" alt="<%= book.title %>">
+              </div>
+              <div class="profile-book-body">
+                <h5><%= book.title %></h5>
+                <div class="profile-book-price">₹<%= book.price %></div>
+                <span class="badge <%= book.status === 'Available' ? 'bg-success' : book.status === 'Reserved' ? 'bg-warning text-dark' : 'bg-secondary' %>"><%= book.status %></span>
+              </div>
+              <div class="profile-book-footer">
+                <a href="/books/<%= book._id %>" class="btn btn-outline-primary"><i class="bi bi-eye me-2"></i>View Book</a>
+              </div>
+            </article>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
 </div>
