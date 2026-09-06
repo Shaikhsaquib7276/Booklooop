@@ -1,10 +1,31 @@
-/* ================= BOOK IMAGE ================= */
+/* ================= BOOK DETAIL SHELL ================= */
+.book-detail-shell{
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    transition:background .25s ease,border-color .25s ease,box-shadow .25s ease;
+}
+
+.book-detail-shell:hover{
+    box-shadow:var(--shadow-hover);
+}
+
+.book-detail-media{
+    padding:30px;
+    background:var(--surface-soft);
+    border-right:1px solid var(--border);
+}
+
 .book-image-card{
     background:var(--surface);
     border:1px solid var(--border);
     border-radius:20px;
     overflow:hidden;
     box-shadow:var(--shadow);
+    height:100%;
 }
 
 .book-image-card img{
@@ -14,14 +35,36 @@
     display:block;
 }
 
-/* ================= PRICE ================= */
+.book-detail-content{
+    min-width:0;
+}
+
+/* The included bookInfo becomes the right side of the unified card. */
+.book-details-card{
+    height:100%;
+    padding:42px;
+    background:var(--surface);
+    color:var(--text);
+}
+
+.book-details-title{
+    color:var(--text);
+    line-height:1.15;
+    overflow-wrap:anywhere;
+}
+
+.book-details-author{
+    color:var(--text-light)!important;
+}
+
+.book-details-section-title{ color:var(--text); }
+
 .price-box{
     font-size:2.6rem;
     font-weight:700;
     color:var(--primary);
 }
 
-/* ================= DESCRIPTION ================= */
 .book-description{
     padding:1rem;
     overflow:auto;
@@ -31,10 +74,17 @@
     font-size:1.05rem;
 }
 
-/* ================= BUTTONS ================= */
-.btn{ border-radius:12px; }
+.book-details-card hr{
+    border-color:var(--border);
+    opacity:1;
+}
 
-/* ================= BADGES ================= */
+.book-details-actions .btn,
+.book-owner-actions .btn{
+    min-height:46px;
+    border-radius:12px;
+}
+
 .badge{ border-radius:50px; }
 
 /* ================= SELLER CARD ================= */
@@ -47,106 +97,115 @@
     box-shadow:var(--shadow);
     transition:box-shadow .25s ease,border-color .25s ease;
 }
-
-.seller-card:hover{
-    box-shadow:var(--shadow-hover);
-}
-
-.seller-card-title{
-    color:var(--text);
-    line-height:1.2;
-}
-
+.seller-card:hover{ box-shadow:var(--shadow-hover); }
+.seller-card-title{ color:var(--text); line-height:1.2; }
 .seller-name{ color:var(--primary); }
 .seller-detail{ color:var(--text-light)!important; }
-
 .seller-avatar{
-    width:120px;
-    height:120px;
-    margin:auto;
-    border-radius:50%;
+    width:120px;height:120px;margin:auto;border-radius:50%;
     background:linear-gradient(135deg,#2563EB,#60A5FA);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    font-size:3.5rem;
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-size:3.5rem;
 }
-
 .seller-card .btn{ border-radius:12px; min-height:44px; }
-.seller-actions .btn{ display:flex; align-items:center; justify-content:center; }
+.seller-actions .btn{ display:flex;align-items:center;justify-content:center; }
 
 /* ================= RELATED BOOKS ================= */
 .related-book-card{
-    background:var(--surface);
-    color:var(--text);
-    border:1px solid var(--border);
-    border-radius:18px;
-    overflow:hidden;
+    background:var(--surface);color:var(--text);
+    border:1px solid var(--border);border-radius:18px;overflow:hidden;
     transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
     box-shadow:var(--shadow);
 }
-
-.related-book-card:hover{
-    transform:translateY(-5px);
-    box-shadow:var(--shadow-hover);
-}
-
-.related-book-card img{
-    height:220px;
-    object-fit:cover;
-}
-
+.related-book-card:hover{ transform:translateY(-5px);box-shadow:var(--shadow-hover); }
+.related-book-card img{ height:220px;object-fit:cover; }
 .related-book-card .card-body{ padding:20px; }
 
+/* ================= RESPONSIVE ================= */
+@media (max-width:991.98px){
+    .book-detail-shell{ border-radius:20px; }
+    .book-detail-media{ padding:22px; border-right:0; border-bottom:1px solid var(--border); }
+    .book-image-card img{ height:480px; }
+    .book-details-card{ padding:30px; }
+}
+
 @media (max-width:767.98px){
-    .book-image-card{
-        border-radius:16px;
-        border:1px solid var(--border);
+    .book-detail-shell{
+        border-radius:17px;
         box-shadow:var(--shadow);
     }
-
+    .book-detail-media{
+        padding:12px;
+        background:var(--surface-soft);
+    }
+    .book-image-card{
+        border-radius:14px;
+    }
     .book-image-card img{
         height:min(300px,60vh);
     }
-
-    .seller-card{
+    .book-details-card{
         padding:20px 16px;
-        border-radius:16px;
-        border:1px solid var(--border);
     }
-
-    .seller-avatar{
-        width:82px;
-        height:82px;
-        font-size:2.35rem;
+    .book-details-title{
+        font-size:1.65rem!important;
+        line-height:1.2;
+        margin-bottom:10px;
     }
-
-    .seller-card-title{
-        font-size:1.45rem;
-        margin-bottom:12px;
+    .book-details-author{ font-size:.98rem!important; }
+    .book-details-badges{
+        display:flex;
+        flex-wrap:wrap;
+        gap:7px;
+        margin-bottom:20px!important;
     }
-
-    .seller-detail{
-        font-size:.92rem;
-        line-height:1.45;
+    .book-details-badges .badge{
+        margin:0!important;
+        font-size:.75rem!important;
+        padding:.5rem .7rem!important;
     }
+    .price-box{
+        font-size:2rem;
+        margin-bottom:18px!important;
+    }
+    .book-details-section-title{ font-size:1.2rem; }
+    .book-description{
+        height:auto;
+        padding:10px 2px;
+        margin-bottom:14px;
+        font-size:.9rem;
+        line-height:1.6;
+    }
+    .book-details-actions{
+        display:grid!important;
+        grid-template-columns:1fr;
+        gap:9px!important;
+    }
+    .book-details-actions > *{ width:100%; margin:0!important; }
+    .book-details-actions form{ width:100%; }
+    .book-details-actions .btn{ width:100%; min-height:46px; }
+    .book-owner-actions{ flex-direction:column; gap:9px!important; }
+    .book-owner-actions > *{ width:100%; }
+    .book-owner-actions .btn{ width:100%; }
 
+    .seller-card{ padding:20px 16px;border-radius:16px; }
+    .seller-avatar{ width:82px;height:82px;font-size:2.35rem; }
+    .seller-card-title{ font-size:1.45rem;margin-bottom:12px; }
+    .seller-detail{ font-size:.92rem;line-height:1.45; }
     .seller-actions{ margin-top:2px!important; }
     .seller-actions .btn{ min-height:46px; }
-
-    .related-book-card{
-        border-radius:15px;
-    }
-
-    .related-book-card img{
-        height:170px;
-    }
+    .related-book-card{ border-radius:15px; }
+    .related-book-card img{ height:170px; }
 }
 
 @media (max-width:420px){
+    .book-detail-media{ padding:10px; }
+    .book-image-card img{ height:280px; }
+    .book-details-card{ padding:17px 13px; }
+    .book-details-title{ font-size:1.4rem!important; }
+    .price-box{ font-size:1.7rem; }
     .seller-card{ padding:17px 13px; }
-    .seller-avatar{ width:76px; height:76px; font-size:2.1rem; }
+    .seller-avatar{ width:76px;height:76px;font-size:2.1rem; }
     .seller-card-title{ font-size:1.3rem; }
     .seller-detail{ font-size:.86rem; }
 }
