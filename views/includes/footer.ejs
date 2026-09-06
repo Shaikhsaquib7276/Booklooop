@@ -1,71 +1,37 @@
-<footer class="mt-5 py-5 border-top">
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="footer-logo"><i class="bi bi-book-half"></i> BookLoop</a>
+        <p>Buy, sell and discover affordable second-hand books from your community.</p>
+      </div>
 
-    <div class="container">
+      <div class="footer-links">
+        <h5>Explore</h5>
+        <a href="/">Home</a>
+        <a href="/books">Browse Books</a>
+        <% if (currentUser) { %>
+          <a href="/books/new">Sell a Book</a>
+          <a href="/wishlist">Wishlist</a>
+        <% } %>
+      </div>
 
-        <div class="row">
-
-            <div class="col-md-4">
-
-                <h4 class="text-primary">
-
-                    📘 BookLoop
-
-                </h4>
-
-                <p>
-
-                    Buy • Sell • Save
-
-                </p>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <h5>
-
-                    Quick Links
-
-                </h5>
-
-                <ul class="list-unstyled">
-
-                    <li><a href="/">Home</a></li>
-
-                    <li><a href="/books">Books</a></li>
-
-                    <li><a href="#">About</a></li>
-
-                </ul>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <h5>
-
-                    Contact
-
-                </h5>
-
-                <p>
-
-                    Made with ❤️ using MERN
-
-                </p>
-
-            </div>
-
-        </div>
-
-        <hr>
-
-        <p class="text-center">
-
-            © 2026 BookLoop
-
-        </p>
-
+      <div class="footer-links">
+        <h5>Account</h5>
+        <% if (currentUser) { %>
+          <a href="/dashboard">Dashboard</a>
+          <a href="/users/<%= currentUser._id %>">My Profile</a>
+          <a href="/reservations">My Requests</a>
+        <% } else { %>
+          <a href="/login">Login</a>
+          <a href="/signup">Create Account</a>
+        <% } %>
+      </div>
     </div>
 
+    <div class="footer-bottom">
+      <span>© 2026 BookLoop</span>
+      <span>Built for students & book lovers <i class="bi bi-heart-fill"></i></span>
+    </div>
+  </div>
 </footer>
