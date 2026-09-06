@@ -1,110 +1,66 @@
 <% layout("/layouts/boilerplate") %>
 
-    <div class="container mt-4">
+<div class="book-form-page">
+  <div class="book-form-header">
+    <span class="book-form-eyebrow">Manage listing</span>
+    <h1 class="book-form-title">Edit Book</h1>
+    <p class="book-form-subtitle">Update your listing details, condition, status or cover image.</p>
+  </div>
 
-        <h2 class="mb-4">Edit Book</h2>
-
-        <form action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation" novalidate
-            enctype="multipart/form-data">
-
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-
-                <input type="text" name="title" class="form-control" value="<%= book.title %>" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Author</label>
-
-                <input type="text" name="author" class="form-control" value="<%= book.author %>" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-
-                <textarea name="description" class="form-control" rows="5" required><%= book.description %></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Price</label>
-
-                <input type="number" name="price" class="form-control" value="<%= book.price %>" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-
-                <input type="text" name="category" class="form-control" value="<%= book.category %>" required>
-            </div>
-
-            <div class="mb-3">
-
-                <label class="form-label">Condition</label>
-
-                <select name="condition" class="form-select">
-
-                    <option <%=book.condition==="New" ? "selected" : "" %>>New</option>
-
-                    <option <%=book.condition==="Like New" ? "selected" : "" %>>Like New</option>
-
-                    <option <%=book.condition==="Good" ? "selected" : "" %>>Good</option>
-
-                    <option <%=book.condition==="Fair" ? "selected" : "" %>>Fair</option>
-
-                    <option <%=book.condition==="Poor" ? "selected" : "" %>>Poor</option>
-
-                </select>
-
-            </div>
-            <div class="mb-3">
-
-                <label class="form-label">
-
-                    Status
-
-                </label>
-
-                <select name="status" class="form-select">
-
-                    <option value="Available" <%=book.status==="Available" ? "selected" :"" %>>
-
-                        Available
-
-                    </option>
-
-                    <option value="Reserved" <%=book.status==="Reserved" ? "selected" :"" %>>
-
-                        Reserved
-
-                    </option>
-
-                    <option value="Sold" <%=book.status==="Sold" ? "selected" :"" %>>
-
-                        Sold
-
-                    </option>
-
-                </select>
-
-            </div>
-            <div class="mb-3">
-
-                <label class="form-label">
-
-                    Change Book Cover
-
-                </label>
-
-                <input type="file" name="image" class="form-control">
-
-            </div>
-
-            <button class="btn btn-warning">
-
-                Update Book
-
-            </button>
-
-        </form>
-
+  <form action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation book-form-card" novalidate enctype="multipart/form-data">
+    <div class="book-form-grid">
+      <div class="book-form-field">
+        <label for="editTitle">Title</label>
+        <input id="editTitle" type="text" name="title" class="form-control" value="<%= book.title %>" required>
+      </div>
+      <div class="book-form-field">
+        <label for="editAuthor">Author</label>
+        <input id="editAuthor" type="text" name="author" class="form-control" value="<%= book.author %>" required>
+      </div>
+      <div class="book-form-field full">
+        <label for="editDescription">Description</label>
+        <textarea id="editDescription" name="description" class="form-control" rows="5" required><%= book.description %></textarea>
+      </div>
+      <div class="book-form-field">
+        <label for="editPrice">Price (₹)</label>
+        <input id="editPrice" type="number" name="price" class="form-control" min="0" value="<%= book.price %>" required>
+      </div>
+      <div class="book-form-field">
+        <label for="editCategory">Category</label>
+        <input id="editCategory" type="text" name="category" class="form-control" value="<%= book.category %>" required>
+      </div>
+      <div class="book-form-field">
+        <label for="editCondition">Condition</label>
+        <select id="editCondition" name="condition" class="form-select">
+          <option <%=book.condition==="New" ? "selected" : "" %>>New</option>
+          <option <%=book.condition==="Like New" ? "selected" : "" %>>Like New</option>
+          <option <%=book.condition==="Good" ? "selected" : "" %>>Good</option>
+          <option <%=book.condition==="Fair" ? "selected" : "" %>>Fair</option>
+          <option <%=book.condition==="Poor" ? "selected" : "" %>>Poor</option>
+        </select>
+      </div>
+      <div class="book-form-field">
+        <label for="editStatus">Listing Status</label>
+        <select id="editStatus" name="status" class="form-select">
+          <option value="Available" <%=book.status==="Available" ? "selected" : "" %>>Available</option>
+          <option value="Reserved" <%=book.status==="Reserved" ? "selected" : "" %>>Reserved</option>
+          <option value="Sold" <%=book.status==="Sold" ? "selected" : "" %>>Sold</option>
+        </select>
+      </div>
+      <div class="book-form-field full">
+        <label for="editImage">Change Book Cover</label>
+        <div class="book-image-upload">
+          <% if (book.image && book.image.url) { %>
+            <img src="<%= book.image.url %>" alt="Current cover of <%= book.title %>" class="book-current-image">
+          <% } %>
+          <input id="editImage" type="file" name="image" class="form-control" accept="image/*">
+          <div class="book-form-help">Leave this empty to keep the current cover.</div>
+        </div>
+      </div>
     </div>
+    <div class="book-form-actions">
+      <a href="/books/<%= book._id %>" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Cancel</a>
+      <button type="submit" class="btn btn-warning"><i class="bi bi-check2-circle me-2"></i>Update Book</button>
+    </div>
+  </form>
+</div>
