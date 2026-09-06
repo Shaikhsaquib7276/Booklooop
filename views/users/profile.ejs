@@ -1,0 +1,148 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container py-4 py-md-5 profile-edit-page">
+  <div class="profile-edit-layout">
+    <section class="profile-edit-card">
+      <div class="profile-edit-header">
+        <div class="profile-edit-icon"><i class="bi bi-person-gear"></i></div>
+        <div>
+          <span class="user-eyebrow">Account settings</span>
+          <h1>Edit Profile</h1>
+          <p>Keep your BookLoop profile information up to date.</p>
+        </div>
+      </div>
+
+      <form action="/profile?_method=PUT" method="POST" enctype="multipart/form-data" class="profile-edit-form">
+        <div class="profile-photo-section">
+          <div class="profile-photo-preview">
+            <img src="<%= user.profileImage && user.profileImage.url ? user.profileImage.url : '' %>" alt="Profile photo" id="profilePreview">
+            <div class="profile-photo-fallback" id="profileFallback"><i class="bi bi-person-fill"></i></div>
+          </div>
+          <div class="profile-photo-copy">
+            <h5>Profile photo</h5>
+            <p>Use a clear JPG, PNG, or WebP image up to 5 MB.</p>
+            <label for="profileImage" class="btn btn-outline-primary profile-upload-btn">
+              <i class="bi bi-camera me-2"></i>Choose photo
+            </label>
+            <input type="file" name="profileImage" id="profileImage" accept="image/jpeg,image/png,image/webp" hidden>
+          </div>
+        </div>
+
+        <div class="profile-form-section">
+          <div class="profile-form-heading">
+            <h4>Basic information</h4>
+            <span>Required</span>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label">Username</label>
+              <div class="input-group profile-input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" id="username" name="username" value="<%= user.username %>" required autocomplete="username">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email</label>
+              <div class="input-group profile-input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required autocomplete="email">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-form-section">
+          <div class="profile-form-heading">
+            <h4>Contact & college</h4>
+            <span>Optional</span>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="phone" class="form-label">Phone</label>
+              <div class="input-group profile-input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>" autocomplete="tel">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="city" class="form-label">City</label>
+              <div class="input-group profile-input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" class="form-control" id="city" name="city" value="<%= user.city || '' %>">
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="college" class="form-label">College</label>
+              <div class="input-group profile-input-group">
+                <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
+                <input type="text" class="form-control" id="college" name="college" value="<%= user.college || '' %>">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-form-actions">
+          <a href="/users/<%= user._id %>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>Cancel</a>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>Save Changes</button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="profile-edit-side">
+      <div class="profile-side-card">
+        <span class="user-eyebrow">Your profile</span>
+        <h3><%= user.username %></h3>
+        <p>Buyers can use your profile to learn more about you and view your book listings.</p>
+        <a href="/users/<%= user._id %>" class="btn btn-outline-primary w-100"><i class="bi bi-eye me-2"></i>View Public Profile</a>
+      </div>
+      <div class="profile-side-card profile-tip-card">
+        <i class="bi bi-shield-check"></i>
+        <div>
+          <h5>Keep it accurate</h5>
+          <p class="mb-0">Accurate contact and college details make it easier for buyers to trust your listings.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  const profileInput = document.getElementById("profileImage");
+  const profilePreview = document.getElementById("profilePreview");
+  const profileFallback = document.getElementById("profileFallback");
+
+  function toggleFallback() {
+    if (profilePreview.getAttribute("src")) {
+      profileFallback.classList.add("d-none");
+    } else {
+      profileFallback.classList.remove("d-none");
+    }
+  }
+
+  profilePreview.addEventListener("error", () => {
+    profilePreview.removeAttribute("src");
+    toggleFallback();
+  });
+
+  profileInput.addEventListener("change", () => {
+    const file = profileInput.files && profileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      profileInput.value = "";
+      alert("Profile image must be 5 MB or smaller.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      profilePreview.src = event.target.result;
+      profileFallback.classList.add("d-none");
+    };
+    reader.readAsDataURL(file);
+  });
+
+  toggleFallback();
+</script>
