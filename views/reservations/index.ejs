@@ -1,33 +1,48 @@
 <% layout("layouts/boilerplate") %>
 
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container py-4 py-md-5 user-page">
+    <div class="user-page-header">
         <div>
-            <h1 class="fw-bold mb-1">My Reservation Requests</h1>
-            <p class="text-secondary mb-0">Track the books you asked sellers to reserve.</p>
+            <span class="user-eyebrow">Your activity</span>
+            <h1>My Reservation Requests</h1>
+            <p>Track the books you asked sellers to reserve.</p>
         </div>
-        <a href="/books" class="btn btn-primary">Browse Books</a>
+        <a href="/books" class="btn btn-primary"><i class="bi bi-search me-2"></i>Browse Books</a>
     </div>
 
     <% if (reservations.length === 0) { %>
-        <div class="alert alert-info">You have not requested any books yet.</div>
+        <div class="user-empty">
+            <div class="user-empty-icon"><i class="bi bi-calendar-check"></i></div>
+            <h3>No reservations yet</h3>
+            <p>When you request a book, you can follow its reservation status from here.</p>
+            <a href="/books" class="btn btn-primary"><i class="bi bi-search me-2"></i>Browse Books</a>
+        </div>
     <% } else { %>
-        <div class="row g-4">
+        <div class="row g-3 g-md-4">
             <% reservations.forEach((reservation) => { %>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
+                    <article class="reservation-card">
                         <% if (reservation.book) { %>
-                            <img src="<%= reservation.book.image.url %>" class="card-img-top" style="height: 220px; object-fit: cover;" alt="<%= reservation.book.title %>">
+                            <div class="user-book-image"><img src="<%= reservation.book.image.url %>" alt="<%= reservation.book.title %>"></div>
+                        <% } else { %>
+                            <div class="user-book-image d-grid place-items-center"><div class="user-empty-icon mb-0"><i class="bi bi-book"></i></div></div>
                         <% } %>
-                        <div class="card-body">
-                            <span class="badge <%= reservation.status === 'Accepted' ? 'bg-success' : reservation.status === 'Pending' ? 'bg-warning text-dark' : 'bg-secondary' %> mb-2"><%= reservation.status %></span>
-                            <h5 class="fw-bold"><%= reservation.book ? reservation.book.title : 'Deleted listing' %></h5>
-                            <p class="text-secondary mb-2">Seller: <%= reservation.seller ? reservation.seller.username : 'Unavailable' %></p>
+                        <div class="user-book-body">
+                            <span class="reservation-status <%= reservation.status.toLowerCase() %>">
+                                <i class="bi <%= reservation.status === 'Accepted' ? 'bi-check-circle' : reservation.status === 'Pending' ? 'bi-clock' : 'bi-info-circle' %>"></i>
+                                <%= reservation.status %>
+                            </span>
+                            <h5 class="mt-3"><%= reservation.book ? reservation.book.title : 'Deleted listing' %></h5>
+                            <p class="user-book-seller mb-0"><i class="bi bi-person me-1"></i>Seller: <strong><%= reservation.seller ? reservation.seller.username : 'Unavailable' %></strong></p>
+                        </div>
+                        <div class="user-book-footer">
                             <% if (reservation.book) { %>
-                                <a href="/books/<%= reservation.book._id %>" class="btn btn-outline-primary">View Book</a>
+                                <a href="/books/<%= reservation.book._id %>" class="btn btn-outline-primary w-100"><i class="bi bi-eye me-1"></i>View Book</a>
+                            <% } else { %>
+                                <span class="text-secondary small">Listing unavailable</span>
                             <% } %>
                         </div>
-                    </div>
+                    </article>
                 </div>
             <% }) %>
         </div>
