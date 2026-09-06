@@ -1,0 +1,1 @@
+BookLoop default image is served from the existing root-level book.jpg via the /book.jpg route in app.js.
