@@ -1,80 +1,161 @@
-.navbar{
-
-    padding:14px 0;
-
-    backdrop-filter:blur(15px);
-
-    box-shadow:0 5px 20px rgba(0,0,0,.08);
-
+.navbar {
+  padding: 12px 0;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 5px 20px rgba(15, 23, 42, .06);
+  transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
 
-.navbar-brand{
-
-    font-size:1.7rem;
-
-    font-weight:700;
-
-    color:var(--primary)!important;
-
+.navbar-brand {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--primary) !important;
+  letter-spacing: -.4px;
 }
 
-.navbar-brand span{
+.navbar-brand i { color: var(--primary); }
+.navbar-brand span { color: var(--primary); }
 
-    color:var(--primary);
-
+.nav-link {
+  position: relative;
+  font-weight: 500;
+  margin-left: 10px;
+  padding: 10px 8px !important;
+  color: var(--text) !important;
+  transition: color .2s ease, background-color .2s ease;
+  border-radius: 10px;
 }
 
-.nav-link{
-position: relative;
-    font-weight:500;
-
-    margin-left:10px;
-
-    transition:.3s;
-
+.nav-link:hover {
+  color: var(--primary) !important;
+  background: var(--surface-soft);
 }
 
-.nav-link:hover{
+.search-form { width: 40%; }
 
-    color:var(--primary)!important;
-
+.search-form .input-group {
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, .05);
 }
 
-.search-form{
-
-    width:40%;
-
+.search-form .form-control {
+  border-radius: 0 30px 30px 0;
+  border-left: 0;
 }
 
-.search-form .form-control{
-
-    border-radius:30px;
-
+.search-form .input-group-text {
+  border-radius: 30px 0 0 30px;
+  background: var(--input-bg);
+  color: var(--text-light);
+  border-color: var(--border);
+  border-right: 0;
 }
 
-.search-form .input-group-text{
-
-    border-radius:30px 0 0 30px;
-
+#themeToggle {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: var(--border);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 3px 12px rgba(15, 23, 42, .06);
 }
 
-#themeToggle{
-
-    width:45px;
-
-    height:45px;
-
+#themeToggle:hover {
+  color: var(--primary);
+  background: var(--surface-soft);
+  border-color: var(--primary);
 }
 
-.dropdown-menu{
+#themeToggle i { font-size: 1rem; }
 
-    border:none;
-
-    border-radius:15px;
-
-    box-shadow:0 10px 25px rgba(0,0,0,.12);
-
+.dropdown-menu {
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 8px;
 }
-.badge{
-    font-size: 0.7rem;
+
+.dropdown-item {
+  border-radius: 9px;
+  padding: 9px 12px;
+}
+
+.badge { font-size: .7rem; }
+
+body.dark .navbar {
+  background: rgba(8, 13, 24, .94);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, .25);
+}
+
+body.dark .search-form .input-group { box-shadow: none; }
+
+body.dark #themeToggle {
+  background: #172033;
+  color: #f8fafc;
+  border-color: #3b4a62;
+}
+
+body.dark #themeToggle:hover {
+  background: #1e293b;
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+/* Mobile navbar */
+@media (max-width: 991.98px) {
+  .navbar { padding: 10px 0; }
+
+  .navbar .container { gap: 10px; }
+
+  .navbar-brand { font-size: 1.5rem; }
+
+  .navbar-toggler {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 7px 10px;
+  }
+
+  .navbar-toggler:focus {
+    box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .12);
+  }
+
+  .navbar-toggler-icon {
+    filter: var(--navbar-toggler-filter, none);
+  }
+
+  .search-form {
+    width: 100%;
+    margin: 14px 0 8px !important;
+  }
+
+  .navbar-nav {
+    width: 100%;
+    align-items: stretch !important;
+    padding: 6px 0 4px;
+  }
+
+  .navbar-nav .nav-link {
+    margin-left: 0;
+    padding: 11px 12px !important;
+  }
+
+  .navbar-nav .btn { margin: 6px 0 !important; width: 100%; }
+
+  .navbar-nav #themeToggle { margin: 8px 0 2px 0 !important; }
+
+  .navbar-nav .dropdown-menu { position: static !important; width: 100%; }
+}
+
+body.dark .navbar-toggler-icon {
+  filter: invert(1) grayscale(1) brightness(2);
 }
