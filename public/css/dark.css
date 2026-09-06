@@ -1,57 +1,173 @@
-body.dark{
+/* =========================================================
+   BookLoop Theme System
+   The same components stay consistent in light and dark mode.
+   ========================================================= */
 
-    --background:#0F172A;
-
-    --card:#1E293B;
-
-    --text:#F8FAFC;
-
-    --text-light:#CBD5E1;
-
-    --border:#334155;
-
+body {
+  background: var(--background);
+  color: var(--text);
+  transition: background-color .25s ease, color .25s ease;
 }
 
-body.dark .navbar{
-
-    background: #020617 !important;;
-
+body,
+.navbar,
+.card,
+.filter-card,
+.seller-card,
+.book-image-card,
+.dropdown-menu,
+.form-control,
+.form-select,
+.input-group-text,
+.alert,
+.list-group-item,
+.mobile-filter-drawer,
+.mobile-filter-toggle,
+.page-link {
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
 
-body.dark .card{
-
-background: var(--card);
-
-    color: var(--text);
+/* ---------- Light theme surfaces ---------- */
+.navbar,
+.card,
+.filter-card,
+.seller-card,
+.book-image-card,
+.dropdown-menu,
+.mobile-filter-drawer {
+  background-color: var(--surface);
+  color: var(--text);
 }
 
-body.dark .nav-link{
-
-    color:white!important;
-
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  color: var(--text);
+  border-color: var(--border);
 }
 
-body.dark .navbar-brand{
-
-    color:#60A5FA!important;
-
+.form-control::placeholder { color: var(--text-light); opacity: .85; }
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--input-bg);
+  color: var(--text);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .12);
 }
+
+.text-muted,
+.text-secondary { color: var(--text-light) !important; }
+
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end { border-color: var(--border) !important; }
+
+.list-group-item {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.dropdown-item { color: var(--text); }
+.dropdown-item:hover,
+.dropdown-item:focus { background: var(--surface-soft); color: var(--text); }
+
+/* ---------- Dark theme ---------- */
+body.dark {
+  background: var(--background);
+  color: var(--text);
+}
+
+body.dark .navbar {
+  background: #080d18 !important;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 6px 24px rgba(0,0,0,.22);
+}
+
+body.dark .navbar-brand { color: #60a5fa !important; }
+body.dark .navbar-brand span { color: #93c5fd; }
+body.dark .nav-link { color: #e5edf8 !important; }
+body.dark .nav-link:hover { color: #60a5fa !important; }
+
+body.dark .card,
+body.dark .filter-card,
+body.dark .seller-card,
+body.dark .book-image-card,
+body.dark .mobile-filter-drawer {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
 body.dark .form-control,
-body.dark .form-select{
-
-    background:#1E293B;
-
-    color:white;
-
-    border:1px solid #334155;
-
+body.dark .form-select {
+  background: var(--input-bg);
+  color: var(--text);
+  border-color: var(--border);
 }
 
 body.dark .form-control:focus,
-body.dark .form-select:focus{
-
-    background:#1E293B;
-
-    color:white;
-
+body.dark .form-select:focus {
+  background: var(--input-bg);
+  color: var(--text);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 .2rem rgba(96,165,250,.14);
 }
+
+body.dark .input-group-text {
+  background: var(--surface-soft);
+  color: var(--text-light);
+  border-color: var(--border);
+}
+
+body.dark .dropdown-menu {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 14px 35px rgba(0,0,0,.35);
+}
+
+body.dark .dropdown-item { color: var(--text); }
+body.dark .dropdown-item:hover,
+body.dark .dropdown-item:focus { background: var(--surface-soft); color: #fff; }
+
+body.dark .btn-outline-secondary {
+  color: #cbd5e1;
+  border-color: #475569;
+}
+body.dark .btn-outline-secondary:hover {
+  background: #334155;
+  border-color: #64748b;
+  color: #fff;
+}
+
+body.dark .btn-light {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+body.dark .btn-light:hover { background: #334155; color:#fff; }
+
+body.dark .page-link {
+  background: var(--card);
+  color: #cbd5e1;
+  border-color: var(--border);
+}
+body.dark .page-link:hover {
+  background: var(--surface-soft);
+  color: #fff;
+  border-color: #475569;
+}
+
+body.dark .alert {
+  border-color: var(--border);
+}
+
+body.dark .mobile-filter-overlay { background: rgba(0,0,0,.68); }
+
+/* Prevent Bootstrap utility backgrounds from becoming bright islands. */
+body.dark .bg-white { background-color: var(--surface) !important; }
+body.dark .bg-light { background-color: var(--surface-soft) !important; }
+body.dark .text-dark { color: var(--text) !important; }
