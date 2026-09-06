@@ -8,80 +8,54 @@ body {
   font-family: "Poppins", sans-serif;
   background: var(--background);
   color: var(--text);
-  transition: 0.3s;
+  transition: background-color .25s ease, color .25s ease;
 }
 
-a {
-  text-decoration: none;
-}
+a { text-decoration: none; }
+img { max-width: 100%; }
 
-img {
-  max-width: 100%;
-}
-
-.container {
-  max-width: 1200px;
-}
+.container { max-width: 1200px; }
 
 .section-title {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
+  color: var(--text);
 }
 
-.btn-primary{
-
-    background:var(--primary)!important;
-
-    border-color:var(--primary)!important;
-
-    color:white!important;
-
+.btn-primary {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
 }
 
-.btn-primary:hover{
-
-    background:var(--primary-hover)!important;
-
-    border-color:var(--primary-hover)!important;
-
+.btn-primary:hover {
+  background: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
 }
-
-
 
 .card {
-  border: none;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
-
-.btn{
-
-    border-radius:12px;
-
-    transition:.3s;
-
+.btn {
+  border-radius: 12px;
+  transition: .25s ease;
 }
 
-.btn:hover{
+.btn:hover { transform: translateY(-2px); }
 
-    transform:translateY(-2px);
+section { margin-top: 80px; }
 
-}
+/* Theme-aware Bootstrap utility overrides */
+.bg-white { background-color: var(--surface) !important; }
+.bg-light { background-color: var(--surface-soft) !important; }
+.text-dark { color: var(--text) !important; }
+.text-secondary,
+.text-muted { color: var(--text-light) !important; }
 
-.card{
-
-    border:none;
-
-    border-radius:18px;
-
-    overflow:hidden;
-
-}
-
-section{
-
-    margin-top:80px;
-
-}
+hr { border-color: var(--border); opacity: 1; }
