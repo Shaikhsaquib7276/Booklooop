@@ -1,0 +1,46 @@
+/* ================= USER PAGES ================= */
+.user-page{color:var(--text)}
+.user-page-header{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:28px}
+.user-page-header h1{margin:0;color:var(--text);font-size:clamp(1.6rem,3vw,2.1rem)}
+.user-page-header p{color:var(--text-light);margin:5px 0 0}
+.user-eyebrow{display:block;color:var(--primary);font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
+.user-panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.user-panel-body{padding:clamp(18px,3vw,28px)}
+.wishlist-card,.reservation-card{height:100%;background:var(--surface);border:1px solid var(--border);border-radius:17px;overflow:hidden;box-shadow:var(--shadow);transition:transform .25s ease,box-shadow .25s ease}
+.wishlist-card:hover,.reservation-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+.user-book-image{height:235px;background:var(--surface-soft);overflow:hidden}
+.user-book-image img{width:100%;height:100%;object-fit:cover;display:block}
+.user-book-body{padding:16px}
+.user-book-body h5{color:var(--text);font-size:1rem;font-weight:700;overflow-wrap:anywhere;margin-bottom:5px}
+.user-book-author,.user-book-seller{color:var(--text-light);font-size:.82rem}
+.user-book-price{color:var(--primary);font-size:1.2rem;font-weight:700;margin:12px 0}
+.user-book-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface-soft)}
+.user-book-footer .btn{min-height:38px}
+.user-empty{text-align:center;padding:46px 20px;background:var(--surface-soft);border:1px dashed var(--border);border-radius:17px}
+.user-empty-icon{width:62px;height:62px;margin:0 auto 13px;display:grid;place-items:center;border-radius:18px;background:var(--surface);border:1px solid var(--border);color:var(--primary);font-size:1.6rem}
+.user-empty h3,.user-empty h5{color:var(--text);font-weight:700}
+.user-empty p{color:var(--text-light);font-size:.88rem;max-width:430px;margin:0 auto 17px}
+.reservation-card .user-book-image{height:205px}
+.reservation-status{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:50px;font-size:.7rem;font-weight:700}
+.reservation-status.accepted{background:rgba(34,197,94,.12);color:#16a34a}
+.reservation-status.pending{background:rgba(245,158,11,.14);color:#b45309}
+.reservation-status.rejected,.reservation-status.cancelled{background:rgba(100,116,139,.14);color:var(--text-light)}
+@media(max-width:767.98px){
+ .user-page{padding-top:18px!important}
+ .user-page-header{align-items:stretch;flex-direction:column;margin-bottom:20px}
+ .user-page-header h1{font-size:1.5rem}
+ .user-page-header p{font-size:.82rem;line-height:1.5}
+ .user-page-header>.btn{width:100%;min-height:44px}
+ .user-panel{border-radius:16px}
+ .user-panel-body{padding:14px}
+ .user-book-image{height:210px}
+ .user-book-footer{padding:10px 12px}
+ .wishlist-card,.reservation-card{border-radius:15px}
+ .reservation-card .user-book-image{height:195px}
+}
+@media(max-width:420px){
+ .user-page-header h1{font-size:1.35rem}
+ .user-book-image{height:190px}
+ .reservation-card .user-book-image{height:180px}
+ .user-book-body{padding:14px}
+}
