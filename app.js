@@ -34,6 +34,11 @@ app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// BookLoop default image (existing root-level book.jpg)
+app.get("/book.jpg", (req, res) => {
+    res.sendFile(path.join(__dirname, "book.jpg"));
+});
+
 const sessionOptions = {
     secret: process.env.SESSION_SECRET,
     resave: false,
