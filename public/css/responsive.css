@@ -1,382 +1,152 @@
 /* =========================================================
-   BookLoop Responsive UI
-   Mobile-first fixes for navbar, marketplace, cards,
-   book details, forms and common Bootstrap layouts.
+   BookLoop Responsive UI/UX
+   Dedicated mobile + desktop polish. Keep layout fluid and
+   avoid horizontal scrolling at every breakpoint.
    ========================================================= */
 
-html {
-  overflow-x: hidden;
+html { overflow-x: hidden; }
+body { min-width: 320px; overflow-x: hidden; }
+img { max-width: 100%; }
+
+.navbar .container { gap: 12px; }
+.navbar-toggler { padding: 7px 9px; border-radius: 10px; }
+.navbar-collapse, .navbar-nav, .search-form { min-width: 0; }
+.search-form .input-group { width: 100%; }
+
+.market-header, .market-hero, .filter-card { width: 100%; }
+.market-hero { padding: 60px 40px; }
+.hero-image { max-width: 100%; max-height: 320px; }
+.book-title, .book-description, .card-title, .card-text { overflow-wrap: anywhere; }
+.book-image img { display:block; width:100%; height:320px; object-fit:cover; }
+.book-image-card img { display:block; width:100%; height:min(620px,70vh); object-fit:cover; }
+.price-box { overflow-wrap:anywhere; }
+.pagination { flex-wrap:wrap; gap:4px; }
+.page-link { margin:0 3px; }
+
+/* Desktop: use space efficiently without making content oversized. */
+@media (min-width: 992px) {
+  .container { max-width: 1240px; }
+  .navbar .container { gap: 22px; }
+  .search-form { width: min(420px, 38vw); }
+  .hero { min-height: 500px; display:flex; align-items:center; }
+  .category-card { min-height: 155px; }
+  .book-card { height:100%; }
 }
 
-body {
-  min-width: 320px;
-  overflow-x: hidden;
-}
-
-img {
-  max-width: 100%;
-}
-
-/* ---------- Navbar ---------- */
-.navbar .container {
-  gap: 12px;
-}
-
-.navbar-toggler {
-  padding: 7px 9px;
-  border-radius: 10px;
-}
-
-.navbar-collapse {
-  min-width: 0;
-}
-
-.navbar-nav {
-  min-width: 0;
-}
-
-.search-form {
-  min-width: 0;
-}
-
-.search-form .input-group {
-  width: 100%;
-}
-
-/* ---------- Marketplace ---------- */
-.market-header,
-.market-hero {
-  width: 100%;
-}
-
-.market-hero {
-  padding: 60px 40px;
-}
-
-.hero-image {
-  max-width: 100%;
-  max-height: 320px;
-}
-
-.filter-card {
-  width: 100%;
-}
-
-/* Prevent long titles/descriptions from forcing horizontal overflow. */
-.book-title,
-.book-description,
-.card-title,
-.card-text {
-  overflow-wrap: anywhere;
-}
-
-.book-image img {
-  display: block;
-  width: 100%;
-  height: 320px;
-  object-fit: cover;
-}
-
-/* ---------- Book details ---------- */
-.book-image-card img {
-  display: block;
-  width: 100%;
-  height: min(620px, 70vh);
-  object-fit: cover;
-}
-
-.price-box {
-  overflow-wrap: anywhere;
-}
-
-/* ---------- Pagination ---------- */
-.pagination {
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.page-link {
-  margin: 0 3px;
-}
-
-/* =========================================================
-   Tablet
-   ========================================================= */
+/* Tablet */
 @media (max-width: 991.98px) {
-  .navbar {
-    padding: 10px 0;
-  }
-
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-
-  .navbar-collapse {
-    padding: 14px 0 8px;
-  }
-
-  .navbar-nav {
-    align-items: stretch !important;
-    width: 100%;
-    margin-top: 4px;
-  }
-
-  .navbar-nav .nav-item {
-    width: 100%;
-  }
-
-  .navbar-nav .nav-link {
-    margin-left: 0;
-    padding: 10px 4px;
-  }
-
-  .navbar-nav .btn {
-    margin: 8px 0 !important;
-    display: inline-block;
-  }
-
-  .navbar-nav .dropdown-menu {
-    position: static !important;
-    width: 100%;
-    margin: 4px 0 8px;
-  }
-
-  .navbar-nav .nav-item.ms-3 {
-    margin-left: 0 !important;
-    margin-top: 6px;
-  }
-
-  #themeToggle {
-    width: 42px;
-    height: 42px;
-  }
-
-  .search-form {
-    width: 100%;
-    margin: 8px 0 12px;
-  }
-
-  .market-hero {
-    padding: 50px 35px;
-  }
-
-  .market-hero h1,
-  .market-header h1 {
-    font-size: 2.4rem;
-  }
-
-  .book-image img {
-    height: 280px;
-  }
-
-  .book-image-card img {
-    height: 500px;
-  }
+  .navbar { padding:10px 0; }
+  .navbar-brand { font-size:1.5rem; }
+  .navbar-collapse { padding:14px 0 8px; }
+  .navbar-nav { align-items:stretch!important; width:100%; margin-top:4px; }
+  .navbar-nav .nav-item { width:100%; }
+  .navbar-nav .nav-link { margin-left:0; padding:11px 4px; }
+  .navbar-nav .btn { margin:8px 0!important; display:inline-block; }
+  .navbar-nav .dropdown-menu { position:static!important; width:100%; margin:4px 0 8px; }
+  .navbar-nav .nav-item.ms-3 { margin-left:0!important; margin-top:6px; }
+  #themeToggle { width:42px; height:42px; }
+  .search-form { width:100%; margin:8px 0 12px; }
+  .market-hero { padding:50px 35px; }
+  .market-hero h1, .market-header h1 { font-size:2.4rem; }
+  .book-image img { height:280px; }
+  .book-image-card img { height:500px; }
 }
 
 /* =========================================================
-   Mobile
+   MOBILE FIRST-CLASS EXPERIENCE
    ========================================================= */
 @media (max-width: 767.98px) {
-  .container {
-    width: 100%;
-    padding-left: 14px;
-    padding-right: 14px;
-  }
+  body { font-size:.94rem; }
+  .container { width:100%; padding-left:14px; padding-right:14px; }
+  main.container { padding-top:4px; }
+  section { margin-top:44px; }
+  .section-title { font-size:1.45rem; line-height:1.25; margin-bottom:1.15rem; }
 
-  section {
-    margin-top: 50px;
-  }
+  /* Navbar: compact, touch-friendly and easy to scan. */
+  .navbar { padding:8px 0; }
+  .navbar .container { gap:8px; }
+  .navbar-brand { font-size:1.18rem; white-space:nowrap; }
+  .navbar-brand i { font-size:1.35rem!important; margin-right:6px!important; }
+  .navbar-toggler { width:44px; height:42px; flex-shrink:0; }
+  .navbar-collapse { margin-top:8px; padding:10px 12px 12px; border-radius:16px; background:var(--bs-body-bg); box-shadow:0 10px 30px rgba(0,0,0,.08); }
+  .navbar-nav .nav-link { padding:10px 4px; }
+  .navbar-nav .btn { width:100%; text-align:center; min-height:44px; }
+  .navbar-nav .dropdown-menu { box-shadow:none; background:transparent; padding:0 8px; }
+  #themeToggle { margin-top:6px; }
 
-  .section-title {
-    font-size: 1.55rem;
-    margin-bottom: 1.25rem;
-  }
+  /* Homepage hero */
+  .hero { margin-top:16px; border-radius:20px; padding:42px 16px; }
+  .hero .row { text-align:center; }
+  .hero h1 { font-size:clamp(2rem,9vw,2.55rem); line-height:1.1; }
+  .hero p { font-size:.98rem; line-height:1.65; margin:14px auto 0; max-width:34rem; }
+  .hero .btn { width:100%; min-height:48px; margin:0 0 10px!important; }
+  .hero-icon { margin-top:16px; font-size:6rem; }
 
-  .navbar-brand {
-    font-size: 1.25rem;
-  }
+  /* Categories become a compact 2-column grid. */
+  .category-card { min-height:118px; padding:22px 10px; border-radius:16px; }
+  .category-card i { font-size:2rem; }
+  .category-card h6 { font-size:.9rem; margin-top:10px!important; }
 
-  .navbar-brand i {
-    font-size: 1.45rem !important;
-    margin-right: 7px !important;
-  }
+  /* Latest-books header stacks instead of squeezing buttons. */
+  .d-flex.justify-content-between.align-items-center.mb-4 { gap:12px; flex-wrap:wrap; }
+  .d-flex.justify-content-between.align-items-center.mb-4 .section-title { margin-bottom:0; }
+  .d-flex.justify-content-between.align-items-center.mb-4 .btn { width:100%; }
 
-  .navbar-toggler {
-    flex-shrink: 0;
-  }
+  .book-card { border-radius:16px; }
+  .book-card img { height:250px; }
+  .book-card .card-body { padding:1rem; }
+  .book-card h5 { font-size:1rem; line-height:1.35; }
+  .book-card .text-secondary { min-height:0; margin-bottom:12px; }
+  .book-card .d-flex { gap:7px; flex-wrap:wrap; justify-content:flex-start!important; align-items:center; }
+  .book-card .badge { font-size:.7rem; padding:.42em .62em; }
+  .book-card .btn { min-height:44px; }
 
-  .market-header {
-    padding: 36px 20px;
-    margin-top: 15px;
-    border-radius: 18px;
-  }
+  /* Marketplace */
+  .market-header { padding:34px 18px; margin-top:12px; border-radius:18px; }
+  .market-header h1, .market-hero h1 { font-size:1.9rem; line-height:1.18; }
+  .market-header p, .market-hero p { font-size:.95rem; line-height:1.6; }
+  .market-hero { padding:34px 18px; margin-top:12px; border-radius:18px; }
+  .market-hero .btn { width:100%; margin:5px 0!important; }
+  .hero-image { width:min(200px,65vw); height:min(200px,65vw); margin:22px auto 0; }
+  .hero-image i { font-size:7rem!important; }
+  .filter-card { padding:16px; border-radius:16px; }
+  .filter-card .btn { min-height:44px; width:100%; }
+  .marketplace-card { border-radius:16px; }
+  .book-image img { height:250px; }
+  .marketplace-card:hover, .book-card:hover, .category-card:hover, .feature-card:hover { transform:none; }
+  .book-title { min-height:0; font-size:1rem; }
+  .book-description { min-height:0; font-size:.88rem; }
+  .wishlist-btn { width:42px; height:42px; right:9px; top:9px; }
+  .category-badge { left:9px; top:9px; }
 
-  .market-header h1,
-  .market-hero h1 {
-    font-size: 2rem;
-    line-height: 1.2;
-  }
+  /* Book detail: image, price and actions become sequential. */
+  .book-image-card, .seller-card { border-radius:16px; }
+  .book-image-card img { height:min(420px,72vh); }
+  .price-box { font-size:1.9rem; }
+  .book-description { height:auto; max-height:none; padding:.7rem; line-height:1.65; }
+  .seller-card { padding:20px 16px; }
+  .seller-avatar { width:82px; height:82px; font-size:2.4rem; }
+  .related-book-card img { height:190px; }
 
-  .market-header p,
-  .market-hero p {
-    font-size: .98rem;
-  }
-
-  .market-hero {
-    padding: 38px 20px;
-    margin-top: 15px;
-    border-radius: 18px;
-  }
-
-  .market-hero .btn {
-    width: 100%;
-    margin: 5px 0 !important;
-  }
-
-  .hero-image {
-    width: min(220px, 70vw);
-    height: min(220px, 70vw);
-    margin-top: 28px;
-  }
-
-  .hero-image i {
-    font-size: 8rem !important;
-  }
-
-  .filter-card {
-    padding: 18px;
-    border-radius: 16px;
-  }
-
-  .filter-card h4 {
-    margin-bottom: 18px;
-  }
-
-  .marketplace-card {
-    border-radius: 16px;
-  }
-
-  .book-image img {
-    height: 260px;
-  }
-
-  .marketplace-card:hover {
-    transform: none;
-  }
-
-  .book-title {
-    min-height: auto;
-    font-size: 1.05rem;
-  }
-
-  .book-description {
-    min-height: auto;
-    font-size: .9rem;
-  }
-
-  .wishlist-btn {
-    width: 40px;
-    height: 40px;
-    right: 10px;
-    top: 10px;
-  }
-
-  .category-badge {
-    left: 10px;
-    top: 10px;
-  }
-
-  .book-image-card,
-  .seller-card {
-    border-radius: 18px;
-  }
-
-  .book-image-card img {
-    height: min(440px, 75vh);
-  }
-
-  .price-box {
-    font-size: 2rem;
-  }
-
-  .book-description {
-    height: auto;
-    max-height: 11rem;
-    padding: .75rem;
-  }
-
-  .seller-card {
-    padding: 22px 18px;
-  }
-
-  .seller-avatar {
-    width: 90px;
-    height: 90px;
-    font-size: 2.6rem;
-  }
-
-  .related-book-card img {
-    height: 200px;
-  }
-
-  .pagination {
-    margin-top: 35px;
-  }
-
-  .page-link {
-    width: 40px;
-    height: 40px;
-    margin: 0 2px;
-  }
-
-  /* Forms and action groups commonly become cramped on phones. */
-  .row > [class*="col-"] {
-    min-width: 0;
-  }
-
-  .btn {
-    max-width: 100%;
-  }
+  .pagination { margin-top:28px; }
+  .page-link { width:40px; height:40px; margin:0 1px; display:inline-flex; align-items:center; justify-content:center; }
+  .row > [class*="col-"] { min-width:0; }
+  .btn { max-width:100%; min-height:42px; }
 }
 
-/* =========================================================
-   Small phones
-   ========================================================= */
+/* Small phones: reduce density further without tiny text. */
 @media (max-width: 420px) {
-  .container {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .navbar-brand {
-    font-size: 1.1rem;
-  }
-
-  .market-header h1,
-  .market-hero h1 {
-    font-size: 1.75rem;
-  }
-
-  .book-image img {
-    height: 230px;
-  }
-
-  .book-image-card img {
-    height: 360px;
-  }
-
-  .price-box {
-    font-size: 1.75rem;
-  }
-
-  .seller-card {
-    padding: 18px 14px;
-  }
-
-  .page-link {
-    width: 36px;
-    height: 36px;
-    font-size: .9rem;
-  }
+  .container { padding-left:11px; padding-right:11px; }
+  .navbar-brand { font-size:1.05rem; }
+  .navbar-brand i { font-size:1.2rem!important; }
+  .hero { padding:36px 12px; border-radius:18px; }
+  .hero h1 { font-size:1.9rem; }
+  .hero p { font-size:.92rem; }
+  .hero-icon { font-size:5rem; }
+  .category-card { min-height:108px; padding:18px 8px; }
+  .book-card img, .book-image img { height:220px; }
+  .book-image-card img { height:340px; }
+  .price-box { font-size:1.65rem; }
+  .seller-card { padding:16px 13px; }
+  .page-link { width:36px; height:36px; font-size:.88rem; }
 }
