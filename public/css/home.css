@@ -46,140 +46,85 @@
 }
 
 .category-card {
-  background: var(--bs-body-bg);
+  background: var(--card);
+  color: var(--text);
   padding: 30px 18px;
   min-height: 150px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease;
   cursor: pointer;
 }
 
-.category-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-}
-
-.category-card i {
-  font-size: 2.5rem;
-  color: #2563eb;
-}
-
-.category-card h6 {
-  font-weight: 600;
-}
+.category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
+.category-card i { font-size: 2.5rem; color: var(--primary); }
+.category-card h6 { font-weight: 600; }
 
 .book-card {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform .25s ease, box-shadow .25s ease;
   position: relative;
 }
 
-.book-card:hover {
-  transform: translateY(-6px);
-}
-
-.book-card img {
-  height: 300px;
-  object-fit: cover;
-}
-
-.book-card .card-body {
-  padding: 1.15rem;
-}
-
-.book-card h5 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-bottom: 0.35rem;
-  overflow-wrap: anywhere;
-}
-
-.book-card .text-secondary {
-  min-height: 24px;
-}
-
-.book-card .badge {
-  font-weight: 500;
-  white-space: normal;
-}
+.book-card:hover { transform: translateY(-6px); }
+.book-card img { height: 300px; object-fit: cover; }
+.book-card .card-body { padding: 1.15rem; }
+.book-card h5 { font-size: 1.05rem; font-weight: 600; margin-bottom: .35rem; overflow-wrap:anywhere; }
+.book-card .text-secondary { min-height: 24px; }
+.book-card .badge { font-weight: 500; white-space: normal; }
 
 .feature-card {
   text-align: center;
   padding: 35px 25px;
   min-height: 190px;
   border-radius: 20px;
-  background: var(--bs-body-bg);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.11);
-}
-
-.feature-card i {
-  font-size: 3rem;
-  color: #2563eb;
-  margin-bottom: 15px;
-}
+.feature-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+.feature-card i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
 
 @media (max-width: 767.98px) {
   .hero {
-    margin-top: 20px;
-    border-radius: 22px;
-    padding: 48px 0;
+    margin-top: 14px;
+    border-radius: 20px;
+    padding: 30px 14px 26px;
   }
 
-  .hero .row {
-    text-align: center;
-  }
-
-  .hero p {
-    margin-inline: auto;
-  }
+  .hero .row { text-align:center; }
+  .hero h1 { font-size:clamp(1.85rem, 8.5vw, 2.35rem); line-height:1.12; margin-bottom:12px; }
+  .hero p { margin:0 auto; font-size:.9rem; line-height:1.55; max-width:330px; }
 
   .hero .btn {
-    width: 100%;
-    margin: 0 0 10px !important;
+    width:100%;
+    min-height:46px;
+    margin:0 0 8px !important;
+    padding:10px 14px;
   }
 
   .hero-icon {
-    margin-top: 20px;
-    font-size: 7rem;
+    margin-top:10px;
+    font-size:4.75rem;
+    line-height:1;
   }
 
-  .category-card {
-    min-height: 125px;
-    padding: 24px 14px;
-  }
+  .category-card { min-height:112px; padding:20px 10px; border-radius:16px; }
+  .category-card i { font-size:1.9rem; }
+  .category-card h6 { font-size:.82rem; margin-top:8px !important; }
 
-  .category-card i {
-    font-size: 2rem;
-  }
-
-  .book-card img {
-    height: 260px;
-  }
-
-  .feature-card {
-    min-height: auto;
-    padding: 28px 20px;
-  }
+  .book-card img { height:240px; }
+  .feature-card { min-height:auto; padding:24px 18px; }
 }
 
 @media (max-width: 420px) {
-  .hero {
-    border-radius: 18px;
-    padding: 40px 0;
-  }
-
-  .hero-icon {
-    font-size: 5.5rem;
-  }
-
-  .book-card img {
-    height: 230px;
-  }
+  .hero { padding:26px 12px 22px; border-radius:18px; }
+  .hero h1 { font-size:1.8rem; }
+  .hero p { font-size:.86rem; }
+  .hero-icon { font-size:4.25rem; margin-top:7px; }
+  .book-card img { height:220px; }
 }
