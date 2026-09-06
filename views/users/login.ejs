@@ -1,23 +1,64 @@
 <% layout("layouts/boilerplate") %>
 
-<div class="row justify-content-center">
-  <div class="col-md-5">
-    <h2 class="mb-4">Login</h2>
+<div class="auth-page">
+  <div class="auth-card auth-card-login">
+    <div class="auth-icon">
+      <i class="bi bi-person-lock"></i>
+    </div>
 
-    <form action="/login" method="POST" novalidate class="needs-validation">
+    <div class="text-center mb-4">
+      <span class="auth-eyebrow">Welcome back</span>
+      <h1 class="auth-title">Login to BookLoop</h1>
+      <p class="auth-subtitle">Continue buying and selling books with your student community.</p>
+    </div>
+
+    <form action="/login" method="POST" novalidate class="needs-validation auth-form">
       <div class="mb-3">
-        <label> Username </label>
-
-        <input name="username" class="form-control" required />
+        <label for="username" class="form-label">Username</label>
+        <div class="auth-input-group">
+          <i class="bi bi-person"></i>
+          <input id="username" name="username" class="form-control" placeholder="Enter your username" autocomplete="username" required />
+        </div>
+        <div class="invalid-feedback">Please enter your username.</div>
       </div>
 
       <div class="mb-3">
-        <label> Password </label>
-
-        <input type="password" name="password" class="form-control" required />
+        <label for="loginPassword" class="form-label">Password</label>
+        <div class="auth-input-group">
+          <i class="bi bi-lock"></i>
+          <input id="loginPassword" type="password" name="password" class="form-control" placeholder="Enter your password" autocomplete="current-password" required />
+          <button type="button" class="auth-password-toggle" data-password-target="loginPassword" aria-label="Show password">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback">Please enter your password.</div>
       </div>
 
-      <button class="btn btn-success w-100">Login</button>
+      <button class="btn btn-primary w-100 auth-submit" type="submit">
+        <i class="bi bi-box-arrow-in-right me-2"></i>
+        Login
+      </button>
     </form>
+
+    <div class="auth-divider"><span>New to BookLoop?</span></div>
+
+    <a href="/signup" class="btn btn-outline-primary w-100 auth-secondary-action">
+      <i class="bi bi-person-plus me-2"></i>
+      Create an Account
+    </a>
   </div>
 </div>
+
+<script>
+  document.querySelectorAll('[data-password-target]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.passwordTarget);
+      const icon = button.querySelector('i');
+      if (!input || !icon) return;
+      const visible = input.type === 'text';
+      input.type = visible ? 'password' : 'text';
+      icon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
+      button.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+    });
+  });
+</script>
