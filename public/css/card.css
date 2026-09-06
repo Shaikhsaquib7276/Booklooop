@@ -1,39 +1,98 @@
 .marketplace-card{
-
-border:none;
-
-border-radius:20px;
-
-overflow:hidden;
-
-transition:.35s;
-
-box-shadow:0 10px 25px rgba(0,0,0,.08);
-
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+    box-shadow:var(--shadow);
 }
 
 .marketplace-card:hover{
+    transform:translateY(-6px);
+    box-shadow:var(--shadow-hover);
+}
 
-transform:translateY(-10px);
-
+.marketplace-card .book-image{
+    position:relative;
+    background:var(--surface-soft);
+    overflow:hidden;
 }
 
 .marketplace-card img{
-
-height:280px;
-
-object-fit:cover;
-
+    display:block;
+    width:100%;
+    height:280px;
+    object-fit:cover;
+    transition:transform .35s ease;
 }
 
-.marketplace-card .card-body{
+.marketplace-card:hover img{ transform:scale(1.025); }
+.marketplace-card .card-body{ padding:20px; }
+.marketplace-card h5{ font-weight:700; color:var(--text); }
+.marketplace-card .book-description{ color:var(--text-light)!important; line-height:1.55; }
+.marketplace-card .price{ color:var(--primary); font-weight:800; font-size:1.5rem; }
+.marketplace-card .seller{ color:var(--text-light); }
+.marketplace-card .seller strong{ color:var(--text); }
+.marketplace-card .badge{ border-radius:50px; }
 
-padding:25px;
-
+.books-results-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:22px;
 }
 
-.marketplace-card h5{
+.books-results-eyebrow{
+    display:block;
+    color:var(--primary);
+    font-size:.72rem;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    margin-bottom:4px;
+}
 
-font-weight:700;
+.books-results-title{
+    color:var(--text);
+    font-size:1.55rem;
+    font-weight:750;
+}
 
+.books-results-count{
+    flex-shrink:0;
+    color:var(--text-light);
+    background:var(--surface-soft);
+    border:1px solid var(--border);
+    border-radius:50px;
+    padding:7px 12px;
+    font-size:.78rem;
+    font-weight:600;
+}
+
+@media (max-width:767.98px){
+    .marketplace-card{
+        border:1px solid var(--border);
+        border-radius:15px;
+        box-shadow:var(--shadow);
+    }
+    .marketplace-card:hover{ transform:none; }
+    .marketplace-card:hover img{ transform:none; }
+    .marketplace-card img{ height:220px; }
+    .marketplace-card .card-body{ padding:15px; }
+    .marketplace-card .price{ font-size:1.35rem; }
+
+    .books-results-header{
+        align-items:center;
+        margin-bottom:15px;
+    }
+    .books-results-title{ font-size:1.25rem; }
+    .books-results-count{ font-size:.7rem; padding:6px 10px; }
+}
+
+@media (max-width:420px){
+    .marketplace-card img{ height:210px; }
+    .books-results-header{ gap:8px; }
+    .books-results-title{ font-size:1.12rem; }
 }

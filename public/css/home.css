@@ -1,89 +1,130 @@
 .hero {
   background: linear-gradient(135deg, #2563eb, #60a5fa);
-
   color: white;
-
-  padding: 100px 0;
-
+  padding: clamp(55px, 8vw, 100px) 0;
   border-radius: 30px;
-
   margin-top: 35px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  right: -70px;
+  bottom: -100px;
 }
 
 .hero h1 {
-  font-size: 3.5rem;
-
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1.12;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.7;
+  opacity: 0.92;
+  max-width: 620px;
+}
 
-  opacity: 0.9;
+.hero .btn {
+  min-height: 48px;
+  font-weight: 600;
+  padding-inline: 1.25rem;
 }
 
 .hero-icon {
-  font-size: 14rem;
-
+  font-size: clamp(7rem, 15vw, 14rem);
   opacity: 0.95;
+  filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.12));
 }
 
 .category-card {
-  background: var(--bs-body-bg);
-
-  padding: 35px;
-
+  background: var(--card);
+  color: var(--text);
+  padding: 30px 18px;
+  min-height: 150px;
   border-radius: 20px;
-
   text-align: center;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-
-  transition: 0.3s;
-
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease;
   cursor: pointer;
 }
 
-.category-card:hover {
-  transform: translateY(-8px);
-}
-
-.category-card i {
-  font-size: 2.5rem;
-
-  color: #2563eb;
-}
+.category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
+.category-card i { font-size: 2.5rem; color: var(--primary); }
+.category-card h6 { font-weight: 600; }
 
 .book-card {
-  transition: 0.35s;
+  transition: transform .25s ease, box-shadow .25s ease;
+  position: relative;
 }
 
-.book-card:hover {
-  transform: translateY(-10px);
-}
-
-.book-card img {
-  height: 300px;
-
-  object-fit: cover;
-}
+.book-card:hover { transform: translateY(-6px); }
+.book-card img { height: 300px; object-fit: cover; }
+.book-card .card-body { padding: 1.15rem; }
+.book-card h5 { font-size: 1.05rem; font-weight: 600; margin-bottom: .35rem; overflow-wrap:anywhere; }
+.book-card .text-secondary { min-height: 24px; }
+.book-card .badge { font-weight: 500; white-space: normal; }
 
 .feature-card {
   text-align: center;
-
-  padding: 35px;
-
+  padding: 35px 25px;
+  min-height: 190px;
   border-radius: 20px;
-
-  background: var(--bs-body-bg);
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
-.feature-card i {
-  font-size: 3rem;
+.feature-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+.feature-card i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
 
-  color: #2563eb;
+@media (max-width: 767.98px) {
+  .hero {
+    margin-top: 14px;
+    border-radius: 20px;
+    padding: 30px 14px 26px;
+  }
 
-  margin-bottom: 15px;
+  .hero .row { text-align:center; }
+  .hero h1 { font-size:clamp(1.85rem, 8.5vw, 2.35rem); line-height:1.12; margin-bottom:12px; }
+  .hero p { margin:0 auto; font-size:.9rem; line-height:1.55; max-width:330px; }
+
+  .hero .btn {
+    width:100%;
+    min-height:46px;
+    margin:0 0 8px !important;
+    padding:10px 14px;
+  }
+
+  .hero-icon {
+    margin-top:10px;
+    font-size:4.75rem;
+    line-height:1;
+  }
+
+  .category-card { min-height:112px; padding:20px 10px; border-radius:16px; }
+  .category-card i { font-size:1.9rem; }
+  .category-card h6 { font-size:.82rem; margin-top:8px !important; }
+
+  .book-card img { height:240px; }
+  .feature-card { min-height:auto; padding:24px 18px; }
+}
+
+@media (max-width: 420px) {
+  .hero { padding:26px 12px 22px; border-radius:18px; }
+  .hero h1 { font-size:1.8rem; }
+  .hero p { font-size:.86rem; }
+  .hero-icon { font-size:4.25rem; margin-top:7px; }
+  .book-card img { height:220px; }
 }

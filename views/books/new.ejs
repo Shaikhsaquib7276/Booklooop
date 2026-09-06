@@ -1,72 +1,51 @@
 <% layout("layouts/boilerplate") %>
 
-<h2>Add Book</h2>
-
-<form
-  action="/books"
-  method="POST"
-  class="needs-validation"
-  novalidate
-  enctype="multipart/form-data"
-   id="bookForm"
-data-ajax-form
-data-loader-icon="📚"
-
-data-loader-title="Uploading Book"
-
-data-loader-message="Saving your listing..."
-
->
-  <div class="mb-3">
-    <label>Title</label>
-
-    <input name="title" class="form-control" required />
+<div class="book-form-page">
+  <div class="book-form-header">
+    <span class="book-form-eyebrow">Marketplace</span>
+    <h1 class="book-form-title">Add a Book</h1>
+    <p class="book-form-subtitle">Create a clean listing so other students can discover your book.</p>
   </div>
 
-  <div class="mb-3">
-    <label>Author</label>
-
-    <input name="author" class="form-control" required />
-  </div>
-
-  <div class="mb-3">
-    <label>Description</label>
-
-    <textarea name="description" class="form-control" required></textarea>
-  </div>
-
-  <div class="mb-3">
-    <label>Price</label>
-
-    <input type="number" name="price" class="form-control" required />
-  </div>
-
-  <div class="mb-3">
-    <label>Condition</label>
-
-    <select name="condition" class="form-select">
-      <option>New</option>
-
-      <option>Like New</option>
-
-      <option>Good</option>
-
-      <option>Fair</option>
-
-      <option>Poor</option>
-    </select>
-  </div>
-
-  <div class="mb-3">
-    <label>Category</label>
-
-    <input name="category" class="form-control" required />
-  </div>
-
-  <div class="mb-3">
-    <label class="form-label"> Book Cover </label>
-    <input type="file" name="image" class="form-control" accept="image/*" />
-  </div>
-
-  <button class="btn btn-success">Add Book</button>
-</form>
+  <form action="/books" method="POST" class="needs-validation book-form-card" novalidate enctype="multipart/form-data" id="bookForm" data-ajax-form data-loader-icon="📚" data-loader-title="Uploading Book" data-loader-message="Saving your listing...">
+    <div class="book-form-grid">
+      <div class="book-form-field">
+        <label for="bookTitle">Title</label>
+        <input id="bookTitle" name="title" class="form-control" placeholder="e.g. Data Structures & Algorithms" required>
+      </div>
+      <div class="book-form-field">
+        <label for="bookAuthor">Author</label>
+        <input id="bookAuthor" name="author" class="form-control" placeholder="Author name" required>
+      </div>
+      <div class="book-form-field full">
+        <label for="bookDescription">Description</label>
+        <textarea id="bookDescription" name="description" class="form-control" placeholder="Mention edition, useful notes, highlights or any important details..." required></textarea>
+      </div>
+      <div class="book-form-field">
+        <label for="bookPrice">Price (₹)</label>
+        <input id="bookPrice" type="number" name="price" class="form-control" min="0" placeholder="500" required>
+      </div>
+      <div class="book-form-field">
+        <label for="bookCondition">Condition</label>
+        <select id="bookCondition" name="condition" class="form-select">
+          <option>New</option><option>Like New</option><option>Good</option><option>Fair</option><option>Poor</option>
+        </select>
+      </div>
+      <div class="book-form-field full">
+        <label for="bookCategory">Category</label>
+        <input id="bookCategory" name="category" class="form-control" placeholder="e.g. Programming, Engineering, Novel" required>
+      </div>
+      <div class="book-form-field full">
+        <label for="bookImage">Book Cover</label>
+        <div class="book-image-upload">
+          <input id="bookImage" type="file" name="image" class="form-control" accept="image/*">
+          <div class="book-form-help">Use a clear front-cover image. JPG, PNG and other common image formats are supported.</div>
+        </div>
+      </div>
+    </div>
+    <div class="book-form-actions">
+      <a href="/books" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Cancel</a>
+      <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Add Book</button>
+    </div>
+  </form>
+</div>
