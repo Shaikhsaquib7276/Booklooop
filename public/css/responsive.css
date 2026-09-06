@@ -1,27 +1,382 @@
-@media(max-width:992px){
+/* =========================================================
+   BookLoop Responsive UI
+   Mobile-first fixes for navbar, marketplace, cards,
+   book details, forms and common Bootstrap layouts.
+   ========================================================= */
 
-.search-form{
-
-width:100%;
-
-margin:20px 0;
-
+html {
+  overflow-x: hidden;
 }
 
-.navbar-nav{
-
-margin-top:15px;
-
+body {
+  min-width: 320px;
+  overflow-x: hidden;
 }
 
+img {
+  max-width: 100%;
 }
 
-@media(max-width:768px){
-
-.navbar-brand{
-
-font-size:1.4rem;
-
+/* ---------- Navbar ---------- */
+.navbar .container {
+  gap: 12px;
 }
 
+.navbar-toggler {
+  padding: 7px 9px;
+  border-radius: 10px;
+}
+
+.navbar-collapse {
+  min-width: 0;
+}
+
+.navbar-nav {
+  min-width: 0;
+}
+
+.search-form {
+  min-width: 0;
+}
+
+.search-form .input-group {
+  width: 100%;
+}
+
+/* ---------- Marketplace ---------- */
+.market-header,
+.market-hero {
+  width: 100%;
+}
+
+.market-hero {
+  padding: 60px 40px;
+}
+
+.hero-image {
+  max-width: 100%;
+  max-height: 320px;
+}
+
+.filter-card {
+  width: 100%;
+}
+
+/* Prevent long titles/descriptions from forcing horizontal overflow. */
+.book-title,
+.book-description,
+.card-title,
+.card-text {
+  overflow-wrap: anywhere;
+}
+
+.book-image img {
+  display: block;
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+}
+
+/* ---------- Book details ---------- */
+.book-image-card img {
+  display: block;
+  width: 100%;
+  height: min(620px, 70vh);
+  object-fit: cover;
+}
+
+.price-box {
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Pagination ---------- */
+.pagination {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.page-link {
+  margin: 0 3px;
+}
+
+/* =========================================================
+   Tablet
+   ========================================================= */
+@media (max-width: 991.98px) {
+  .navbar {
+    padding: 10px 0;
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+
+  .navbar-collapse {
+    padding: 14px 0 8px;
+  }
+
+  .navbar-nav {
+    align-items: stretch !important;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .navbar-nav .nav-item {
+    width: 100%;
+  }
+
+  .navbar-nav .nav-link {
+    margin-left: 0;
+    padding: 10px 4px;
+  }
+
+  .navbar-nav .btn {
+    margin: 8px 0 !important;
+    display: inline-block;
+  }
+
+  .navbar-nav .dropdown-menu {
+    position: static !important;
+    width: 100%;
+    margin: 4px 0 8px;
+  }
+
+  .navbar-nav .nav-item.ms-3 {
+    margin-left: 0 !important;
+    margin-top: 6px;
+  }
+
+  #themeToggle {
+    width: 42px;
+    height: 42px;
+  }
+
+  .search-form {
+    width: 100%;
+    margin: 8px 0 12px;
+  }
+
+  .market-hero {
+    padding: 50px 35px;
+  }
+
+  .market-hero h1,
+  .market-header h1 {
+    font-size: 2.4rem;
+  }
+
+  .book-image img {
+    height: 280px;
+  }
+
+  .book-image-card img {
+    height: 500px;
+  }
+}
+
+/* =========================================================
+   Mobile
+   ========================================================= */
+@media (max-width: 767.98px) {
+  .container {
+    width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  section {
+    margin-top: 50px;
+  }
+
+  .section-title {
+    font-size: 1.55rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .navbar-brand i {
+    font-size: 1.45rem !important;
+    margin-right: 7px !important;
+  }
+
+  .navbar-toggler {
+    flex-shrink: 0;
+  }
+
+  .market-header {
+    padding: 36px 20px;
+    margin-top: 15px;
+    border-radius: 18px;
+  }
+
+  .market-header h1,
+  .market-hero h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .market-header p,
+  .market-hero p {
+    font-size: .98rem;
+  }
+
+  .market-hero {
+    padding: 38px 20px;
+    margin-top: 15px;
+    border-radius: 18px;
+  }
+
+  .market-hero .btn {
+    width: 100%;
+    margin: 5px 0 !important;
+  }
+
+  .hero-image {
+    width: min(220px, 70vw);
+    height: min(220px, 70vw);
+    margin-top: 28px;
+  }
+
+  .hero-image i {
+    font-size: 8rem !important;
+  }
+
+  .filter-card {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .filter-card h4 {
+    margin-bottom: 18px;
+  }
+
+  .marketplace-card {
+    border-radius: 16px;
+  }
+
+  .book-image img {
+    height: 260px;
+  }
+
+  .marketplace-card:hover {
+    transform: none;
+  }
+
+  .book-title {
+    min-height: auto;
+    font-size: 1.05rem;
+  }
+
+  .book-description {
+    min-height: auto;
+    font-size: .9rem;
+  }
+
+  .wishlist-btn {
+    width: 40px;
+    height: 40px;
+    right: 10px;
+    top: 10px;
+  }
+
+  .category-badge {
+    left: 10px;
+    top: 10px;
+  }
+
+  .book-image-card,
+  .seller-card {
+    border-radius: 18px;
+  }
+
+  .book-image-card img {
+    height: min(440px, 75vh);
+  }
+
+  .price-box {
+    font-size: 2rem;
+  }
+
+  .book-description {
+    height: auto;
+    max-height: 11rem;
+    padding: .75rem;
+  }
+
+  .seller-card {
+    padding: 22px 18px;
+  }
+
+  .seller-avatar {
+    width: 90px;
+    height: 90px;
+    font-size: 2.6rem;
+  }
+
+  .related-book-card img {
+    height: 200px;
+  }
+
+  .pagination {
+    margin-top: 35px;
+  }
+
+  .page-link {
+    width: 40px;
+    height: 40px;
+    margin: 0 2px;
+  }
+
+  /* Forms and action groups commonly become cramped on phones. */
+  .row > [class*="col-"] {
+    min-width: 0;
+  }
+
+  .btn {
+    max-width: 100%;
+  }
+}
+
+/* =========================================================
+   Small phones
+   ========================================================= */
+@media (max-width: 420px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .market-header h1,
+  .market-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .book-image img {
+    height: 230px;
+  }
+
+  .book-image-card img {
+    height: 360px;
+  }
+
+  .price-box {
+    font-size: 1.75rem;
+  }
+
+  .seller-card {
+    padding: 18px 14px;
+  }
+
+  .page-link {
+    width: 36px;
+    height: 36px;
+    font-size: .9rem;
+  }
 }
