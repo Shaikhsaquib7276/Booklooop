@@ -2,7 +2,7 @@
 
 <%- include("./includes/hero") %>
 
-<section class="container mt-5 mb-5 books-market-section">
+<section class="container mt-5 mb-5 books-market-section" id="books">
 
   <!-- Mobile filter trigger -->
   <div class="mobile-filter-bar">
@@ -40,13 +40,23 @@
     <!-- Books -->
     <div class="col-lg-9 books-results-column">
 
+      <div class="books-results-header">
+        <div>
+          <span class="books-results-eyebrow">Marketplace</span>
+          <h2 class="books-results-title mb-0">Available Books</h2>
+        </div>
+        <span class="books-results-count">
+          <%= books.length %> <%= books.length === 1 ? 'book' : 'books' %>
+        </span>
+      </div>
+
       <% if(books.length===0){ %>
 
       <%- include("./includes/emptyState") %>
 
       <% } else { %>
 
-      <div class="row">
+      <div class="row g-3 g-md-4">
 
         <% books.forEach(book=>{ %>
 
