@@ -1,166 +1,152 @@
 /* ================= BOOK IMAGE ================= */
-
 .book-image-card{
-
-    background:var(--bs-body-bg);
-
-    border-radius:25px;
-
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
     overflow:hidden;
-
-    box-shadow:0 15px 35px rgba(0,0,0,.08);
-
+    box-shadow:var(--shadow);
 }
 
 .book-image-card img{
-
     width:100%;
-
     height:620px;
-
     object-fit:cover;
-
+    display:block;
 }
 
 /* ================= PRICE ================= */
-
 .price-box{
-
     font-size:2.6rem;
-
     font-weight:700;
-
-    color:#2563EB;
-
+    color:var(--primary);
 }
 
 /* ================= DESCRIPTION ================= */
-
 .book-description{
-    padding: 1rem;
-        overflow: auto;
-    height: 8rem;
-
+    padding:1rem;
+    overflow:auto;
+    height:8rem;
     line-height:1.8;
-
-    color:#6B7280;
-
-
+    color:var(--text-light);
     font-size:1.05rem;
-
 }
 
 /* ================= BUTTONS ================= */
-
-.btn{
-
-    border-radius:12px;
-
-}
+.btn{ border-radius:12px; }
 
 /* ================= BADGES ================= */
-
-.badge{
-
-    border-radius:50px;
-
-}
-
-
-
+.badge{ border-radius:50px; }
 
 /* ================= SELLER CARD ================= */
-
 .seller-card{
-
-    background:var(--bs-body-bg);
-
-    border-radius:25px;
-
-    padding:35px;
-
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:var(--shadow);
+    transition:box-shadow .25s ease,border-color .25s ease;
 }
+
+.seller-card:hover{
+    box-shadow:var(--shadow-hover);
+}
+
+.seller-card-title{
+    color:var(--text);
+    line-height:1.2;
+}
+
+.seller-name{ color:var(--primary); }
+.seller-detail{ color:var(--text-light)!important; }
 
 .seller-avatar{
-
     width:120px;
-
     height:120px;
-
     margin:auto;
-
     border-radius:50%;
-
     background:linear-gradient(135deg,#2563EB,#60A5FA);
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     color:white;
-
     font-size:3.5rem;
-
 }
 
-.seller-card h3{
-
-    margin-bottom:15px;
-
-}
-
-.seller-card .btn{
-
-    border-radius:12px;
-
-}
-
-.btn:hover{
-    color: white;
-}
-
-
-
-
+.seller-card .btn{ border-radius:12px; min-height:44px; }
+.seller-actions .btn{ display:flex; align-items:center; justify-content:center; }
 
 /* ================= RELATED BOOKS ================= */
-
 .related-book-card{
-
-    border:none;
-
-    border-radius:20px;
-
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:18px;
     overflow:hidden;
-
-    transition:.35s;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+    box-shadow:var(--shadow);
 }
 
 .related-book-card:hover{
-
-    transform:translateY(-8px);
-
-    box-shadow:0 15px 35px rgba(0,0,0,.15);
-
+    transform:translateY(-5px);
+    box-shadow:var(--shadow-hover);
 }
 
 .related-book-card img{
-
     height:220px;
-
     object-fit:cover;
-
 }
 
-.related-book-card .card-body{
+.related-book-card .card-body{ padding:20px; }
 
-    padding:20px;
+@media (max-width:767.98px){
+    .book-image-card{
+        border-radius:16px;
+        border:1px solid var(--border);
+        box-shadow:var(--shadow);
+    }
 
+    .book-image-card img{
+        height:min(300px,60vh);
+    }
+
+    .seller-card{
+        padding:20px 16px;
+        border-radius:16px;
+        border:1px solid var(--border);
+    }
+
+    .seller-avatar{
+        width:82px;
+        height:82px;
+        font-size:2.35rem;
+    }
+
+    .seller-card-title{
+        font-size:1.45rem;
+        margin-bottom:12px;
+    }
+
+    .seller-detail{
+        font-size:.92rem;
+        line-height:1.45;
+    }
+
+    .seller-actions{ margin-top:2px!important; }
+    .seller-actions .btn{ min-height:46px; }
+
+    .related-book-card{
+        border-radius:15px;
+    }
+
+    .related-book-card img{
+        height:170px;
+    }
+}
+
+@media (max-width:420px){
+    .seller-card{ padding:17px 13px; }
+    .seller-avatar{ width:76px; height:76px; font-size:2.1rem; }
+    .seller-card-title{ font-size:1.3rem; }
+    .seller-detail{ font-size:.86rem; }
 }
