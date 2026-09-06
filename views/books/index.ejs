@@ -2,21 +2,43 @@
 
 <%- include("./includes/hero") %>
 
-<section class="container mt-5 mb-5">
+<section class="container mt-5 mb-5 books-market-section">
 
-  <div class="row">
+  <!-- Mobile filter trigger -->
+  <div class="mobile-filter-bar">
+    <button type="button" class="btn btn-primary mobile-filter-toggle" id="filterToggle" aria-controls="mobileFilterPanel" aria-expanded="false">
+      <i class="bi bi-funnel-fill me-2"></i>
+      Filters
+      <span class="filter-toggle-hint">Refine books</span>
+    </button>
+  </div>
 
-    <!-- Sidebar -->
+  <div class="row books-market-row">
 
-    <div class="col-lg-3">
-
+    <!-- Desktop Sidebar -->
+    <div class="col-lg-3 desktop-filter-column">
       <%- include("./includes/filters") %>
-
     </div>
 
-    <!-- Books -->
+    <!-- Mobile slide-in filter drawer -->
+    <div class="mobile-filter-overlay" id="mobileFilterOverlay" aria-hidden="true"></div>
+    <aside class="mobile-filter-drawer" id="mobileFilterPanel" aria-hidden="true" aria-label="Book filters">
+      <div class="mobile-filter-drawer-header">
+        <div>
+          <span class="small text-secondary">Browse smarter</span>
+          <h4 class="fw-bold mb-0">Filters</h4>
+        </div>
+        <button type="button" class="btn btn-light mobile-filter-close" id="filterClose" aria-label="Close filters">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="mobile-filter-drawer-body">
+        <%- include("./includes/filters") %>
+      </div>
+    </aside>
 
-    <div class="col-lg-9">
+    <!-- Books -->
+    <div class="col-lg-9 books-results-column">
 
       <% if(books.length===0){ %>
 
@@ -43,3 +65,30 @@
   </div>
 
 </section>
+
+<script>
+  (() => {
+    const toggle = document.getElementById('filterToggle');
+    const close = document.getElementById('filterClose');
+    const drawer = document.getElementById('mobileFilterPanel');
+    const overlay = document.getElementById('mobileFilterOverlay');
+
+    if (!toggle || !close || !drawer || !overlay) return;
+
+    const setDrawer = (open) => {
+      drawer.classList.toggle('is-open', open);
+      overlay.classList.toggle('is-visible', open);
+      document.body.classList.toggle('filter-drawer-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      drawer.setAttribute('aria-hidden', String(!open));
+      overlay.setAttribute('aria-hidden', String(!open));
+    };
+
+    toggle.addEventListener('click', () => setDrawer(true));
+    close.addEventListener('click', () => setDrawer(false));
+    overlay.addEventListener('click', () => setDrawer(false));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setDrawer(false);
+    });
+  })();
+</script>
