@@ -1,89 +1,185 @@
 .hero {
   background: linear-gradient(135deg, #2563eb, #60a5fa);
-
   color: white;
-
-  padding: 100px 0;
-
+  padding: clamp(55px, 8vw, 100px) 0;
   border-radius: 30px;
-
   margin-top: 35px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  right: -70px;
+  bottom: -100px;
 }
 
 .hero h1 {
-  font-size: 3.5rem;
-
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1.12;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.7;
+  opacity: 0.92;
+  max-width: 620px;
+}
 
-  opacity: 0.9;
+.hero .btn {
+  min-height: 48px;
+  font-weight: 600;
+  padding-inline: 1.25rem;
 }
 
 .hero-icon {
-  font-size: 14rem;
-
+  font-size: clamp(7rem, 15vw, 14rem);
   opacity: 0.95;
+  filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.12));
 }
 
 .category-card {
   background: var(--bs-body-bg);
-
-  padding: 35px;
-
+  padding: 30px 18px;
+  min-height: 150px;
   border-radius: 20px;
-
   text-align: center;
-
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-
-  transition: 0.3s;
-
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
 }
 
 .category-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
 }
 
 .category-card i {
   font-size: 2.5rem;
-
   color: #2563eb;
 }
 
+.category-card h6 {
+  font-weight: 600;
+}
+
 .book-card {
-  transition: 0.35s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
 }
 
 .book-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-6px);
 }
 
 .book-card img {
   height: 300px;
-
   object-fit: cover;
+}
+
+.book-card .card-body {
+  padding: 1.15rem;
+}
+
+.book-card h5 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  overflow-wrap: anywhere;
+}
+
+.book-card .text-secondary {
+  min-height: 24px;
+}
+
+.book-card .badge {
+  font-weight: 500;
+  white-space: normal;
 }
 
 .feature-card {
   text-align: center;
-
-  padding: 35px;
-
+  padding: 35px 25px;
+  min-height: 190px;
   border-radius: 20px;
-
   background: var(--bs-body-bg);
-
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.11);
 }
 
 .feature-card i {
   font-size: 3rem;
-
   color: #2563eb;
-
   margin-bottom: 15px;
+}
+
+@media (max-width: 767.98px) {
+  .hero {
+    margin-top: 20px;
+    border-radius: 22px;
+    padding: 48px 0;
+  }
+
+  .hero .row {
+    text-align: center;
+  }
+
+  .hero p {
+    margin-inline: auto;
+  }
+
+  .hero .btn {
+    width: 100%;
+    margin: 0 0 10px !important;
+  }
+
+  .hero-icon {
+    margin-top: 20px;
+    font-size: 7rem;
+  }
+
+  .category-card {
+    min-height: 125px;
+    padding: 24px 14px;
+  }
+
+  .category-card i {
+    font-size: 2rem;
+  }
+
+  .book-card img {
+    height: 260px;
+  }
+
+  .feature-card {
+    min-height: auto;
+    padding: 28px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero {
+    border-radius: 18px;
+    padding: 40px 0;
+  }
+
+  .hero-icon {
+    font-size: 5.5rem;
+  }
+
+  .book-card img {
+    height: 230px;
+  }
 }
