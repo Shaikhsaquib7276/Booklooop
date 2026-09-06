@@ -9,42 +9,45 @@
     transition:background .25s ease,border-color .25s ease,box-shadow .25s ease;
 }
 
-.book-detail-shell:hover{
-    box-shadow:var(--shadow-hover);
-}
+.book-detail-shell:hover{ box-shadow:var(--shadow-hover); }
 
 .book-detail-media{
-    padding:30px;
+    padding:34px;
     background:var(--surface-soft);
     border-right:1px solid var(--border);
+    display:flex;
 }
 
 .book-image-card{
+    width:100%;
+    height:100%;
     background:var(--surface);
     border:1px solid var(--border);
     border-radius:20px;
     overflow:hidden;
     box-shadow:var(--shadow);
-    height:100%;
+    display:flex;
 }
 
 .book-image-card img{
     width:100%;
-    height:620px;
+    height:100%;
+    min-height:620px;
     object-fit:cover;
     display:block;
 }
 
-.book-detail-content{
-    min-width:0;
-}
+.book-detail-content{ min-width:0; }
 
-/* The included bookInfo becomes the right side of the unified card. */
+/* Right side of the unified product-style card. */
 .book-details-card{
     height:100%;
+    min-height:100%;
     padding:42px;
     background:var(--surface);
     color:var(--text);
+    display:flex;
+    flex-direction:column;
 }
 
 .book-details-title{
@@ -53,10 +56,7 @@
     overflow-wrap:anywhere;
 }
 
-.book-details-author{
-    color:var(--text-light)!important;
-}
-
+.book-details-author{ color:var(--text-light)!important; }
 .book-details-section-title{ color:var(--text); }
 
 .price-box{
@@ -122,31 +122,35 @@
 .related-book-card .card-body{ padding:20px; }
 
 /* ================= RESPONSIVE ================= */
+@media (max-width:1199.98px) and (min-width:992px){
+    .book-detail-media{ padding:26px; }
+    .book-details-card{ padding:32px; }
+    .book-image-card img{ min-height:560px; }
+    .book-details-title{ font-size:2.7rem!important; }
+}
+
 @media (max-width:991.98px){
     .book-detail-shell{ border-radius:20px; }
-    .book-detail-media{ padding:22px; border-right:0; border-bottom:1px solid var(--border); }
-    .book-image-card img{ height:480px; }
+    .book-detail-media{
+        padding:22px;
+        border-right:0;
+        border-bottom:1px solid var(--border);
+        display:block;
+    }
+    .book-image-card{ height:auto; }
+    .book-image-card img{ height:480px; min-height:0; }
     .book-details-card{ padding:30px; }
 }
 
 @media (max-width:767.98px){
-    .book-detail-shell{
-        border-radius:17px;
-        box-shadow:var(--shadow);
-    }
+    .book-detail-shell{ border-radius:17px; }
     .book-detail-media{
         padding:12px;
         background:var(--surface-soft);
     }
-    .book-image-card{
-        border-radius:14px;
-    }
-    .book-image-card img{
-        height:min(300px,60vh);
-    }
-    .book-details-card{
-        padding:20px 16px;
-    }
+    .book-image-card{ border-radius:14px; }
+    .book-image-card img{ height:min(300px,60vh); min-height:0; }
+    .book-details-card{ padding:20px 16px; }
     .book-details-title{
         font-size:1.65rem!important;
         line-height:1.2;
@@ -164,10 +168,7 @@
         font-size:.75rem!important;
         padding:.5rem .7rem!important;
     }
-    .price-box{
-        font-size:2rem;
-        margin-bottom:18px!important;
-    }
+    .price-box{ font-size:2rem; margin-bottom:18px!important; }
     .book-details-section-title{ font-size:1.2rem; }
     .book-description{
         height:auto;
@@ -185,8 +186,7 @@
     .book-details-actions form{ width:100%; }
     .book-details-actions .btn{ width:100%; min-height:46px; }
     .book-owner-actions{ flex-direction:column; gap:9px!important; }
-    .book-owner-actions > *{ width:100%; }
-    .book-owner-actions .btn{ width:100%; }
+    .book-owner-actions > *,.book-owner-actions .btn{ width:100%; }
 
     .seller-card{ padding:20px 16px;border-radius:16px; }
     .seller-avatar{ width:82px;height:82px;font-size:2.35rem; }
