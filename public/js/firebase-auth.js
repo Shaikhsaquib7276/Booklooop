@@ -1,3 +1,5 @@
+require("dotenv").config({ path: ".env" });
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
 import {
@@ -7,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyClNC3iHCi2pGbgI4AbZOaX_IZzZs-iPck",
+    apiKey: "firebase_API_key",
     authDomain: "bookloop-3.firebaseapp.com",
     projectId: "bookloop-3",
     storageBucket: "bookloop-3.firebasestorage.app",
