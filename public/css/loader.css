@@ -31,10 +31,12 @@
   box-shadow: var(--shadow-hover);
 }
 
-.loader-icon {
-  font-size: 54px;
-  margin-bottom: 14px;
-  color: var(--primary);
+.loader-logo {
+  display: block;
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  margin: 0 auto 14px;
   animation: loader-float 2s ease infinite;
 }
 
@@ -65,10 +67,10 @@ button.is-loading { cursor: wait; opacity: .8; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .loader-icon, .loader-spinner, .loader-card { animation: none; }
+  .loader-logo, .loader-spinner, .loader-card { animation: none; }
   .loader-overlay { transition: none; }
 }
 @media (max-width: 420px) {
   .loader-card { padding: 28px 20px; border-radius: 18px; }
-  .loader-icon { font-size: 46px; }
+  .loader-logo { width: 150px; height: 150px; }
 }

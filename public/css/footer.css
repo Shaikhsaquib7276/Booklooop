@@ -93,3 +93,12 @@ footer { margin-top: auto; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-brand { grid-column: auto; }
 }
+
+
+.footer-logo-image {
+  display: block;
+  width: 150px;
+  height: 76px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}

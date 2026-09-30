@@ -2,10 +2,11 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="/" class="footer-logo"><i class="bi bi-book-half"></i> BookLoop</a>
+        <a href="/" class="footer-logo" aria-label="BookLoop home">
+          <img src="/images/bookloop-logo.png" alt="BookLoop" class="footer-logo-image" width="150" height="76">
+        </a>
         <p>Buy, sell and discover affordable second-hand books from your community.</p>
       </div>
-
       <div class="footer-links">
         <h5>Explore</h5>
         <a href="/">Home</a>
@@ -15,7 +16,6 @@
           <a href="/wishlist">Wishlist</a>
         <% } %>
       </div>
-
       <div class="footer-links">
         <h5>Account</h5>
         <% if (currentUser) { %>
@@ -28,7 +28,6 @@
         <% } %>
       </div>
     </div>
-
     <div class="footer-bottom">
       <span>© 2026 BookLoop</span>
       <span>Built for students & book lovers <i class="bi bi-heart-fill"></i></span>
