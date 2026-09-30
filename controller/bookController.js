@@ -1,6 +1,17 @@
 const path = require("path");
 const Book = require("../models/Book");
 const Reservation = require("../models/Reservation");
+const AcademicBook = require("../models/AcademicBook");
+const BookRequest = require("../models/BookRequest");
+const Notification = require("../models/Notification");
+
+async function notifyAcademicMatches(book, sellerId) {
+    if (!book.academicBook) return;
+    const requests = await BookRequest.find({ academicBook: book.academicBook, status: "Open", student: { $ne: sellerId } }).select("_id student").lean();
+    if (!requests.length) return;
+    await BookRequest.updateMany({ _id: { $in: requests.map(r => r._id) } }, { $set: { status: "Matched", matchedBook: book._id, matchedAt: new Date() } });
+    await Notification.insertMany(requests.map(r => ({ recipient: r.student, type: "book_match", title: "A book you requested is now available", message: book.title + " has been listed on BookLoop.", link: "/books/" + book._id })));
+}
 
 const uploadedImages = (files = {}) => (files.images || []).map((file) => ({
     url: file.path,
@@ -91,7 +102,7 @@ module.exports.index = async (req, res) => {
 
 module.exports.showBook = async (req, res) => {
     const { id } = req.params;
-    const book = await Book.findById(id).populate("owner");
+    const book = await Book.findById(id).populate("owner").populate("academicBook");
 
     if (!book) {
         req.flash("error", "Book not found");
@@ -126,7 +137,8 @@ module.exports.renderEditForm = async (req, res) => {
         req.flash("error", "Book not found.");
         return res.redirect("/books");
     }
-    res.render("books/edit", { book, title: "Edit page" });
+    const academicBooks = await AcademicBook.find({ active: true }).sort({ college: 1, course: 1, academicYear: 1, semester: 1, subject: 1, title: 1 });
+    res.render("books/edit", { book, academicBooks, title: "Edit page" });
 };
 
 module.exports.updateBook = async (req, res) => {
@@ -139,6 +151,7 @@ module.exports.updateBook = async (req, res) => {
     }
 
     Object.assign(book, req.body);
+    book.academicBook = req.body.academicBook || null;
 
     const newImages = uploadedImages(req.files);
     const legacyImage = req.files?.image?.[0];
@@ -160,12 +173,14 @@ module.exports.updateBook = async (req, res) => {
     }
 
     await book.save();
+    await notifyAcademicMatches(book, req.user._id);
     req.flash("success", "Book updated successfully.");
     res.redirect(`/books/${id}`);
 };
 
-module.exports.renderNewForm = (req, res) => {
-    res.render("books/new", { title: "Render new form" });
+module.exports.renderNewForm = async (req, res) => {
+    const academicBooks = await AcademicBook.find({ active: true }).sort({ college: 1, course: 1, academicYear: 1, semester: 1, subject: 1, title: 1 });
+    res.render("books/new", { title: "Add a Book", academicBooks });
 };
 
 module.exports.deleteBook = async (req, res) => {
@@ -179,6 +194,7 @@ module.exports.deleteBook = async (req, res) => {
 module.exports.createBook = async (req, res) => {
     const book = new Book(req.body);
     book.owner = req.user._id;
+    book.academicBook = req.body.academicBook || null;
 
     const newImages = uploadedImages(req.files);
     const legacyImage = req.files?.image?.[0];
@@ -192,6 +208,7 @@ module.exports.createBook = async (req, res) => {
     }
 
     await book.save();
+    await notifyAcademicMatches(book, req.user._id);
     req.flash("success", "Book Added Successfully");
     res.redirect("/books");
 };
