@@ -72,5 +72,5 @@ button.is-loading { cursor: wait; opacity: .8; }
 }
 @media (max-width: 420px) {
   .loader-card { padding: 28px 20px; border-radius: 18px; }
-  .loader-logo { width: 64px; height: 64px; }
+  .loader-logo { width: 150px; height: 150px; }
 }
