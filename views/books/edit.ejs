@@ -47,6 +47,9 @@
           <option value="Sold" <%=book.status==="Sold" ? "selected" : "" %>>Sold</option>
         </select>
       </div>
+      <div class="book-form-field"><label for="editLatitude">Pickup latitude</label><input id="editLatitude" type="number" step="any" name="latitude" class="form-control" value="<%= book.location && book.location.coordinates ? book.location.coordinates[1] : '' %>"></div>
+      <div class="book-form-field"><label for="editLongitude">Pickup longitude</label><input id="editLongitude" type="number" step="any" name="longitude" class="form-control" value="<%= book.location && book.location.coordinates ? book.location.coordinates[0] : '' %>"></div>
+      <% if (currentUser && currentUser.accountType === "shop") { %><div class="book-form-field full"><label for="editStock">Available stock</label><input id="editStock" type="number" name="stock" min="0" value="<%= book.stock || 0 %>" class="form-control" required></div><% } %>
       <div class="book-form-field full">
         <label>Current Photos</label>
         <div class="book-current-gallery">
