@@ -194,6 +194,14 @@ module.exports.deleteBook = async (req, res) => {
 module.exports.createBook = async (req, res) => {
     const book = new Book(req.body);
     book.owner = req.user._id;
+    book.sellerType = req.user.accountType === "shop" ? "shop" : "student";
+    book.stock = book.sellerType === "shop" ? Math.max(1, Number.parseInt(req.body.stock, 10) || 1) : 1;
+    const latitude = Number(req.body.latitude), longitude = Number(req.body.longitude);
+    if (Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
+        book.location = { type: "Point", coordinates: [longitude, latitude] };
+    } else if (req.user.accountType === "shop" && req.user.shopLocation?.coordinates?.length === 2) {
+        book.location = req.user.shopLocation;
+    }
     book.academicBook = req.body.academicBook || null;
 
     const newImages = uploadedImages(req.files);
