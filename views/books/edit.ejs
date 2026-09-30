@@ -7,7 +7,7 @@
     <p class="book-form-subtitle">Update your listing details, condition, status or add more book photos.</p>
   </div>
 
-  <form action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation book-form-card" novalidate enctype="multipart/form-data">
+  <form action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation book-form-card" novalidate enctype="multipart/form-data" data-loader-icon="📚" data-loader-title="Updating Book" data-loader-message="Saving your changes...">
     <div class="book-form-grid">
       <div class="book-form-field">
         <label for="editTitle">Title</label>
