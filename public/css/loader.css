@@ -33,8 +33,8 @@
 
 .loader-logo {
   display: block;
-  width: 76px;
-  height: 76px;
+  width: 180px;
+  height: 180px;
   object-fit: contain;
   margin: 0 auto 14px;
   animation: loader-float 2s ease infinite;
