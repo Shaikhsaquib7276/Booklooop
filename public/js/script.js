@@ -10,13 +10,15 @@ console.log("Website Loaded");
   const title = document.getElementById("loaderTitle");
   const message = document.getElementById("loaderMessage");
   let activeForm = null;
+  let isVisible = false;
 
-  const showLoader = (form) => {
-    if (activeForm) return;
+  const showLoader = (form = null) => {
+    if (isVisible) return;
+    isVisible = true;
     activeForm = form;
-    if (icon) icon.textContent = form.dataset.loaderIcon || "📚";
-    if (title) title.textContent = form.dataset.loaderTitle || "Please Wait";
-    if (message) message.textContent = form.dataset.loaderMessage || "Saving your changes...";
+    if (icon) icon.textContent = (form && form.dataset.loaderIcon) || "📚";
+    if (title) title.textContent = (form && form.dataset.loaderTitle) || "Loading";
+    if (message) message.textContent = (form && form.dataset.loaderMessage) || "Please wait while the page loads...";
     overlay.classList.add("active");
     overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("is-loading");
@@ -42,7 +44,18 @@ console.log("Website Loaded");
       }
     }
     activeForm = null;
+    isVisible = false;
   };
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[href]");
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (link.target && link.target !== "_self") return;
+    if (link.hasAttribute("download")) return;
+    const url = new URL(link.href, window.location.href);
+    if (url.origin !== window.location.origin || url.href === window.location.href || url.hash && url.pathname === window.location.pathname && url.search === window.location.search) return;
+    showLoader();
+  });
 
   document.addEventListener("submit", (event) => {
     const form = event.target;
