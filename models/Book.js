@@ -38,6 +38,7 @@ const bookSchema = new mongoose.Schema(
             required: true
         },
 
+        // Keep the original single-image field for older listings and existing views.
         image: {
             url: {
                 type: String,
@@ -51,6 +52,15 @@ const bookSchema = new mongoose.Schema(
             },
             filename: String
         },
+
+        // Additional photos used by the book detail image carousel.
+        images: [{
+            url: {
+                type: String,
+                required: true
+            },
+            filename: String
+        }],
 
         owner: {
             type: mongoose.Schema.Types.ObjectId,
