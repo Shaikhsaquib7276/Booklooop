@@ -39,6 +39,22 @@
 
       <div id="signupSection" class="d-none">
         <div class="mb-3">
+          <label for="accountType" class="form-label">Account type</label>
+          <select id="accountType" name="accountType" class="form-select">
+            <option value="student">Student / Individual seller</option>
+            <option value="shop">Bookshop</option>
+          </select>
+        </div>
+        <div id="shopSignupFields" class="d-none">
+          <div class="mb-3"><label for="shopName" class="form-label">Shop name</label><input id="shopName" name="shopName" class="form-control" maxlength="120" placeholder="Your bookstore name"></div>
+          <div class="mb-3"><label for="shopAddress" class="form-label">Shop address</label><input id="shopAddress" name="shopAddress" class="form-control" maxlength="300" placeholder="Full shop address"></div>
+          <div class="row g-2 mb-3">
+            <div class="col"><label for="shopLatitude" class="form-label">Latitude</label><input id="shopLatitude" name="shopLatitude" type="number" step="any" class="form-control" placeholder="Latitude"></div>
+            <div class="col"><label for="shopLongitude" class="form-label">Longitude</label><input id="shopLongitude" name="shopLongitude" type="number" step="any" class="form-control" placeholder="Longitude"></div>
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="shopUseLocation">Use current shop location</button>
+        </div>
+        <div class="mb-3">
           <label for="signupUsername" class="form-label">Username</label>
           <div class="auth-input-group">
             <i class="bi bi-person"></i>
@@ -85,6 +101,19 @@
 </div>
 
 <script>
+  const accountType = document.getElementById("accountType");
+  const shopFields = document.getElementById("shopSignupFields");
+  accountType?.addEventListener("change", () => shopFields.classList.toggle("d-none", accountType.value !== "shop"));
+  document.getElementById("shopUseLocation")?.addEventListener("click", () => {
+    const status = document.getElementById("otpStatus");
+    if (!navigator.geolocation) { status.textContent = "Location is not supported."; return; }
+    status.textContent = "Getting shop location…";
+    navigator.geolocation.getCurrentPosition(position => {
+      document.getElementById("shopLatitude").value = position.coords.latitude;
+      document.getElementById("shopLongitude").value = position.coords.longitude;
+      status.textContent = "Shop location added.";
+    }, () => { status.textContent = "Could not get location. Enter coordinates manually."; });
+  });
   document.querySelectorAll('[data-password-target]').forEach((button) => {
     button.addEventListener('click', () => {
       const input = document.getElementById(button.dataset.passwordTarget);

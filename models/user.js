@@ -28,6 +28,13 @@ const userSchema = new mongoose.Schema(
             },
             filename: String
         },
+        accountType: { type: String, enum: ["student", "shop"], default: "student" },
+        shopName: { type: String, trim: true, maxlength: 120 },
+        shopAddress: { type: String, trim: true, maxlength: 300 },
+        shopLocation: {
+            type: { type: String, enum: ["Point"], default: "Point" },
+            coordinates: { type: [Number], default: undefined }
+        },
         role: {
             type: String,
             enum: ["user", "admin"],
