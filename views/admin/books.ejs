@@ -1,4 +1,4 @@
-<% layout("../layouts/boilerplate") %>
+<% layout("/layouts/boilerplate") %>
 <div class="admin-page"><div class="admin-section"><div class="admin-section-head"><div><span class="admin-eyebrow">Marketplace</span><h2>Manage Books</h2></div><a href="/admin" class="btn btn-outline-primary btn-sm">Dashboard</a></div>
 <div class="table-responsive"><table class="table align-middle admin-table"><thead><tr><th>Book</th><th>Seller</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody>
 <% books.forEach(book=>{ %><tr><td><strong><%= book.title %></strong><br><small><%= book.author %></small></td><td><%= book.owner ? book.owner.username : "Unknown" %></td><td>₹<%= book.price %></td><td><span class="badge <%= book.status==="Available"?"bg-success":book.status==="Sold"?"bg-secondary":"bg-warning text-dark" %>"><%= book.status %></span></td><td class="text-end"><a href="/books/<%= book._id %>" class="btn btn-sm btn-outline-primary">View</a> <form class="d-inline" method="POST" action="/admin/books/<%= book._id %>?_method=DELETE" onsubmit="return confirm('Delete this book?')"><button class="btn btn-sm btn-outline-danger">Delete</button></form></td></tr><% }) %>
