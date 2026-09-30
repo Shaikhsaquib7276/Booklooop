@@ -1,5 +1,5 @@
 <% layout("/layouts/boilerplate") %>
 <div class="admin-page"><div class="admin-section"><div class="admin-section-head"><div><span class="admin-eyebrow">Transactions</span><h2>Orders</h2></div><a href="/admin" class="btn btn-outline-primary btn-sm">Dashboard</a></div>
 <div class="table-responsive"><table class="table align-middle admin-table"><thead><tr><th>Order</th><th>Buyer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>
-<% orders.forEach(order=>{ %><tr><td><small><%= order._id %></small></td><td><%= order.buyer ? order.buyer.username : "Unknown" %><br><small><%= order.buyer ? order.buyer.email : "" %></small></td><td>₹<%= order.amount %></td><td><span class="badge bg-secondary"><%= order.status %></span></td><td><%= new Date(order.createdAt).toLocaleDateString() %></td></tr><% }) %>
+<% orders.forEach(order=>{ %><tr><td><small><%= order._id %></small></td><td><%= order.buyer ? order.buyer.username : "Unknown" %><br><small><%= order.buyer ? order.buyer.email : "" %></small></td><td>₹<%= (order.amount / 100).toFixed(2) %></td><td><span class="badge bg-secondary"><%= order.status %></span></td><td><%= new Date(order.createdAt).toLocaleDateString() %></td></tr><% }) %>
 </tbody></table></div></div></div>
