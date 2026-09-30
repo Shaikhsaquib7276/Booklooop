@@ -1,4 +1,10 @@
 <% layout("layouts/boilerplate") %>
+<%
+    const bookPhotos = book.images && book.images.length
+        ? book.images
+        : [{ url: book.image && book.image.url ? book.image.url : "/book.jpg" }];
+    const carouselId = `bookGallery-${book._id}`;
+%>
 
 <div class="container py-5">
 
@@ -14,14 +20,38 @@
     <div class="book-detail-shell">
         <div class="row g-0 align-items-stretch">
 
-            <!-- Book Image -->
+            <!-- Book Image Carousel -->
             <div class="col-lg-5 book-detail-media">
-                <div class="book-image-card">
-                    <img
-                        src="<%= book.image.url %>"
-                        alt="<%= book.title %>"
-                        class="img-fluid"
-                    >
+                <div class="book-image-card book-gallery-card">
+                    <div id="<%= carouselId %>" class="carousel slide book-gallery-carousel" data-bs-ride="false">
+                        <div class="carousel-inner">
+                            <% bookPhotos.forEach((photo, index) => { %>
+                                <div class="carousel-item <%= index === 0 ? "active" : "" %>">
+                                    <img
+                                        src="<%= photo.url %>"
+                                        alt="<%= book.title %> - photo <%= index + 1 %>"
+                                        class="d-block w-100"
+                                        loading="<%= index === 0 ? "eager" : "lazy" %>"
+                                    >
+                                </div>
+                            <% }) %>
+                        </div>
+
+                        <% if (bookPhotos.length > 1) { %>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#<%= carouselId %>" data-bs-slide="prev" aria-label="Previous photo">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#<%= carouselId %>" data-bs-slide="next" aria-label="Next photo">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            </button>
+                            <div class="book-gallery-count"><span class="bi bi-images me-1"></span><%= bookPhotos.length %> photos</div>
+                            <div class="carousel-indicators book-gallery-indicators">
+                                <% bookPhotos.forEach((photo, index) => { %>
+                                    <button type="button" data-bs-target="#<%= carouselId %>" data-bs-slide-to="<%= index %>" class="<%= index === 0 ? "active" : "" %>" aria-current="<%= index === 0 ? "true" : "false" %>" aria-label="Go to photo <%= index + 1 %>"></button>
+                                <% }) %>
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
             </div>
 
