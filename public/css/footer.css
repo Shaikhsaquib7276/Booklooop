@@ -97,8 +97,8 @@ footer { margin-top: auto; }
 
 .footer-logo-image {
   display: block;
-  width: 34px;
-  height: 34px;
+  width: 150px;
+  height: 76px;
   object-fit: contain;
   flex: 0 0 auto;
 }
