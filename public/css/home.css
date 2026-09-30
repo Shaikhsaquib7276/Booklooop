@@ -39,9 +39,13 @@
   padding-inline: 1.25rem;
 }
 
-.hero-icon {
-  font-size: clamp(7rem, 15vw, 14rem);
-  opacity: 0.95;
+.hero-logo {
+  display: block;
+  width: min(100%, 420px);
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;
+  margin-inline: auto;
   filter: drop-shadow(0 20px 25px rgba(0, 0, 0, 0.12));
 }
 
@@ -107,10 +111,10 @@
     padding:10px 14px;
   }
 
-  .hero-icon {
-    margin-top:10px;
-    font-size:4.75rem;
-    line-height:1;
+  .hero-logo {
+    width: min(72%, 260px);
+    max-height: 260px;
+    margin-top: 10px;
   }
 
   .category-card { min-height:112px; padding:20px 10px; border-radius:16px; }
@@ -125,6 +129,6 @@
   .hero { padding:26px 12px 22px; border-radius:18px; }
   .hero h1 { font-size:1.8rem; }
   .hero p { font-size:.86rem; }
-  .hero-icon { font-size:4.25rem; margin-top:7px; }
+  .hero-logo { width: min(68%, 220px); max-height: 220px; margin-top: 7px; }
   .book-card img { height:220px; }
 }
