@@ -78,6 +78,43 @@ exports.createOrder = async (req, res) => {
   const amount = books.reduce((sum, book) => sum + Math.round(Number(book.price) * 100), 0);
   if (!Number.isSafeInteger(amount) || amount < 100) return res.status(400).json({ error: "Invalid order amount." });
 
+  // Expire abandoned checkout attempts after 30 minutes. Keep them in the
+  // database for the admin order history instead of deleting them.
+  const checkoutExpiry = new Date(Date.now() - 30 * 60 * 1000);
+  await Order.updateMany(
+    { buyer: req.user._id, status: "created", createdAt: { $lt: checkoutExpiry } },
+    { $set: { status: "failed" } }
+  );
+
+  // Reuse an active Razorpay order for the exact same cart to avoid creating
+  // duplicate payment attempts when the checkout button is clicked again.
+  const activeOrders = await Order.find({
+    buyer: req.user._id,
+    status: "created",
+    createdAt: { $gte: checkoutExpiry }
+  }).sort({ createdAt: -1 });
+
+  const requestedIds = [...ids].sort();
+  const existingOrder = activeOrders.find(order => {
+    const existingIds = order.items.map(item => String(item.book)).sort();
+    return existingIds.length === requestedIds.length &&
+      existingIds.every((id, index) => id === requestedIds[index]) &&
+      order.amount === amount;
+  });
+
+  if (existingOrder) {
+    if (!existingOrder.razorpayOrderId) {
+      return res.status(409).json({ error: "Your checkout is already being prepared. Please wait a moment and try again." });
+    }
+    return res.json({
+      orderId: existingOrder.razorpayOrderId,
+      amount: existingOrder.amount,
+      currency: existingOrder.currency,
+      keyId: process.env.RAZORPAY_KEY_ID,
+      localOrderId: String(existingOrder._id)
+    });
+  }
+
   const order = await Order.create({
     buyer: req.user._id,
     items: books.map(book => ({ book: book._id, title: book.title, price: book.price, seller: book.owner })),
@@ -140,8 +177,10 @@ exports.verifyPayment = async (req, res) => {
     return res.status(502).json({ error: error.message || "Payment verification service unavailable." });
   }
 
+  // A checkout may have been marked failed as abandoned while the buyer
+  // still had Razorpay open. A verified captured payment must still be honored.
   const updated = await Order.findOneAndUpdate(
-    { _id: order._id, status: "created" },
+    { _id: order._id, status: { $in: ["created", "failed"] } },
     { $set: { status: "paid", razorpayPaymentId: razorpay_payment_id, paidAt: new Date() } },
     { new: true }
   );
