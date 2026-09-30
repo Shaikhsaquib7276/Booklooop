@@ -35,6 +35,9 @@
         <label for="bookCategory">Category</label>
         <input id="bookCategory" name="category" class="form-control" placeholder="e.g. Programming, Engineering, Novel" required>
       </div>
+      <div class="book-form-field"><label for="bookLatitude">Pickup latitude</label><input id="bookLatitude" type="number" step="any" name="latitude" class="form-control" placeholder="Optional"></div>
+      <div class="book-form-field"><label for="bookLongitude">Pickup longitude</label><input id="bookLongitude" type="number" step="any" name="longitude" class="form-control" placeholder="Optional"></div>
+      <% if (currentUser && currentUser.accountType === "shop") { %><div class="book-form-field full"><label for="bookStock">Available stock</label><input id="bookStock" type="number" name="stock" min="1" value="1" class="form-control" required></div><% } %>
       <div class="book-form-field full">
         <label for="bookImages">Book Photos</label>
         <div class="book-image-upload">
