@@ -58,6 +58,8 @@ const wishlistRoute=require("./routes/wishlist");
 const reservationRoute = require("./routes/reservations");
 const paymentRoutes = require("./routes/payments");
 const adminRoutes = require("./routes/admin");
+const academicRoutes = require("./routes/academic");
+const notificationRoutes = require("./routes/notifications");
 
 
 
@@ -90,6 +92,8 @@ app.use("/",wishlistRoute);
 app.use("/", reservationRoute);
 app.use("/", paymentRoutes);
 app.use("/admin", adminRoutes);
+app.use("/", academicRoutes);
+app.use("/", notificationRoutes);
 
 
 // Home Route
