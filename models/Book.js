@@ -68,6 +68,13 @@ const bookSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         },
+        sellerType: { type: String, enum: ["student", "shop"], default: "student", index: true },
+        stock: { type: Number, min: 0, default: 1 },
+        location: {
+            type: { type: String, enum: ["Point"], default: "Point" },
+            coordinates: { type: [Number], default: undefined }
+        },
+
         status: {
             type: String,
             enum: [
@@ -83,5 +90,7 @@ const bookSchema = new mongoose.Schema(
         toJSON: { getters: true },
         toObject: { getters: true }
     });
+
+bookSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model("Book", bookSchema);
