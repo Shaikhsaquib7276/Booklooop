@@ -152,6 +152,15 @@ module.exports.updateBook = async (req, res) => {
 
     Object.assign(book, req.body);
     book.academicBook = req.body.academicBook || null;
+    book.sellerType = req.user.accountType === "shop" ? "shop" : "student";
+    book.stock = book.sellerType === "shop" ? Math.max(0, Number.parseInt(req.body.stock, 10) || 0) : (book.status === "Sold" ? 0 : 1);
+    const latitude = Number(req.body.latitude);
+    const longitude = Number(req.body.longitude);
+    if (Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180) {
+        book.location = { type: "Point", coordinates: [longitude, latitude] };
+    } else if (req.user.accountType === "shop" && req.user.shopLocation && req.user.shopLocation.coordinates.length === 2) {
+        book.location = req.user.shopLocation;
+    }
 
     const newImages = uploadedImages(req.files);
     const legacyImage = req.files?.image?.[0];
