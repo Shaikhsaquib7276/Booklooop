@@ -18,6 +18,7 @@ module.exports.index = async (req, res) => {
         const filter = {
             title: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
             status: "Available",
+            stock: { $gt: 0 },
             location: {
                 $near: {
                     $geometry: { type: "Point", coordinates: [lng, lat] },
