@@ -33,6 +33,9 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a></li>
+              <% if(currentUser.role === "admin"){ %>
+                <li><a class="dropdown-item text-primary" href="/admin"><i class="bi bi-shield-lock me-2"></i>Admin Panel</a></li>
+              <% } %>
               <li><a class="dropdown-item" href="/users/<%= currentUser._id %>"><i class="bi bi-person me-2"></i>My Profile</a></li>
               <li><a class="dropdown-item" href="/profile/edit"><i class="bi bi-person-gear me-2"></i>Edit Profile</a></li>
               <li><a class="dropdown-item" href="/reservations"><i class="bi bi-bookmark-check me-2"></i>My Requests</a></li>
