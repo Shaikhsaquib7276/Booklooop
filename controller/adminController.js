@@ -10,7 +10,10 @@ module.exports.dashboard = async (req, res) => {
         Book.countDocuments({ status: "Sold" }),
         Order.find({ status: "paid" }).select("amount")
     ]);
-    const revenue = paidOrders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
+    const revenue = paidOrders.reduce(
+    (sum, order) => sum + Number(order.amount || 0),
+    0
+) / 100;
     res.render("admin/index", { title: "Admin Dashboard", stats: { bookCount, userCount, orderCount, soldCount, revenue } });
 };
 
