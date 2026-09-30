@@ -1,4 +1,4 @@
-<% layout("layouts/boilerplate") %>
+<% layout("../layouts/boilerplate") %>
 <div class="admin-page"><div class="admin-section"><div class="admin-section-head"><div><span class="admin-eyebrow">Accounts</span><h2>Manage Users</h2></div><a href="/admin" class="btn btn-outline-primary btn-sm">Dashboard</a></div>
 <div class="table-responsive"><table class="table align-middle admin-table"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>
 <% users.forEach(user=>{ %><tr><td><strong><%= user.username %></strong></td><td><%= user.email %></td><td><span class="badge <%= user.role==="admin"?"bg-primary":"bg-light text-dark" %>"><%= user.role %></span></td><td><span class="badge <%= user.isActive?"bg-success":"bg-danger" %>"><%= user.isActive?"Active":"Suspended" %></span></td><td class="text-end"><% if(user.role!=="admin"){ %><form method="POST" action="/admin/users/<%= user._id %>/toggle"><button class="btn btn-sm <%= user.isActive?"btn-outline-danger":"btn-outline-success" %>"><%= user.isActive?"Suspend":"Activate" %></button></form><% } %></td></tr><% }) %>
