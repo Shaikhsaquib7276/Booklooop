@@ -57,6 +57,7 @@ const profileRoute=require("./routes/profile");
 const wishlistRoute=require("./routes/wishlist");
 const reservationRoute = require("./routes/reservations");
 const paymentRoutes = require("./routes/payments");
+const adminRoutes = require("./routes/admin");
 
 
 
@@ -88,6 +89,7 @@ app.use("/",profileRoute);
 app.use("/",wishlistRoute);
 app.use("/", reservationRoute);
 app.use("/", paymentRoutes);
+app.use("/admin", adminRoutes);
 
 
 // Home Route
