@@ -398,3 +398,28 @@
         padding: .5rem .75rem;
     }
 }
+
+
+/* ================= EDIT FORM IMAGE SELECTION PREVIEW ================= */
+.book-image-selection {
+    margin-top: 10px;
+    color: var(--text-light);
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.book-image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.book-selected-preview {
+    width: 76px;
+    height: 96px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface-soft);
+}
