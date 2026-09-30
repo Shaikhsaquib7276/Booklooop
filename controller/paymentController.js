@@ -2,6 +2,8 @@ const crypto = require("crypto");
 const https = require("https");
 const Book = require("../models/Book");
 const Order = require("../models/Order");
+const StudentBook = require("../models/StudentBook");
+const BookRequest = require("../models/BookRequest");
 
 function razorpayRequest(path, payload) {
   return new Promise((resolve, reject) => {
@@ -186,7 +188,16 @@ exports.verifyPayment = async (req, res) => {
   );
   if (!updated && order.status !== "paid") return res.status(409).json({ error: "Order state changed. Contact support if you were charged." });
 
-  await Book.updateMany({ _id: { $in: order.items.map(item => item.book) }, status: "Available" }, { $set: { status: "Sold" } });
+  const purchasedIds = order.items.map(item => item.book);
+  const purchasedBooks = await Book.find({ _id: { $in: purchasedIds } }).select("_id academicBook author");
+  await Book.updateMany({ _id: { $in: purchasedIds }, status: "Available" }, { $set: { status: "Sold" } });
+  for (const item of order.items) {
+    const purchased = purchasedBooks.find(book => String(book._id) === String(item.book));
+    if (!purchased || !purchased.academicBook) continue;
+    await StudentBook.updateOne({ student: req.user._id, order: order._id, book: item.book }, { $setOnInsert: { student: req.user._id, book: item.book, academicBook: purchased.academicBook, order: order._id, titleSnapshot: item.title, authorSnapshot: purchased.author || "", pricePaid: Number(item.price) || 0, purchasedAt: new Date(), status: "Owned" } }, { upsert: true });
+    await BookRequest.updateOne({ student: req.user._id, matchedBook: item.book, status: "Matched" }, { $set: { status: "Fulfilled" } });
+    await BookRequest.updateMany({ matchedBook: item.book, status: "Matched", student: { $ne: req.user._id } }, { $set: { status: "Open", matchedBook: null, matchedAt: null } });
+  }
   req.session.cart = (req.session.cart || []).filter(id => !order.items.some(item => String(item.book) === id));
   res.json({ success: true, redirect: `/payments/success/${order._id}` });
 };

@@ -62,6 +62,8 @@ const bookSchema = new mongoose.Schema(
             filename: String
         }],
 
+        academicBook: { type: mongoose.Schema.Types.ObjectId, ref: "AcademicBook", default: null, index: true },
+
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"

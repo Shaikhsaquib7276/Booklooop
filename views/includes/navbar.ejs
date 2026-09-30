@@ -19,6 +19,7 @@
       <ul class="navbar-nav align-items-center">
         <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="/books">Browse</a></li>
+        <li class="nav-item"><a class="nav-link" href="/find-books"><i class="bi bi-mortarboard me-1"></i>Find My Books</a></li>
         <% if(currentUser){ %>
           <li class="nav-item"><a class="nav-link" href="/books/new">Sell Book</a></li>
           <li class="nav-item">
@@ -32,6 +33,8 @@
               <i class="bi bi-person-circle"></i> <%= currentUser.username %>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/my-academic-books"><i class="bi bi-journal-bookmark me-2"></i>My Academic Books</a></li>
+              <li><a class="dropdown-item" href="/book-requests"><i class="bi bi-bell me-2"></i>My Book Requests</a></li>
               <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a></li>
               <% if(currentUser.role === "admin"){ %>
                 <li><a class="dropdown-item text-primary" href="/admin"><i class="bi bi-shield-lock me-2"></i>Admin Panel</a></li>

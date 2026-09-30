@@ -15,6 +15,8 @@ const academicBookSchema = new mongoose.Schema({
   active: { type: Boolean, default: true, index: true }
 }, { timestamps: true });
 
-academicBookSchema.index({ college: 1, course: 1, academicYear: 1, semester: 1, subject: 1 });
+academicBookSchema.index({
+  college: 1, course: 1, academicYear: 1, semester: 1, subject: 1
+});
 
 module.exports = mongoose.model("AcademicBook", academicBookSchema);
