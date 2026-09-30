@@ -58,7 +58,9 @@
         <label for="editImages">Add More Photos</label>
         <div class="book-image-upload">
           <input id="editImages" type="file" name="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
-          <div class="book-form-help">Select up to 8 new photos per upload. Existing photos will be kept; this form adds photos rather than replacing them.</div>
+          <div class="book-form-help">Select up to 8 new photos per upload. On Windows, use Ctrl-click to select separate files or Shift-click to select a range. Existing photos will be kept.</div>
+          <div id="editImageSelection" class="book-image-selection" aria-live="polite">No new photos selected.</div>
+          <div id="editImagePreview" class="book-image-preview" aria-label="Selected photo previews"></div>
         </div>
       </div>
     </div>
@@ -68,3 +70,40 @@
     </div>
   </form>
 </div>
+
+
+<script>
+(() => {
+  const input = document.getElementById("editImages");
+  const selection = document.getElementById("editImageSelection");
+  const preview = document.getElementById("editImagePreview");
+  if (!input || !selection || !preview) return;
+
+  input.addEventListener("change", () => {
+    const files = Array.from(input.files || []);
+    preview.replaceChildren();
+
+    if (files.length > 8) {
+      selection.textContent = "Please select no more than 8 photos.";
+      input.setCustomValidity("Select no more than 8 photos.");
+      return;
+    }
+
+    input.setCustomValidity("");
+    selection.textContent = files.length
+      ? files.length + (files.length === 1 ? " new photo selected." : " new photos selected.")
+      : "No new photos selected.";
+
+    files.forEach((file) => {
+      if (!file.type.startsWith("image/")) return;
+      const url = URL.createObjectURL(file);
+      const image = document.createElement("img");
+      image.src = url;
+      image.alt = file.name;
+      image.className = "book-selected-preview";
+      image.onload = () => URL.revokeObjectURL(url);
+      preview.appendChild(image);
+    });
+  });
+})();
+</script>
