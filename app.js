@@ -70,6 +70,10 @@ app.use(loadWishlist);
 
 
 app.use((req, res, next) => {
+    if (req.user && req.user.isActive === false) {
+        req.logout(() => res.redirect("/login"));
+        return;
+    }
     res.locals.success = req.flash("success") || [];
     res.locals.error = req.flash("error") || [];
     res.locals.currentUser = req.user || null;

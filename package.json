@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "test": "node --test"
+    "test": "node --test",
+    "make-admin": "node scripts/makeAdmin.js"
   },
   "keywords": [],
   "author": "",

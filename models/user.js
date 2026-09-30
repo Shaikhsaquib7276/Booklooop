@@ -28,6 +28,17 @@ const userSchema = new mongoose.Schema(
             },
             filename: String
         },
+        role: {
+            type: String,
+            enum: ["user", "admin"],
+            default: "user"
+        },
+
+        isActive: {
+            type: Boolean,
+            default: true
+        },
+
         wishlist: [
             {
                 type: mongoose.Schema.Types.ObjectId,
