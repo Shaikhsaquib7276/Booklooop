@@ -1,0 +1,16 @@
+<% layout("../layouts/boilerplate") %>
+<div class="container py-5" style="max-width:700px">
+  <div class="card border-0 shadow-sm text-center p-4 p-md-5">
+    <div class="text-success display-2"><i class="bi bi-check-circle-fill"></i></div>
+    <h1 class="h2 fw-bold mt-3">Payment successful</h1>
+    <p class="text-muted">Your payment has been verified by Razorpay.</p>
+    <div class="bg-light rounded p-3 text-start my-3">
+      <div class="d-flex justify-content-between"><span>Order ID</span><strong><%= order._id %></strong></div>
+      <div class="d-flex justify-content-between mt-2"><span>Payment ID</span><strong><%= order.razorpayPaymentId %></strong></div>
+      <div class="d-flex justify-content-between mt-2"><span>Total paid</span><strong>₹<%= (order.amount / 100).toFixed(2) %></strong></div>
+    </div>
+    <h2 class="h6 fw-bold">Books purchased</h2>
+    <% order.items.forEach(item => { %><p class="mb-1"><%= item.title %> — ₹<%= Number(item.price).toFixed(2) %></p><% }) %>
+    <a href="/books" class="btn btn-primary mt-4">Continue browsing</a>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<% layout("../layouts/boilerplate") %>
+<div class="container py-5" style="max-width: 850px">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h1 class="h2 fw-bold mb-1">Checkout</h1><p class="text-muted mb-0">Review your books before paying securely.</p></div>
+    <a href="/books" class="btn btn-outline-secondary">Continue browsing</a>
+  </div>
+  <% if (!books.length) { %>
+    <div class="card border-0 shadow-sm p-5 text-center">
+      <i class="bi bi-cart3 display-4 text-muted"></i><h2 class="h4 mt-3">Your cart is empty</h2>
+      <p class="text-muted">Browse books and add one to your cart.</p><a href="/books" class="btn btn-primary mx-auto">Browse books</a>
+    </div>
+  <% } else { %>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 fw-bold mb-3">Order summary</h2>
+        <% let total = 0; %>
+        <% books.forEach(book => { total += Number(book.price); %>
+          <div class="d-flex align-items-center gap-3 py-3 border-bottom">
+            <img src="<%= book.image.url %>" alt="" style="width:64px;height:78px;object-fit:cover;border-radius:8px">
+            <div class="flex-grow-1"><div class="fw-semibold"><%= book.title %></div><small class="text-muted"><%= book.author %></small></div>
+            <strong>₹<%= Number(book.price).toFixed(2) %></strong>
+            <form method="POST" action="/cart/remove/<%= book._id %>"><button class="btn btn-sm btn-outline-danger" aria-label="Remove <%= book.title %>">Remove</button></form>
+          </div>
+        <% }) %>
+        <div class="d-flex justify-content-between align-items-center pt-4"><span class="fw-bold">Total</span><span class="h4 fw-bold mb-0">₹<%= total.toFixed(2) %></span></div>
+        <div id="payment-error" class="alert alert-danger mt-3 d-none" role="alert"></div>
+        <button id="pay-button" class="btn btn-success btn-lg w-100 mt-3" <%= keyId ? "" : "disabled" %>>
+          <i class="bi bi-lock-fill me-2"></i>Pay ₹<%= total.toFixed(2) %> with Razorpay
+        </button>
+        <% if (!keyId) { %><p class="text-danger small mt-2 mb-0">Payment is not configured. Add Razorpay test keys to your .env file.</p><% } %>
+        <p class="text-muted small text-center mt-3 mb-0">Payment is processed by Razorpay. BookLoop never stores card details.</p>
+      </div>
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      window.bookLoopCheckout = {
+        keyId: <%- JSON.stringify(keyId) %>,
+        bookIds: <%- JSON.stringify(books.map(book => String(book._id))) %>
+      };
+    </script>
+    <script src="/js/checkout.js" defer></script>
+  <% } %>
+</div>
