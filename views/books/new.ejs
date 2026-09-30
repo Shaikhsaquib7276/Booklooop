@@ -36,10 +36,10 @@
         <input id="bookCategory" name="category" class="form-control" placeholder="e.g. Programming, Engineering, Novel" required>
       </div>
       <div class="book-form-field full">
-        <label for="bookImage">Book Cover</label>
+        <label for="bookImages">Book Photos</label>
         <div class="book-image-upload">
-          <input id="bookImage" type="file" name="image" class="form-control" accept="image/*">
-          <div class="book-form-help">Use a clear front-cover image. JPG, PNG and other common image formats are supported.</div>
+          <input id="bookImages" type="file" name="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
+          <div class="book-form-help">Upload up to 8 photos (front cover, back cover, pages, and condition details). The first photo becomes the cover. JPG, PNG, and WebP are supported.</div>
         </div>
       </div>
     </div>

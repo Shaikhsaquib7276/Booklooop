@@ -4,7 +4,7 @@
   <div class="book-form-header">
     <span class="book-form-eyebrow">Manage listing</span>
     <h1 class="book-form-title">Edit Book</h1>
-    <p class="book-form-subtitle">Update your listing details, condition, status or cover image.</p>
+    <p class="book-form-subtitle">Update your listing details, condition, status or add more book photos.</p>
   </div>
 
   <form action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation book-form-card" novalidate enctype="multipart/form-data">
@@ -48,13 +48,17 @@
         </select>
       </div>
       <div class="book-form-field full">
-        <label for="editImage">Change Book Cover</label>
+        <label>Current Photos</label>
+        <div class="book-current-gallery">
+          <% const currentPhotos = book.images && book.images.length ? book.images : (book.image && book.image.url ? [book.image] : []); %>
+          <% currentPhotos.forEach((photo) => { %>
+            <img src="<%= photo.url %>" alt="Current photo of <%= book.title %>" class="book-current-image">
+          <% }) %>
+        </div>
+        <label for="editImages">Add More Photos</label>
         <div class="book-image-upload">
-          <% if (book.image && book.image.url) { %>
-            <img src="<%= book.image.url %>" alt="Current cover of <%= book.title %>" class="book-current-image">
-          <% } %>
-          <input id="editImage" type="file" name="image" class="form-control" accept="image/*">
-          <div class="book-form-help">Leave this empty to keep the current cover.</div>
+          <input id="editImages" type="file" name="images" class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
+          <div class="book-form-help">Select up to 8 new photos per upload. Existing photos will be kept; this form adds photos rather than replacing them.</div>
         </div>
       </div>
     </div>

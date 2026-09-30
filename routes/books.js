@@ -11,7 +11,7 @@ const { storage } = require("../cloudConfig/cloudinary");
 const upload = multer({
     storage,
     limits: {
-        // fileSize: 5 * 1024 * 1024
+        files: 8
     },
     fileFilter: (req, file, callback) => {
         const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -23,20 +23,21 @@ const upload = multer({
         callback(new Error("Only JPG, PNG, and WebP image files are allowed."));
     }
 });
-// const multer = require("multer");
-// const upload = multer({
-//     dest: "uploads/"
-// });
 
-router.route("/").get(wrapAsync(bookController.latestBooks))
+// Accept the legacy single image field and the new multiple-image gallery field.
+const bookImageUpload = upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "images", maxCount: 8 }
+]);
+
+router.route("/").get(wrapAsync(bookController.latestBooks));
 
 router.route("/books")
     .get(wrapAsync(bookController.index))
     .post(
         isLoggedIn,
-         upload.single("image"),
+        bookImageUpload,
         validateBook,
-       
         wrapAsync(bookController.createBook)
     );
 
@@ -46,8 +47,6 @@ router.get(
     bookController.renderNewForm
 );
 
-
-
 router.get(
     "/books/:id/edit",
     isLoggedIn,
@@ -55,22 +54,22 @@ router.get(
     bookController.renderEditForm
 );
 
-router.get("/books/:id", bookController.showBook);
+router.get("/books/:id", wrapAsync(bookController.showBook));
 
 router.put(
     "/books/:id",
     isLoggedIn,
     isOwned,
-    upload.single("image"),
+    bookImageUpload,
     validateBook,
-    bookController.updateBook
+    wrapAsync(bookController.updateBook)
 );
 
 router.delete(
     "/books/:id",
     isLoggedIn,
     isOwned,
-    bookController.deleteBook
+    wrapAsync(bookController.deleteBook)
 );
 
 module.exports = router;
