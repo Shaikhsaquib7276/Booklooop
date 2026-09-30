@@ -60,6 +60,7 @@ const paymentRoutes = require("./routes/payments");
 const adminRoutes = require("./routes/admin");
 const academicRoutes = require("./routes/academic");
 const notificationRoutes = require("./routes/notifications");
+const exchangeRoutes = require("./routes/exchange");
 
 
 
@@ -94,6 +95,7 @@ app.use("/", paymentRoutes);
 app.use("/admin", adminRoutes);
 app.use("/", academicRoutes);
 app.use("/", notificationRoutes);
+app.use("/", exchangeRoutes);
 
 
 // Home Route
