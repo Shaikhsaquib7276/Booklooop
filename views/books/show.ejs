@@ -113,6 +113,16 @@
     const zoomReset = document.getElementById("bookZoomReset");
     if (!modal || !zoomImage) return;
 
+    // Make the image action accessible from the keyboard as well as a mouse/touch.
+    document.querySelectorAll(".book-gallery-zoom-trigger").forEach((image) => {
+        image.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                image.click();
+            }
+        });
+    });
+
     let scale = 1;
     let dragging = false;
     let startX = 0;
