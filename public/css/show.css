@@ -209,3 +209,114 @@
     .seller-card-title{ font-size:1.3rem; }
     .seller-detail{ font-size:.86rem; }
 }
+
+
+/* ================= BOOK IMAGE CAROUSEL ================= */
+.book-gallery-card {
+    position: relative;
+    min-height: 620px;
+    align-self: stretch;
+}
+
+.book-gallery-carousel,
+.book-gallery-carousel .carousel-inner,
+.book-gallery-carousel .carousel-item {
+    width: 100%;
+    height: 100%;
+}
+
+.book-gallery-carousel .carousel-item {
+    background: var(--surface-soft);
+}
+
+.book-gallery-carousel .carousel-item img {
+    width: 100%;
+    height: 620px;
+    min-height: 0;
+    object-fit: contain;
+    background: var(--surface-soft);
+}
+
+.book-gallery-carousel .carousel-control-prev,
+.book-gallery-carousel .carousel-control-next {
+    width: 13%;
+    opacity: .9;
+}
+
+.book-gallery-carousel .carousel-control-prev-icon,
+.book-gallery-carousel .carousel-control-next-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 1.1rem;
+    border-radius: 50%;
+    background-color: rgba(15, 23, 42, .72);
+    background-size: 55%;
+}
+
+.book-gallery-indicators {
+    margin-bottom: 12px;
+    gap: 5px;
+}
+
+.book-gallery-indicators [data-bs-target] {
+    width: 8px;
+    height: 8px;
+    border: 0;
+    border-radius: 50%;
+    margin: 0 3px;
+    opacity: .65;
+}
+
+.book-gallery-indicators .active {
+    opacity: 1;
+    transform: scale(1.25);
+}
+
+.book-gallery-count {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    z-index: 2;
+    padding: 5px 10px;
+    border-radius: 30px;
+    color: #fff;
+    background: rgba(15, 23, 42, .72);
+    font-size: .78rem;
+    line-height: 1.4;
+}
+
+.book-current-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.book-current-gallery .book-current-image {
+    width: 90px;
+    height: 110px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-soft);
+}
+
+@media (max-width: 1199.98px) and (min-width: 992px) {
+    .book-gallery-card { min-height: 560px; }
+    .book-gallery-carousel .carousel-item img { height: 560px; }
+}
+
+@media (max-width: 991.98px) {
+    .book-gallery-card { min-height: 0; }
+    .book-gallery-carousel .carousel-item img { height: 480px; }
+}
+
+@media (max-width: 767.98px) {
+    .book-gallery-carousel .carousel-item img { height: min(300px, 60vh); }
+    .book-gallery-count { top: 10px; right: 10px; }
+    .book-gallery-indicators { margin-bottom: 8px; }
+}
+
+@media (max-width: 420px) {
+    .book-gallery-carousel .carousel-item img { height: 280px; }
+}
