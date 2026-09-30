@@ -5,7 +5,7 @@
     <div class="col-6 col-lg-3"><div class="admin-stat"><i class="bi bi-book"></i><strong><%= stats.bookCount %></strong><span>Books</span></div></div>
     <div class="col-6 col-lg-3"><div class="admin-stat"><i class="bi bi-people"></i><strong><%= stats.userCount %></strong><span>Users</span></div></div>
     <div class="col-6 col-lg-3"><div class="admin-stat"><i class="bi bi-receipt"></i><strong><%= stats.orderCount %></strong><span>Orders</span></div></div>
-    <div class="col-6 col-lg-3"><div class="admin-stat"><i class="bi bi-currency-rupee"></i><strong>₹<%= stats.revenue %></strong><span>Paid Revenue</span></div></div>
+    <div class="col-6 col-lg-3"><div class="admin-stat"><i class="bi bi-currency-rupee"></i><strong>₹<%= stats.revenue.toFixed(2) %></strong><span>Paid Revenue</span></div></div>
   </div>
   <div class="admin-actions mt-4">
     <a href="/admin/books" class="btn btn-primary"><i class="bi bi-book me-2"></i>Manage Books</a>
