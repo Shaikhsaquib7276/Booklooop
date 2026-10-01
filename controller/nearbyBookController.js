@@ -8,15 +8,16 @@ module.exports.index = async (req, res) => {
     const radius = allowedRadii.includes(radiusValue) ? radiusValue : 10;
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
+
     const hasLocation = Number.isFinite(lat) && Number.isFinite(lng)
         && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
         && req.query.lat !== undefined && req.query.lng !== undefined;
 
     let books = [];
     let locationError = "";
-    if (hasLocation && q) {
+
+    if (hasLocation) {
         const filter = {
-            title: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
             status: "Available",
             stock: { $gt: 0 },
             location: {
@@ -26,17 +27,29 @@ module.exports.index = async (req, res) => {
                 }
             }
         };
-        books = await Book.find(filter).populate("owner", "username city college").limit(100).lean();
+
+        if (q) {
+            const safeQuery = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            filter.$or = [
+                { title: { $regex: safeQuery, $options: "i" } },
+                { author: { $regex: safeQuery, $options: "i" } }
+            ];
+        }
+
+        books = await Book.find(filter)
+            .populate("owner", "username city college accountType shopName shopAddress")
+            .limit(100)
+            .lean();
+
         books = books.map(book => {
             const coords = book.location && book.location.coordinates;
             const distanceKm = coords && coords.length === 2
-                ? haversineKm(lat, lng, coords[1], coords[0]) : null;
+                ? haversineKm(lat, lng, coords[1], coords[0])
+                : null;
             return { ...book, distanceKm };
         });
-    } else if (!hasLocation) {
+    } else {
         locationError = "Allow location access or enter your location to find nearby listings.";
-    } else if (!q) {
-        locationError = "Enter a book title to search nearby listings.";
     }
 
     res.render("books/nearby", {
