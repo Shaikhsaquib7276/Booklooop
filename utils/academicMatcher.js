@@ -67,9 +67,9 @@ async function findExistingAcademicBook(data) {
 async function attachAcademicBook(book, req) {
     const data = getAcademicSubmission(req);
 
-    // Generic/non-academic listings remain supported. Smart Semester Finder simply won't include them.
+    // Generic/non-academic listings remain supported. Keep an existing academic
+    // link when editing a mapped book; otherwise leave it unmapped.
     if (!isCompleteAcademicSubmission(data)) {
-        book.academicBook = null;
         return null;
     }
 
