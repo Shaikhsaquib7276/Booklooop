@@ -38,7 +38,6 @@
 
   let lastGeocoderRequest = 0;
   let requestInFlight = false;
-  let suggestionTimer = null;
 
   const validCoordinates = (lat, lng) =>
     Number.isFinite(lat) &&
@@ -218,20 +217,21 @@
     }
   });
 
-  searchInput?.addEventListener("input", () => {
-    clearTimeout(suggestionTimer);
-    const query = searchInput.value.trim();
-    if (query.length < 3) {
-      clearSuggestions();
-      return;
-    }
-    suggestionTimer = setTimeout(() => searchLocation(), 650);
-  });
-
   document.addEventListener("click", (event) => {
     if (suggestions && !suggestions.parentElement.contains(event.target)) {
       clearSuggestions();
     }
+  });
+
+  document.getElementById("centerPickupMap")?.addEventListener("click", () => {
+    const lat = Number(latitudeInput.value);
+    const lng = Number(longitudeInput.value);
+    if (!validCoordinates(lat, lng)) {
+      setStatus("Select a pickup location first.", true);
+      return;
+    }
+    ensureMarker(lat, lng);
+    map.setView([lat, lng], Math.max(map.getZoom(), 15));
   });
 
   useCurrentButton?.addEventListener("click", () => {
