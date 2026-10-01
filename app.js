@@ -61,6 +61,7 @@ const adminRoutes = require("./routes/admin");
 const academicRoutes = require("./routes/academic");
 const notificationRoutes = require("./routes/notifications");
 const nearbyBookRoutes = require("./routes/nearbyBooks");
+const exchangeRoutes = require("./routes/exchange");
 
 
 
@@ -96,6 +97,7 @@ app.use("/admin", adminRoutes);
 app.use("/", academicRoutes);
 app.use("/", notificationRoutes);
 app.use("/", nearbyBookRoutes);
+app.use("/", exchangeRoutes);
 
 
 // Home Route

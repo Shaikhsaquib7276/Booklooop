@@ -18,7 +18,7 @@
           <label for="phone" class="form-label">Phone Number</label>
           <div class="input-group auth-input-group auth-action-group">
             <span class="input-group-text"><i class="bi bi-phone"></i></span>
-            <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91XXXXXXXXXX" required value="+91" />
+            <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91XXXXXXXXXX" required value="" autocomplete="tel" inputmode="tel" />
             <button type="button" id="sendOTP" class="btn btn-outline-primary">Send OTP</button>
           </div>
 
@@ -101,6 +101,7 @@
 </div>
 
 <script>
+  const firebaseConfig = <%- JSON.stringify(firebaseConfig || {}) %>;
   const accountType = document.getElementById("accountType");
   const shopFields = document.getElementById("shopSignupFields");
   accountType?.addEventListener("change", () => shopFields.classList.toggle("d-none", accountType.value !== "shop"));

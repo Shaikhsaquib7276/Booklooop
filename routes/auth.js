@@ -7,6 +7,9 @@ const validateUser = require("../middleware/validateUser");
 const authController = require("../controller/authController");
 const wrapAsync = require("../utils/wrapAsync");
 
+// Phone OTP verification
+router.post("/auth/verify-phone", wrapAsync(authController.verifyPhone));
+
 // Signup
 router
     .route("/signup")

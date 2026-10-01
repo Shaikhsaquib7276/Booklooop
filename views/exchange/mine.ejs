@@ -1,0 +1,31 @@
+<% layout("layouts/boilerplate") %>
+<div class="container py-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="fw-bold">My Exchanges</h1><p class="text-muted mb-0">Manage offers and confirm completed swaps.</p></div>
+    <a class="btn btn-primary" href="/exchange">Find books to exchange</a>
+  </div>
+  <% if (!exchanges.length) { %><div class="alert alert-light border text-center py-5">No exchange offers yet.</div><% } %>
+  <div class="row g-3">
+    <% exchanges.forEach(exchange => { const isProposer = String(exchange.proposer._id) === currentId; %>
+      <div class="col-12"><div class="card shadow-sm"><div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><span class="badge <%= exchange.status === 'Completed' ? 'bg-success' : exchange.status === 'Pending' ? 'bg-warning text-dark' : 'bg-secondary' %>"><%= exchange.status %></span><small class="text-muted"><%= new Date(exchange.createdAt).toLocaleDateString() %></small></div>
+        <div class="row align-items-center text-center g-3">
+          <div class="col-md-5"><strong><%= exchange.offeredBook ? exchange.offeredBook.title : "Book removed" %></strong><div class="small text-muted">Offered by <%= exchange.proposer.username %></div></div>
+          <div class="col-md-2"><i class="bi bi-arrow-left-right fs-3 text-primary"></i></div>
+          <div class="col-md-5"><strong><%= exchange.requestedBook ? exchange.requestedBook.title : "Book removed" %></strong><div class="small text-muted">Requested from <%= exchange.recipient.username %></div></div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 justify-content-end mt-3">
+          <% if (exchange.status === "Pending" && !isProposer) { %>
+            <form action="/exchange/<%= exchange._id %>/respond" method="POST"><input type="hidden" name="action" value="accept"><button class="btn btn-success btn-sm">Accept offer</button></form>
+            <form action="/exchange/<%= exchange._id %>/respond" method="POST"><input type="hidden" name="action" value="reject"><button class="btn btn-outline-danger btn-sm">Reject</button></form>
+          <% } %>
+          <% if (exchange.status === "Pending" && isProposer) { %><form action="/exchange/<%= exchange._id %>/cancel" method="POST"><button class="btn btn-outline-danger btn-sm">Cancel offer</button></form><% } %>
+          <% if (exchange.status === "Accepted") { %>
+            <span class="small text-muted align-self-center">Your confirmation: <%= isProposer ? (exchange.proposerConfirmed ? "done" : "pending") : (exchange.recipientConfirmed ? "done" : "pending") %></span>
+            <% if (!(isProposer ? exchange.proposerConfirmed : exchange.recipientConfirmed)) { %><form action="/exchange/<%= exchange._id %>/confirm" method="POST"><button class="btn btn-primary btn-sm">Confirm books exchanged</button></form><% } %>
+          <% } %>
+        </div>
+      </div></div></div>
+    <% }) %>
+  </div>
+</div>

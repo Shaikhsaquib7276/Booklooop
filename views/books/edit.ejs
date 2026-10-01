@@ -140,3 +140,36 @@
   });
 })();
 </script>
+
+<script>
+(() => {
+  const button = document.getElementById("useEditBookLocation");
+  const status = document.getElementById("editBookLocationStatus");
+  const lat = document.getElementById("editLatitude");
+  const lng = document.getElementById("editLongitude");
+  if (!button || !status || !lat || !lng) return;
+
+  button.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      status.textContent = "Geolocation is not supported by this browser.";
+      return;
+    }
+    button.disabled = true;
+    status.textContent = "Getting your pickup location…";
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        lat.value = position.coords.latitude.toFixed(6);
+        lng.value = position.coords.longitude.toFixed(6);
+        status.textContent = "Pickup location updated. Click Update Book to save it.";
+        button.disabled = false;
+      },
+      error => {
+        console.error("Edit book location error:", error);
+        status.textContent = "Location permission was denied or unavailable. Enter coordinates manually.";
+        button.disabled = false;
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  });
+})();
+</script>
