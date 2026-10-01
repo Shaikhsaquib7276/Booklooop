@@ -139,7 +139,7 @@ module.exports.showBook = async (req, res) => {
 
 module.exports.renderEditForm = async (req, res) => {
     const { id } = req.params;
-    const book = await Book.findById(id);
+    const book = await Book.findById(id).populate("academicBook");
     if (!book) {
         req.flash("error", "Book not found.");
         return res.redirect("/books");
