@@ -18,8 +18,10 @@ module.exports.index = async (req, res) => {
 
     if (hasLocation) {
         const filter = {
-            status: "Available",
-            stock: { $gt: 0 },
+            $and: [
+                { $or: [{ status: "Available" }, { status: { $exists: false } }] },
+                { $or: [{ stock: { $gt: 0 } }, { stock: { $exists: false } }] }
+            ],
             location: {
                 $near: {
                     $geometry: { type: "Point", coordinates: [lng, lat] },
