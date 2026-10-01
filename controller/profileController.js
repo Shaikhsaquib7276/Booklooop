@@ -22,7 +22,7 @@ module.exports.renderEditProfile = (req, res) => {
 };
 
 module.exports.updateProfile = async (req, res) => {
-    const { username, email, phone, city, college } = req.body;
+    const { username, email, phone, city, college, degree, course, academicYear, year, semester } = req.body;
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -56,6 +56,11 @@ module.exports.updateProfile = async (req, res) => {
     user.phone = String(phone || "").trim();
     user.city = String(city || "").trim();
     user.college = String(college || "").trim();
+    user.degree = String(degree || "").trim();
+    user.course = String(course || "").trim();
+    user.academicYear = String(academicYear || "").trim();
+    user.year = Number.isFinite(Number(year)) ? Number(year) : undefined;
+    user.semester = Number.isFinite(Number(semester)) ? Number(semester) : undefined;
 
     if (req.file) {
         user.profileImage = {
