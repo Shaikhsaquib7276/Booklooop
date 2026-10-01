@@ -14,29 +14,42 @@ module.exports.index = async (req, res) => {
 
     let books = [];
     let locationError = "";
-    if (hasLocation && q) {
+
+    if (hasLocation) {
         const filter = {
-            title: { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" },
-            status: "Available",
-            stock: { $gt: 0 },
             location: {
                 $near: {
                     $geometry: { type: "Point", coordinates: [lng, lat] },
                     $maxDistance: radius * 1000
                 }
-            }
+            },
+            $and: [
+                { $or: [{ status: "Available" }, { status: { $exists: false } }] },
+                { $or: [{ stock: { $gt: 0 } }, { stock: { $exists: false } }] }
+            ]
         };
-        books = await Book.find(filter).populate("owner", "username city college").limit(100).lean();
+
+        if (q) {
+            filter.title = {
+                $regex: q.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&"),
+                $options: "i"
+            };
+        }
+
+        books = await Book.find(filter)
+            .populate("owner", "username city college accountType shopName shopAddress")
+            .limit(100)
+            .lean();
+
         books = books.map(book => {
             const coords = book.location && book.location.coordinates;
             const distanceKm = coords && coords.length === 2
-                ? haversineKm(lat, lng, coords[1], coords[0]) : null;
+                ? haversineKm(lat, lng, coords[1], coords[0])
+                : null;
             return { ...book, distanceKm };
         });
-    } else if (!hasLocation) {
+    } else {
         locationError = "Allow location access or enter your location to find nearby listings.";
-    } else if (!q) {
-        locationError = "Enter a book title to search nearby listings.";
     }
 
     res.render("books/nearby", {
