@@ -1,4 +1,5 @@
 <% layout("layouts/boilerplate") %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <div class="book-form-page">
   <div class="book-form-header">
@@ -35,11 +36,33 @@
         <label for="bookCategory">Category</label>
         <input id="bookCategory" name="category" class="form-control" placeholder="e.g. Programming, Engineering, Novel" required>
       </div>
-      <div class="book-form-field"><label for="bookLatitude">Pickup latitude</label><input id="bookLatitude" type="number" step="any" name="latitude" class="form-control" placeholder="Optional"></div>
-      <div class="book-form-field"><label for="bookLongitude">Pickup longitude</label><input id="bookLongitude" type="number" step="any" name="longitude" class="form-control" placeholder="Optional"></div>
-      <div class="book-form-field full">
-        <button type="button" class="btn btn-outline-primary" id="useBookLocation"><i class="bi bi-crosshair me-2"></i>Use my current pickup location</button>
-        <div class="book-form-help" id="bookLocationStatus">Adding a pickup location helps nearby students find this listing.</div>
+      <div class="book-form-field full pickup-location-field">
+        <div class="pickup-location-header">
+          <div>
+            <label for="pickupAddress">Pickup address line</label>
+            <div class="book-form-help">Search an address, select the correct place, then drag the pin or click the map to fine-tune the exact pickup point.</div>
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="useCurrentPickupLocation"><i class="bi bi-crosshair me-1"></i>Use my location</button>
+        </div>
+
+        <div class="pickup-location-search">
+          <input id="pickupLocationSearch" type="text" class="form-control" placeholder="Search building, college, area, street or landmark">
+          <button type="button" class="btn btn-primary" id="pickupLocationSearchButton"><i class="bi bi-search me-1"></i>Find</button>
+          <div id="pickupLocationSuggestions" class="pickup-location-suggestions" role="listbox"></div>
+        </div>
+
+        <input id="pickupAddress" name="addressLine" class="form-control mt-2" maxlength="300" placeholder="e.g. ABC College, Main Road, Boisar" required>
+
+        <div id="pickupLocationMap" class="pickup-location-map" aria-label="Select pickup location on map"></div>
+
+        <div class="pickup-location-coordinates-row">
+          <span id="pickupLocationCoordinates" class="book-form-help">No precise pickup location selected yet.</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="centerPickupMap">Center map on selected pin</button>
+        </div>
+
+        <input id="bookLatitude" type="hidden" name="latitude">
+        <input id="bookLongitude" type="hidden" name="longitude">
+        <div id="pickupLocationStatus" class="book-form-help" aria-live="polite"></div>
       </div>
       <% if (currentUser && currentUser.accountType === "shop") { %><div class="book-form-field full"><label for="bookStock">Available stock</label><input id="bookStock" type="number" name="stock" min="1" value="1" class="form-control" required></div><% } %>
       <div class="book-form-field full">
@@ -57,35 +80,5 @@
   </form>
 </div>
 
-<script>
-(() => {
-  const button = document.getElementById("useBookLocation");
-  const status = document.getElementById("bookLocationStatus");
-  const lat = document.getElementById("bookLatitude");
-  const lng = document.getElementById("bookLongitude");
-  if (!button || !status || !lat || !lng) return;
-
-  button.addEventListener("click", () => {
-    if (!navigator.geolocation) {
-      status.textContent = "Geolocation is not supported by this browser.";
-      return;
-    }
-    button.disabled = true;
-    status.textContent = "Getting your pickup location…";
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        lat.value = position.coords.latitude.toFixed(6);
-        lng.value = position.coords.longitude.toFixed(6);
-        status.textContent = "Pickup location added.";
-        button.disabled = false;
-      },
-      error => {
-        console.error("Book location error:", error);
-        status.textContent = "Location permission was denied or unavailable. Enter coordinates manually.";
-        button.disabled = false;
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
-    );
-  });
-})();
-</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/pickup-location.js"></script>
