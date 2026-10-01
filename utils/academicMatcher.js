@@ -66,10 +66,11 @@ async function findExistingAcademicBook(data) {
 
 async function attachAcademicBook(book, req) {
     const data = getAcademicSubmission(req);
+    const wantsAcademicMapping = req.body.academicListing === "yes" || Boolean(book.academicBook);
 
     // Generic/non-academic listings remain supported. Keep an existing academic
     // link when editing a mapped book; otherwise leave it unmapped.
-    if (!isCompleteAcademicSubmission(data)) {
+    if (!wantsAcademicMapping || !isCompleteAcademicSubmission(data)) {
         return null;
     }
 
