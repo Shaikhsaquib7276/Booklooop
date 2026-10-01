@@ -223,6 +223,8 @@ module.exports.index = async (req, res) => {
         page = 1
     } = req.query;
 
+    q = String(q || "").trim().slice(0, 80);
+
     page = Number.parseInt(page, 10);
     if (!Number.isFinite(page) || page < 1) page = 1;
 
