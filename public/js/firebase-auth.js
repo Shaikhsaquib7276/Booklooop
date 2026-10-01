@@ -34,6 +34,10 @@ if (
         "appId"
     ];
 
+    function showStatus(message, type = "info") {
+        otpStatus.innerHTML = `<div class="alert alert-${type} mt-3">${message}</div>`;
+    }
+
     if (requiredKeys.some(key => !firebaseConfig[key])) {
         otpStatus.innerHTML = `
             <div class="alert alert-danger mt-3">
@@ -48,10 +52,6 @@ if (
             let recaptchaVerifier = null;
             let confirmationResult = null;
             let verifiedPhone = null;
-
-            function setStatus(message, type = "info") {
-                otpStatus.innerHTML = `<div class="alert alert-${type} mt-3">${message}</div>`;
-            }
 
             function normalizePhone(value) {
                 const cleaned = String(value || "").trim().replace(/[\\s()-]/g, "");
@@ -77,12 +77,12 @@ if (
                 const phone = normalizePhone(phoneInput.value);
 
                 if (!/^\\+?[1-9]\\d{7,14}$/.test(phone)) {
-                    setStatus("Enter a valid phone number, for example +919876543210.", "danger");
+                    showStatus("Enter a valid phone number, for example +919876543210.", "danger");
                     return;
                 }
 
                 sendOtpButton.disabled = true;
-                setStatus("Sending OTP…", "info");
+                showStatus("Sending OTP…", "info");
 
                 try {
                     if (!recaptchaVerifier) {
@@ -97,7 +97,7 @@ if (
                     verifyOtpButton.disabled = false;
                     phoneInput.value = phone;
 
-                    setStatus("OTP sent successfully. Check your phone.", "success");
+                    showStatus("OTP sent successfully. Check your phone.", "success");
                     otpInput.focus();
                 } catch (err) {
                     console.error("Firebase OTP error:", err.code, err.message);
@@ -105,21 +105,21 @@ if (
                     if (
                         err.code === "auth/invalid-phone-number"
                     ) {
-                        setStatus("Firebase rejected this phone number. Use international format such as +919876543210.", "danger");
+                        showStatus("Firebase rejected this phone number. Use international format such as +919876543210.", "danger");
                     } else if (
                         err.code === "auth/operation-not-allowed"
                     ) {
-                        setStatus("Phone sign-in is disabled in your Firebase project. Enable Phone authentication in Firebase Console.", "danger");
+                        showStatus("Phone sign-in is disabled in your Firebase project. Enable Phone authentication in Firebase Console.", "danger");
                     } else if (
                         err.code === "auth/unauthorized-domain"
                     ) {
-                        setStatus("This website domain is not authorized in Firebase. Add localhost to Firebase Authentication → Settings → Authorized domains.", "danger");
+                        showStatus("This website domain is not authorized in Firebase. Add localhost to Firebase Authentication → Settings → Authorized domains.", "danger");
                     } else if (
                         err.code === "auth/too-many-requests"
                     ) {
-                        setStatus("Too many OTP attempts. Wait and try again, or use a Firebase test phone number.", "danger");
+                        showStatus("Too many OTP attempts. Wait and try again, or use a Firebase test phone number.", "danger");
                     } else {
-                        setStatus(`${err.code || "OTP_ERROR"}: ${err.message || "Could not send OTP."}`, "danger");
+                        showStatus(`${err.code || "OTP_ERROR"}: ${err.message || "Could not send OTP."}`, "danger");
                     }
 
                     await createRecaptcha().catch(() => {});
@@ -131,17 +131,17 @@ if (
                 const otp = otpInput.value.trim();
 
                 if (!confirmationResult) {
-                    setStatus("Send the OTP first.", "warning");
+                    showStatus("Send the OTP first.", "warning");
                     return;
                 }
 
                 if (!/^\\d{6}$/.test(otp)) {
-                    setStatus("Enter the 6-digit OTP.", "danger");
+                    showStatus("Enter the 6-digit OTP.", "danger");
                     return;
                 }
 
                 verifyOtpButton.disabled = true;
-                setStatus("Verifying OTP…", "info");
+                showStatus("Verifying OTP…", "info");
 
                 try {
                     const credential = await confirmationResult.confirm(otp);
@@ -179,14 +179,14 @@ if (
                     if (passwordInput) passwordInput.disabled = false;
                     createAccountButton.disabled = false;
 
-                    setStatus("Phone verified successfully. Complete your account details.", "success");
+                    showStatus("Phone verified successfully. Complete your account details.", "success");
 
                     if (recaptchaVerifier) {
                         try { recaptchaVerifier.clear(); } catch (_) {}
                     }
                 } catch (err) {
                     console.error("OTP verification error:", err);
-                    setStatus(err.message || "Invalid OTP. Please try again.", "danger");
+                    showStatus(err.message || "Invalid OTP. Please try again.", "danger");
                     verifyOtpButton.disabled = false;
                 }
             }
@@ -196,11 +196,11 @@ if (
 
             createRecaptcha().catch(err => {
                 console.error("reCAPTCHA initialization error:", err);
-                setStatus("Could not load reCAPTCHA. Check your Firebase configuration and browser connection.", "danger");
+                showStatus("Could not load reCAPTCHA. Check your Firebase configuration and browser connection.", "danger");
             });
         } catch (err) {
             console.error("Firebase initialization error:", err);
-            setStatus("Firebase could not initialize. Check the Firebase configuration.", "danger");
+            showStatus("Firebase could not initialize. Check the Firebase configuration.", "danger");
         }
     }
 }
