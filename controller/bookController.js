@@ -149,14 +149,10 @@ module.exports.index = async (req, res) => {
     q = String(q || "").trim().slice(0, 80);
 
     if (q) {
-        const safeQuery = escapeRegex(q);
-        filter.$or = [
-            { $text: { $search: q } },
-            { title: { $regex: safeQuery, $options: "i" } },
-            { author: { $regex: safeQuery, $options: "i" } },
-            { category: { $regex: safeQuery, $options: "i" } },
-            { description: { $regex: safeQuery, $options: "i" } }
-        ];
+        // Keep MongoDB text search separate from regex clauses.
+        // Mixing $text and unindexed regex branches inside $or causes
+        // MongoDB's "Failed to produce a solution for TEXT under OR" error.
+        filter.$text = { $search: q };
     }
 
     if (category && category !== "All") filter.category = category;
@@ -189,9 +185,12 @@ module.exports.index = async (req, res) => {
     let books;
 
     if (q && totalBooks === 0) {
+        const fuzzyFilter = { ...filter };
+        delete fuzzyFilter.$text;
+
         const firstCharacter = new RegExp(escapeRegex(q.charAt(0)), "i");
         const candidates = await Book.find({
-            ...filter,
+            ...fuzzyFilter,
             $or: [{ title: firstCharacter }, { author: firstCharacter }, { category: firstCharacter }]
         }).limit(250).populate("owner").lean();
 
