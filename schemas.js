@@ -35,6 +35,11 @@ module.exports.bookSchema = Joi.object({
     description: Joi.string().required(),
     price: Joi.number().min(0).required(),
     condition: Joi.string().required(),
-    category: Joi.string().required()
+    category: Joi.string().required(),
+
+    // Nearby Book Radar requires a human-readable pickup address and precise map point.
+    addressLine: Joi.string().trim().min(3).max(300).required(),
+    latitude: Joi.number().min(-90).max(90).required(),
+    longitude: Joi.number().min(-180).max(180).required()
 
 }).unknown(true)
