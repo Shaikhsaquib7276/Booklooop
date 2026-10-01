@@ -112,6 +112,11 @@ module.exports.signup = async (req, res, next) => {
             city,
             college,
             accountType: accountType === "shop" ? "shop" : "student",
+            degree: accountType === "shop" ? undefined : String(req.body.degree || "").trim(),
+            course: accountType === "shop" ? undefined : String(req.body.course || "").trim(),
+            academicYear: accountType === "shop" ? undefined : String(req.body.academicYear || "").trim(),
+            year: accountType === "shop" ? undefined : Number(req.body.year),
+            semester: accountType === "shop" ? undefined : Number(req.body.semester),
             shopName: accountType === "shop" ? String(shopName || "").trim() : undefined,
             shopAddress: accountType === "shop" ? String(shopAddress || "").trim() : undefined
         });
