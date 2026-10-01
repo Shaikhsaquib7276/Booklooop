@@ -174,6 +174,30 @@ exports.adminIndex=async(req,res)=>{
  ]);
  res.render("admin/academic",{title:"Academic Catalog Review",pending,verified,rejected});
 };
+exports.verifyAcademicBook=async(req,res)=>{
+ const record=await AcademicBook.findById(req.params.id);
+ if(!record){req.flash("error","Academic submission not found.");return res.redirect("/admin/academic");}
+ record.verificationStatus="verified";
+ record.active=true;
+ record.verifiedBy=req.user._id;
+ record.verifiedAt=new Date();
+ await record.save();
+ req.flash("success","Academic book verified and added to Smart Semester Finder.");
+ res.redirect("/admin/academic");
+};
+
+exports.rejectAcademicBook=async(req,res)=>{
+ const record=await AcademicBook.findById(req.params.id);
+ if(!record){req.flash("error","Academic submission not found.");return res.redirect("/admin/academic");}
+ record.verificationStatus="rejected";
+ record.active=false;
+ record.verifiedBy=req.user._id;
+ record.verifiedAt=new Date();
+ await record.save();
+ req.flash("success","Academic submission rejected.");
+ res.redirect("/admin/academic");
+};
+
 exports.adminCreate=async(req,res)=>{
  const b=req.body,semester=Number(b.semester);
  if(!clean(b.college)||!clean(b.course)||!clean(b.academicYear)||!Number.isInteger(semester)||semester<1||!clean(b.subject)||!clean(b.title)){req.flash("error","College, course, year, semester, subject and title are required.");return res.redirect("/admin/academic");}
