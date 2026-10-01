@@ -22,7 +22,34 @@ module.exports.userSchema = Joi.object({
         .allow("", null),
 
     college: Joi.string()
-        .allow("", null)
+        .allow("", null),
+
+    accountType: Joi.string().valid("student", "shop").default("student"),
+    degree: Joi.when("accountType", {
+        is: "student",
+        then: Joi.string().trim().min(2).required(),
+        otherwise: Joi.string().allow("", null)
+    }),
+    course: Joi.when("accountType", {
+        is: "student",
+        then: Joi.string().trim().min(2).required(),
+        otherwise: Joi.string().allow("", null)
+    }),
+    academicYear: Joi.when("accountType", {
+        is: "student",
+        then: Joi.string().trim().required(),
+        otherwise: Joi.string().allow("", null)
+    }),
+    year: Joi.when("accountType", {
+        is: "student",
+        then: Joi.number().integer().min(1).max(10).required(),
+        otherwise: Joi.number().integer().min(1).max(10).allow(null)
+    }),
+    semester: Joi.when("accountType", {
+        is: "student",
+        then: Joi.number().integer().min(1).max(20).required(),
+        otherwise: Joi.number().integer().min(1).max(20).allow(null)
+    })
 
 }).unknown(true)
 
