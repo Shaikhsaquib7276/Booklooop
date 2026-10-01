@@ -8,6 +8,7 @@ module.exports.index = async (req, res) => {
     const radius = allowedRadii.includes(radiusValue) ? radiusValue : 10;
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
+
     const hasLocation = Number.isFinite(lat) && Number.isFinite(lng)
         && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
         && req.query.lat !== undefined && req.query.lng !== undefined;
