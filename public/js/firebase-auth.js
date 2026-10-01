@@ -76,7 +76,7 @@ if (
             async function sendOTP() {
                 const phone = normalizePhone(phoneInput.value);
 
-                if (!/^\\+?[1-9]\d{7,14}$/.test(phone)) {
+                if (!/^\+?[1-9]\d{7,14}$/.test(phone)) {
                     showStatus("Enter a valid phone number, for example +919876543210.", "danger");
                     return;
                 }
