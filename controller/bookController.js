@@ -6,31 +6,24 @@ const BookRequest = require("../models/BookRequest");
 const Notification = require("../models/Notification");
 const { attachAcademicBook } = require("../utils/academicMatcher");
 
-const escapeRegex = (value = "") => String(value).replace(/[.*+?^$()|[\\]\\]/g, "\\const { attachAcademicBook } = require("../utils/academicMatcher");
-
-");
+const escapeRegex = (value = "") => String(value).split("").map(ch => "\\.^$*+?()[]{}|".includes(ch) ? "\\" + ch : ch).join("");
 
 const levenshtein = (a, b) => {
     const left = String(a || "").toLowerCase();
     const right = String(b || "").toLowerCase();
     if (!left) return right.length;
     if (!right) return left.length;
-
     let previous = Array.from({ length: right.length + 1 }, (_, i) => i);
-
     for (let i = 0; i < left.length; i += 1) {
         const current = [i + 1];
-
         for (let j = 0; j < right.length; j += 1) {
             const insert = current[j] + 1;
             const remove = previous[j + 1] + 1;
             const replace = previous[j] + (left[i] === right[j] ? 0 : 1);
             current.push(Math.min(insert, remove, replace));
         }
-
         previous = current;
     }
-
     return previous[right.length];
 };
 
@@ -38,7 +31,6 @@ const fuzzySimilarity = (query, value) => {
     const queryTokens = String(query || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
     const valueTokens = String(value || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
     if (!queryTokens.length || !valueTokens.length) return 0;
-
     let best = 0;
     queryTokens.forEach(queryToken => {
         valueTokens.forEach(valueToken => {
@@ -47,16 +39,12 @@ const fuzzySimilarity = (query, value) => {
             if (score > best) best = score;
         });
     });
-
     return best;
 };
 
 module.exports.searchSuggestions = async (req, res) => {
     const query = String(req.query.q || "").trim().slice(0, 80);
-
-    if (query.length < 2) {
-        return res.json({ suggestions: [] });
-    }
+    if (query.length < 2) return res.json({ suggestions: [] });
 
     const safeQuery = escapeRegex(query);
     const startsWith = new RegExp("^" + safeQuery, "i");
@@ -64,16 +52,11 @@ module.exports.searchSuggestions = async (req, res) => {
     const normalizedQuery = query.toLowerCase();
 
     const books = await Book.find({
-        $or: [
-            { title: contains },
-            { author: contains },
-            { category: contains }
-        ]
+        $or: [{ title: contains }, { author: contains }, { category: contains }]
     }).select("title author category").limit(60).lean();
 
     const seen = new Set();
     const suggestions = [];
-
     const addSuggestion = (value, type) => {
         const text = String(value || "").trim();
         const key = text.toLowerCase();
@@ -81,11 +64,8 @@ module.exports.searchSuggestions = async (req, res) => {
         seen.add(key);
         suggestions.push({ text, type });
     };
-
-    const score = (book) => [
-        [book.title, 30],
-        [book.author, 20],
-        [book.category, 10]
+    const score = book => [
+        [book.title, 30], [book.author, 20], [book.category, 10]
     ].reduce((total, [value, weight]) => {
         const field = String(value || "").toLowerCase();
         if (field.startsWith(normalizedQuery)) return total + weight + 10;
@@ -101,36 +81,22 @@ module.exports.searchSuggestions = async (req, res) => {
 
     if (suggestions.length < 8) {
         books.forEach(book => {
-            if (suggestions.length >= 8) return;
-            addSuggestion(book.title, "Book");
+            if (suggestions.length < 8) addSuggestion(book.title, "Book");
         });
     }
 
     if (suggestions.length === 0) {
         const firstCharacter = new RegExp(escapeRegex(query.charAt(0)), "i");
         const fuzzyBooks = await Book.find({
-            $or: [
-                { title: firstCharacter },
-                { author: firstCharacter },
-                { category: firstCharacter }
-            ]
+            $or: [{ title: firstCharacter }, { author: firstCharacter }, { category: firstCharacter }]
         }).select("title author category").limit(200).lean();
-
         fuzzyBooks.map(book => ({
             book,
-            score: Math.max(
-                fuzzySimilarity(query, book.title),
-                fuzzySimilarity(query, book.author),
-                fuzzySimilarity(query, book.category)
-            )
-        }))
-        .filter(item => item.score >= 0.55)
-        .sort((a, b) => b.score - a.score)
-        .forEach(item => {
+            score: Math.max(fuzzySimilarity(query, book.title), fuzzySimilarity(query, book.author), fuzzySimilarity(query, book.category))
+        })).filter(item => item.score >= 0.55).sort((a, b) => b.score - a.score).forEach(item => {
             if (suggestions.length < 8) addSuggestion(item.book.title, "Book");
         });
     }
-
     res.json({ suggestions });
 };
 
@@ -173,14 +139,14 @@ module.exports.index = async (req, res) => {
         page = 1
     } = req.query;
 
-    q = String(q || "").trim().slice(0, 80);
-
     page = Number.parseInt(page, 10);
     if (!Number.isFinite(page) || page < 1) page = 1;
 
     const limit = 8;
     const skip = (page - 1) * limit;
     const filter = {};
+
+    q = String(q || "").trim().slice(0, 80);
 
     if (q) {
         const safeQuery = escapeRegex(q);
@@ -223,38 +189,21 @@ module.exports.index = async (req, res) => {
     let books;
 
     if (q && totalBooks === 0) {
-        const fuzzyFilter = { ...filter };
-        delete fuzzyFilter.$or;
-
         const firstCharacter = new RegExp(escapeRegex(q.charAt(0)), "i");
         const candidates = await Book.find({
-            ...fuzzyFilter,
-            $or: [
-                { title: firstCharacter },
-                { author: firstCharacter },
-                { category: firstCharacter }
-            ]
+            ...filter,
+            $or: [{ title: firstCharacter }, { author: firstCharacter }, { category: firstCharacter }]
         }).limit(250).populate("owner").lean();
 
         const ranked = candidates.map(book => ({
             book,
-            score: Math.max(
-                fuzzySimilarity(q, book.title),
-                fuzzySimilarity(q, book.author),
-                fuzzySimilarity(q, book.category)
-            )
-        }))
-        .filter(item => item.score >= 0.55)
-        .sort((a, b) => b.score - a.score);
+            score: Math.max(fuzzySimilarity(q, book.title), fuzzySimilarity(q, book.author), fuzzySimilarity(q, book.category))
+        })).filter(item => item.score >= 0.55).sort((a, b) => b.score - a.score);
 
         totalBooks = ranked.length;
         books = ranked.slice(skip, skip + limit).map(item => item.book);
     } else {
-        books = await Book.find(filter)
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit)
-            .populate("owner");
+        books = await Book.find(filter).sort(sortOption).skip(skip).limit(limit).populate("owner");
     }
 
     res.render("books/index", {
