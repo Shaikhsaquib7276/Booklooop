@@ -291,7 +291,7 @@
       addressInput.focus();
       setStatus("Add the pickup address line before saving the book.", true);
     }
-  });
+  }, true);
 
   updateCoordinateText();
 
