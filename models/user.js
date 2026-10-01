@@ -19,7 +19,15 @@ const userSchema = new mongoose.Schema(
 
         college: {
             type: String,
+            trim: true
         },
+
+        // Academic profile used by Smart Semester Finder.
+        degree: { type: String, trim: true },
+        course: { type: String, trim: true },
+        academicYear: { type: String, trim: true },
+        year: { type: Number, min: 1, max: 10 },
+        semester: { type: Number, min: 1, max: 20 },
 
         profileImage: {
             url: {
