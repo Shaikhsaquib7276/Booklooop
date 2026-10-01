@@ -6,6 +6,73 @@ const BookRequest = require("../models/BookRequest");
 const Notification = require("../models/Notification");
 const { attachAcademicBook } = require("../utils/academicMatcher");
 
+const escapeRegex = (value = "") => String(value).replace(/[.*+?^${}()|[\\]\\]/g, "\\const { attachAcademicBook } = require("../utils/academicMatcher");
+
+async function notifyAcademicMatches");
+
+module.exports.searchSuggestions = async (req, res) => {
+    const query = String(req.query.q || "").trim().slice(0, 80);
+
+    if (query.length < 2) {
+        return res.json({ suggestions: [] });
+    }
+
+    const safeQuery = escapeRegex(query);
+    const startsWith = new RegExp("^" + safeQuery, "i");
+    const contains = new RegExp(safeQuery, "i");
+    const normalizedQuery = query.toLowerCase();
+
+    const books = await Book.find({
+        $or: [
+            { title: contains },
+            { author: contains },
+            { category: contains }
+        ]
+    })
+        .select("title author category")
+        .limit(60)
+        .lean();
+
+    const seen = new Set();
+    const suggestions = [];
+
+    const addSuggestion = (value, type) => {
+        const text = String(value || "").trim();
+        const key = text.toLowerCase();
+        if (!text || seen.has(key) || suggestions.length >= 8) return;
+        seen.add(key);
+        suggestions.push({ text, type });
+    };
+
+    const score = (book) => {
+        return [
+            [book.title, 30],
+            [book.author, 20],
+            [book.category, 10]
+        ].reduce((total, [value, weight]) => {
+            const field = String(value || "").toLowerCase();
+            if (field.startsWith(normalizedQuery)) return total + weight + 10;
+            if (field.includes(normalizedQuery)) return total + weight;
+            return total;
+        }, 0);
+    };
+
+    books.sort((a, b) => score(b) - score(a)).forEach(book => {
+        if (startsWith.test(book.title || "")) addSuggestion(book.title, "Book");
+        if (startsWith.test(book.author || "")) addSuggestion(book.author, "Author");
+        if (startsWith.test(book.category || "")) addSuggestion(book.category, "Category");
+    });
+
+    if (suggestions.length < 8) {
+        books.forEach(book => {
+            if (suggestions.length >= 8) return;
+            addSuggestion(book.title, "Book");
+        });
+    }
+
+    res.json({ suggestions });
+};
+
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
     const academicBook = await AcademicBook.findOne({
@@ -53,9 +120,13 @@ module.exports.index = async (req, res) => {
     const filter = {};
 
     if (q) {
+        const safeQuery = escapeRegex(q.trim().slice(0, 80));
         filter.$or = [
-            { title: { $regex: q, $options: "i" } },
-            { author: { $regex: q, $options: "i" } }
+            { $text: { $search: q } },
+            { title: { $regex: safeQuery, $options: "i" } },
+            { author: { $regex: safeQuery, $options: "i" } },
+            { category: { $regex: safeQuery, $options: "i" } },
+            { description: { $regex: safeQuery, $options: "i" } }
         ];
     }
 
@@ -80,7 +151,9 @@ module.exports.index = async (req, res) => {
             sortOption = { title: 1 };
             break;
         default:
-            sortOption = { createdAt: -1 };
+            sortOption = q
+                ? { score: { $meta: "textScore" }, createdAt: -1 }
+                : { createdAt: -1 };
     }
 
     const [totalBooks, books] = await Promise.all([
