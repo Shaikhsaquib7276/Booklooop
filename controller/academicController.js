@@ -7,7 +7,7 @@ const clean=v=>String(v||"").trim();
 const academicRegex=value=>{
  const parts=clean(value).split(/[^a-z0-9]+/i).filter(Boolean);
  if(!parts.length)return null;
- return new RegExp(parts.map(part=>part.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\const clean=v=>String(v||"").trim();")).join("[^a-z0-9]+"),"i");
+ return new RegExp(parts.map(part=>part.replace(/[.*+?^${}()|[\\]\\]/g,"\\$&")).join("[^a-z0-9]+"),"i");
 };
 async function options(filters={}) {
  const f={active:true, verificationStatus:"verified"};
