@@ -48,6 +48,57 @@
           <option value="Sold" <%=book.status==="Sold" ? "selected" : "" %>>Sold</option>
         </select>
       </div>
+      <div class="book-form-field full academic-listing-field">
+        <div class="academic-listing-toggle">
+          <div>
+            <label class="mb-1">Academic book mapping</label>
+            <div class="book-form-help">Keep this listing linked to the academic record used by Smart Semester Finder.</div>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="academicListing" name="academicListing" value="yes" <%= book.academicBook ? "checked" : "" %>>
+            <label class="form-check-label" for="academicListing">This is an academic book</label>
+          </div>
+        </div>
+
+        <div id="studentAcademicListing" class="academic-listing-panel <%= book.academicBook ? "" : "d-none" %>">
+          <% if (currentUser && currentUser.accountType === "student") { %>
+            <div class="academic-profile-preview">
+              <i class="bi bi-mortarboard"></i>
+              <div>
+                <strong><%= currentUser.college || "College not set" %></strong>
+                <span><%= currentUser.degree || "Degree not set" %> · <%= currentUser.course || "Course not set" %></span>
+                <span><%= currentUser.academicYear || "Academic year not set" %> · Year <%= currentUser.year || "—" %> · Semester <%= currentUser.semester || "—" %></span>
+              </div>
+            </div>
+          <% } %>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-8">
+              <label for="academicSubject">Subject</label>
+              <input id="academicSubject" name="academicSubject" class="form-control" value="<%= book.academicBook ? book.academicBook.subject : '' %>" placeholder="e.g. Database Management Systems" <%= book.academicBook ? "required" : "" %>>
+            </div>
+            <div class="col-md-4">
+              <label for="academicSubjectCode">Subject code</label>
+              <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" value="<%= book.academicBook ? book.academicBook.subjectCode : '' %>" placeholder="e.g. CSC501">
+            </div>
+          </div>
+
+          <% if (currentUser && currentUser.accountType !== "student") { %>
+            <div class="row g-3 mt-1">
+              <div class="col-md-6"><label for="academicCollege">College</label><input id="academicCollege" name="academicCollege" class="form-control" value="<%= book.academicBook ? book.academicBook.college : '' %>"></div>
+              <div class="col-md-6"><label for="academicDegree">Degree</label><input id="academicDegree" name="academicDegree" class="form-control" value="<%= book.academicBook ? book.academicBook.degree : '' %>" placeholder="e.g. BSc"></div>
+              <div class="col-md-6"><label for="academicCourse">Course</label><input id="academicCourse" name="academicCourse" class="form-control" value="<%= book.academicBook ? book.academicBook.course : '' %>" placeholder="e.g. Computer Science"></div>
+              <div class="col-md-6"><label for="academicYear">Academic Year</label><input id="academicYear" name="academicYear" class="form-control" value="<%= book.academicBook ? book.academicBook.academicYear : '' %>" placeholder="e.g. 2026-27"></div>
+              <div class="col-md-3"><label for="academicYearNumber">Year</label><input id="academicYearNumber" name="academicYearNumber" type="number" min="1" max="10" class="form-control" value="<%= book.academicBook ? book.academicBook.year : '' %>"></div>
+              <div class="col-md-3"><label for="academicSemester">Semester</label><input id="academicSemester" name="academicSemester" type="number" min="1" max="20" class="form-control" value="<%= book.academicBook ? book.academicBook.semester : '' %>"></div>
+              <div class="col-md-3"><label for="academicType">Type</label><select id="academicType" name="academicType" class="form-select"><option <%= !book.academicBook || book.academicBook.type!=="Reference" ? "selected" : "" %>>Prescribed</option><option <%= book.academicBook && book.academicBook.type==="Reference" ? "selected" : "" %>>Reference</option></select></div>
+            </div>
+          <% } else { %>
+            <input type="hidden" name="academicType" value="<%= book.academicBook && book.academicBook.type==="Reference" ? "Reference" : "Prescribed" %>">
+          <% } %>
+        </div>
+      </div>
+
       <div class="book-form-field full pickup-location-field">
         <div class="pickup-location-header">
           <div>
@@ -171,5 +222,20 @@
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     );
   });
+})();
+</script>
+
+<script>
+(() => {
+  const toggle = document.getElementById("academicListing");
+  const panel = document.getElementById("studentAcademicListing");
+  const subject = document.getElementById("academicSubject");
+  if (!toggle || !panel) return;
+  const sync = () => {
+    panel.classList.toggle("d-none", !toggle.checked);
+    if (subject) subject.required = toggle.checked && <%= currentUser && currentUser.accountType === "student" ? "true" : "false" %>;
+  };
+  toggle.addEventListener("change", sync);
+  sync();
 })();
 </script>
