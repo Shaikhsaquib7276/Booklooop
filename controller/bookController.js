@@ -9,6 +9,46 @@ const { attachAcademicBook } = require("../utils/academicMatcher");
 const escapeRegex = (value = "") => String(value).replace(/[.*+?^${}()|[\\]\\]/g, "\\const { attachAcademicBook } = require("../utils/academicMatcher");
 
 async function notifyAcademicMatches");
+const levenshtein = (a, b) => {
+    const left = String(a || "").toLowerCase();
+    const right = String(b || "").toLowerCase();
+    if (!left) return right.length;
+    if (!right) return left.length;
+
+    let previous = Array.from({ length: right.length + 1 }, (_, i) => i);
+
+    for (let i = 0; i < left.length; i += 1) {
+        const current = [i + 1];
+
+        for (let j = 0; j < right.length; j += 1) {
+            const insert = current[j] + 1;
+            const remove = previous[j + 1] + 1;
+            const replace = previous[j] + (left[i] === right[j] ? 0 : 1);
+            current.push(Math.min(insert, remove, replace));
+        }
+
+        previous = current;
+    }
+
+    return previous[right.length];
+};
+
+const fuzzySimilarity = (query, value) => {
+    const queryTokens = String(query || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    const valueTokens = String(value || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    if (!queryTokens.length || !valueTokens.length) return 0;
+
+    let best = 0;
+    queryTokens.forEach(queryToken => {
+        valueTokens.forEach(valueToken => {
+            const distance = levenshtein(queryToken, valueToken);
+            const score = 1 - distance / Math.max(queryToken.length, valueToken.length);
+            if (score > best) best = score;
+        });
+    });
+
+    return best;
+};
 
 module.exports.searchSuggestions = async (req, res) => {
     const query = String(req.query.q || "").trim().slice(0, 80);
@@ -68,6 +108,36 @@ module.exports.searchSuggestions = async (req, res) => {
             if (suggestions.length >= 8) return;
             addSuggestion(book.title, "Book");
         });
+    }
+
+    // Fuzzy fallback handles small spelling mistakes such as "javscript" → "javascript".
+    if (suggestions.length === 0) {
+        const firstCharacter = new RegExp(escapeRegex(query.charAt(0)), "i");
+        const fuzzyBooks = await Book.find({
+            $or: [
+                { title: firstCharacter },
+                { author: firstCharacter },
+                { category: firstCharacter }
+            ]
+        })
+            .select("title author category")
+            .limit(200)
+            .lean();
+
+        fuzzyBooks
+            .map(book => ({
+                book,
+                score: Math.max(
+                    fuzzySimilarity(query, book.title),
+                    fuzzySimilarity(query, book.author),
+                    fuzzySimilarity(query, book.category)
+                )
+            }))
+            .filter(item => item.score >= 0.55)
+            .sort((a, b) => b.score - a.score)
+            .forEach(item => {
+                if (suggestions.length < 8) addSuggestion(item.book.title, "Book");
+            });
     }
 
     res.json({ suggestions });
@@ -156,14 +226,47 @@ module.exports.index = async (req, res) => {
                 : { createdAt: -1 };
     }
 
-    const [totalBooks, books] = await Promise.all([
-        Book.countDocuments(filter),
-        Book.find(filter)
+    let totalBooks = await Book.countDocuments(filter);
+    let books;
+
+    if (q && totalBooks === 0) {
+        const fuzzyFilter = { ...filter };
+        delete fuzzyFilter.$or;
+
+        const firstCharacter = new RegExp(escapeRegex(q.trim().charAt(0)), "i");
+        const candidates = await Book.find({
+            ...fuzzyFilter,
+            $or: [
+                { title: firstCharacter },
+                { author: firstCharacter },
+                { category: firstCharacter }
+            ]
+        })
+            .limit(250)
+            .populate("owner")
+            .lean();
+
+        const ranked = candidates
+            .map(book => ({
+                book,
+                score: Math.max(
+                    fuzzySimilarity(q, book.title),
+                    fuzzySimilarity(q, book.author),
+                    fuzzySimilarity(q, book.category)
+                )
+            }))
+            .filter(item => item.score >= 0.55)
+            .sort((a, b) => b.score - a.score);
+
+        totalBooks = ranked.length;
+        books = ranked.slice(skip, skip + limit).map(item => item.book);
+    } else {
+        books = await Book.find(filter)
             .sort(sortOption)
             .skip(skip)
             .limit(limit)
-            .populate("owner")
-    ]);
+            .populate("owner");
+    }
 
     res.render("books/index", {
         books,
