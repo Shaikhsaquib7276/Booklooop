@@ -57,7 +57,7 @@
     const lat = Number(latitudeInput.value);
     const lng = Number(longitudeInput.value);
     coordinates.textContent = validCoordinates(lat, lng)
-      ? \`Selected: \${lat.toFixed(6)}, \${lng.toFixed(6)}\`
+      ? `Selected: ${lat.toFixed(6)}, ${lng.toFixed(6)}`
       : "No precise pickup location selected yet.";
   };
 
@@ -102,7 +102,7 @@
     try {
       await waitForRateLimit();
       const response = await fetch(url, { headers: { Accept: "application/json" } });
-      if (!response.ok) throw new Error(\`Geocoder returned \${response.status}\`);
+      if (!response.ok) throw new Error(`Geocoder returned ${response.status}`);
       return await response.json();
     } finally {
       requestInFlight = false;
@@ -130,7 +130,7 @@
       button.type = "button";
       button.className = "pickup-location-suggestion";
       const parts = String(result.display_name || "").split(",");
-      button.innerHTML = \`<strong>\${escapeHtml(parts.slice(0, 2).join(", "))}</strong><span>\${escapeHtml(result.display_name || "")}</span>\`;
+      button.innerHTML = `<strong>${escapeHtml(parts.slice(0, 2).join(", "))}</strong><span>${escapeHtml(result.display_name || "")}</span>`;
       button.addEventListener("click", () => {
         const lat = Number(result.lat);
         const lng = Number(result.lon);
