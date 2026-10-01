@@ -54,8 +54,8 @@ if (
             let verifiedPhone = null;
 
             function normalizePhone(value) {
-                const cleaned = String(value || "").trim().replace(/[\\s()-]/g, "");
-                if (/^\\d{10}$/.test(cleaned)) return "+91" + cleaned;
+                const cleaned = String(value || "").trim().replace(/[\s()-]/g, "");
+                if (/^\d{10}$/.test(cleaned)) return "+91" + cleaned;
                 return cleaned;
             }
 
@@ -76,7 +76,7 @@ if (
             async function sendOTP() {
                 const phone = normalizePhone(phoneInput.value);
 
-                if (!/^\\+?[1-9]\\d{7,14}$/.test(phone)) {
+                if (!/^\\+?[1-9]\d{7,14}$/.test(phone)) {
                     showStatus("Enter a valid phone number, for example +919876543210.", "danger");
                     return;
                 }
@@ -135,7 +135,7 @@ if (
                     return;
                 }
 
-                if (!/^\\d{6}$/.test(otp)) {
+                if (!/^\d{6}$/.test(otp)) {
                     showStatus("Enter the 6-digit OTP.", "danger");
                     return;
                 }
