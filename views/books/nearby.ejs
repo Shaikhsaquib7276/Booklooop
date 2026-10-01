@@ -13,7 +13,7 @@
     <div class="row g-2 align-items-end">
       <div class="col-md-7">
         <label class="form-label" for="nearbyTitle">Book title</label>
-        <input class="form-control" id="nearbyTitle" name="q" value="<%= q %>" placeholder="e.g. Database System Concepts" required>
+        <input class="form-control" id="nearbyTitle" name="q" value="<%= q %>" placeholder="e.g. Database System Concepts">
       </div>
       <div class="col-md-3">
         <label class="form-label" for="nearbyRadius">Search radius</label>
@@ -44,7 +44,7 @@
     <span class="badge text-bg-light"><%= books.length %> results</span>
   </div>
 
-  <% if (hasLocation && q && books.length) { %>
+  <% if (hasLocation && books.length) { %>
     <div id="nearbyMap" class="nearby-map mb-4" aria-label="Map showing nearby book sellers"></div>
     <div class="table-responsive nearby-table-wrap">
       <table class="table align-middle nearby-table">
@@ -63,8 +63,8 @@
         </tbody>
       </table>
     </div>
-  <% } else if (hasLocation && q) { %>
-    <div class="nearby-empty"><i class="bi bi-book"></i><h3>No nearby matches</h3><p>Try a larger search radius or another book title.</p></div>
+  <% } else if (hasLocation) { %>
+    <div class="nearby-empty"><i class="bi bi-book"></i><h3>No nearby matches</h3><p>Try another title/author or increase the search radius.</p></div>
   <% } else { %>
     <div class="nearby-empty"><i class="bi bi-geo-alt"></i><h3>Search nearby books</h3><p>Enter a title and share your location to compare nearby listings.</p></div>
   <% } %>
@@ -78,15 +78,35 @@
   const form = document.getElementById("nearbySearch");
   const lat = document.getElementById("nearbyLat");
   const lng = document.getElementById("nearbyLng");
-  button.addEventListener("click", () => {
-    if (!navigator.geolocation) { status.textContent = "Geolocation is not supported by this browser."; return; }
+  function requestLocationAndSubmit() {
+    if (!navigator.geolocation) {
+      status.textContent = "Geolocation is not supported by this browser.";
+      return;
+    }
+
     status.textContent = "Getting your location…";
+
     navigator.geolocation.getCurrentPosition(position => {
-      lat.value = position.coords.latitude;
-      lng.value = position.coords.longitude;
-      status.textContent = "Location ready. Search to see nearby listings.";
-      if (document.getElementById("nearbyTitle").value.trim()) form.requestSubmit();
-    }, () => { status.textContent = "Location permission was denied or unavailable. You can try again."; }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+      lat.value = position.coords.latitude.toFixed(6);
+      lng.value = position.coords.longitude.toFixed(6);
+      status.textContent = "Location ready.";
+      form.submit();
+    }, error => {
+      console.error("Nearby location error:", error);
+      status.textContent = "Location permission was denied or unavailable. Allow location access and try again.";
+    }, {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 300000
+    });
+  }
+
+  button.addEventListener("click", requestLocationAndSubmit);
+
+  form.addEventListener("submit", event => {
+    if (lat.value && lng.value) return;
+    event.preventDefault();
+    requestLocationAndSubmit();
   });
 
   const mapElement = document.getElementById("nearbyMap");
@@ -99,12 +119,21 @@
     maxZoom: 19
   }).addTo(map);
   const points = <%- JSON.stringify(books.filter(book => book.location && book.location.coordinates && book.location.coordinates.length === 2).map(book => ({lat: book.location.coordinates[1], lng: book.location.coordinates[0], title: book.title, price: book.price, id: book._id, seller: book.owner ? book.owner.username : "Seller", type: book.sellerType === "shop" ? "Bookshop" : "Student"})).map(point => point) ) %>;
-  points.forEach(point => L.marker([point.lat, point.lng]).addTo(map).bindPopup(
-    '<strong>' + escapeHtml(point.title) + '</strong><br>₹' + Number(point.price).toLocaleString("en-IN") +
-    '<br>' + escapeHtml(point.seller) + ' · ' + escapeHtml(point.type) +
-    '<br><a href="/books/' + encodeURIComponent(point.id) + '">View book</a>'
-  ));
-  if (points.length) map.fitBounds(L.featureGroup(points.map(point => L.marker([point.lat, point.lng]))).getBounds().pad(0.15));
+  const markers = points.map(point => {
+    return L.marker([point.lat, point.lng]).bindPopup(
+      '<strong>' + escapeHtml(point.title) + '</strong><br>₹' + Number(point.price).toLocaleString("en-IN") +
+      '<br>' + escapeHtml(point.seller) + ' · ' + escapeHtml(point.type) +
+      '<br><a href="/books/' + encodeURIComponent(point.id) + '">View book</a>'
+    );
+  });
+
+  const markerLayer = L.featureGroup(markers).addTo(map);
+
+  if (markers.length) {
+    map.fitBounds(markerLayer.getBounds().pad(0.15));
+  }
+
+  setTimeout(() => map.invalidateSize(), 0);
   function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[char])); }
 })();
 </script>
