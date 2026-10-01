@@ -14,19 +14,115 @@ async function options(filters={}) {
 }
 exports.options=async(req,res)=>res.json(await options(req.query));
 exports.findBooks=async(req,res)=>{
- const filters={college:clean(req.query.college),course:clean(req.query.course),academicYear:clean(req.query.academicYear),semester:Number(req.query.semester)};
+ const filters={
+  college:clean(req.query.college),
+  course:clean(req.query.course),
+  academicYear:clean(req.query.academicYear),
+  semester:Number(req.query.semester)
+ };
+ const radiusValue=Number.parseInt(req.query.radius,10);
+ const radius=[1,5,10,20,50].includes(radiusValue)?radiusValue:10;
+ const lat=Number(req.query.lat);
+ const lng=Number(req.query.lng);
+ const hasLocation=Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
  const complete=!!(filters.college&&filters.course&&filters.academicYear&&Number.isInteger(filters.semester)&&filters.semester>0);
+
  let subjects=[];
+ let summary={required:0,available:0,requested:0};
  if(complete){
   const rows=await AcademicBook.find({...filters,active:true}).sort({subject:1,title:1}).lean();
+  summary.required=rows.length;
   const ids=rows.map(x=>x._id);
-  const listings=ids.length?await Book.find({academicBook:{$in:ids},status:"Available"}).sort({price:1}).populate("owner","username college").lean():[];
-  const map=new Map();listings.forEach(b=>{const k=String(b.academicBook);if(!map.has(k))map.set(k,[]);map.get(k).push(b);});
-  const groups=new Map();rows.forEach(b=>{if(!groups.has(b.subject))groups.set(b.subject,{name:b.subject,code:b.subjectCode,books:[]});groups.get(b.subject).books.push({...b,listings:map.get(String(b._id))||[]});});
+
+  const listingFilter={
+   academicBook:{$in:ids},
+   $and:[
+    {$or:[{status:"Available"},{status:{$exists:false}}]},
+    {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+   ]
+  };
+
+  if(req.user?._id) listingFilter.owner={$ne:req.user._id};
+  if(hasLocation){
+   listingFilter.location={
+    $near:{
+     $geometry:{type:"Point",coordinates:[lng,lat]},
+     $maxDistance:radius*1000
+    }
+   };
+  }
+
+  let listings=ids.length?await Book.find(listingFilter)
+   .sort(hasLocation?{}:{price:1})
+   .populate("owner","username college")
+   .lean():[];
+
+  listings=listings.map(book=>{
+   const coords=book.location?.coordinates;
+   const distanceKm=hasLocation&&Array.isArray(coords)&&coords.length===2
+    ? haversineKm(lat,lng,coords[1],coords[0])
+    : null;
+   return {...book,distanceKm};
+  });
+
+  const requestMap=new Map();
+  if(req.user?._id&&ids.length){
+   const requests=await BookRequest.find({
+    student:req.user._id,
+    academicBook:{$in:ids},
+    status:{$in:["Open","Matched"]}
+   }).select("academicBook status").lean();
+   requests.forEach(r=>requestMap.set(String(r.academicBook),r.status));
+  }
+
+  const listingMap=new Map();
+  listings.forEach(book=>{
+   const key=String(book.academicBook);
+   if(!listingMap.has(key))listingMap.set(key,[]);
+   listingMap.get(key).push(book);
+  });
+
+  const groups=new Map();
+  rows.forEach(book=>{
+   const list=listingMap.get(String(book._id))||[];
+   if(list.length)summary.available++;
+   else if(requestMap.has(String(book._id)))summary.requested++;
+
+   if(!groups.has(book.subject)){
+    groups.set(book.subject,{name:book.subject,code:book.subjectCode,books:[]});
+   }
+   groups.get(book.subject).books.push({
+    ...book,
+    listings:list,
+    requestStatus:requestMap.get(String(book._id))||null
+   });
+  });
   subjects=[...groups.values()];
  }
- res.render("academic/find",{title:"Find My Semester Books",options:await options(filters),filters,complete,subjects});
+
+ res.render("academic/find",{
+  title:"Find My Semester Books",
+  options:await options(filters),
+  filters,
+  complete,
+  subjects,
+  radius,
+  hasLocation,
+  searchLat:hasLocation?lat:"",
+  searchLng:hasLocation?lng:"",
+  summary
+ });
 };
+
+function haversineKm(lat1,lng1,lat2,lng2){
+ const toRad=value=>value*Math.PI/180;
+ const dLat=toRad(lat2-lat1);
+ const dLng=toRad(lng2-lng1);
+ const a=Math.sin(dLat/2)**2+
+  Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+ return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
 exports.requestBook=async(req,res)=>{
  const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true});
  if(!academicBook){req.flash("error","Academic book not found.");return res.redirect("/find-books");}
