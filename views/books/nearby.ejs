@@ -44,8 +44,11 @@
     <span class="badge text-bg-light"><%= books.length %> results</span>
   </div>
 
+  <% if (hasLocation) { %>
+    <div id="nearbyMap" class="nearby-map mb-4" aria-label="Map showing your location and nearby book sellers"></div>
+  <% } %>
+
   <% if (hasLocation && books.length) { %>
-    <div id="nearbyMap" class="nearby-map mb-4" aria-label="Map showing nearby book sellers"></div>
     <div class="table-responsive nearby-table-wrap">
       <table class="table align-middle nearby-table">
         <thead><tr><th>Book / Seller</th><th>Distance</th><th>Price</th><th>Condition</th><th>Availability</th><th>Seller type</th></tr></thead>
@@ -64,7 +67,7 @@
       </table>
     </div>
   <% } else if (hasLocation) { %>
-    <div class="nearby-empty"><i class="bi bi-book"></i><h3>No nearby matches</h3><p>Try another title/author or increase the search radius.</p></div>
+    <div class="nearby-empty"><i class="bi bi-book"></i><h3>No nearby matches</h3><p>Try another title, author, or category, or increase the search radius. The map above shows your current location.</p></div>
   <% } else { %>
     <div class="nearby-empty"><i class="bi bi-geo-alt"></i><h3>Search nearby books</h3><p>Enter a title and share your location to compare nearby listings.</p></div>
   <% } %>
@@ -119,6 +122,8 @@
     maxZoom: 19
   }).addTo(map);
   const points = <%- JSON.stringify(books.filter(book => book.location && book.location.coordinates && book.location.coordinates.length === 2).map(book => ({lat: book.location.coordinates[1], lng: book.location.coordinates[0], title: book.title, price: book.price, id: book._id, seller: book.owner ? book.owner.username : "Seller", type: book.sellerType === "shop" ? "Bookshop" : "Student"})).map(point => point) ) %>;
+  const userMarker = L.marker(center).addTo(map).bindPopup("<strong>Your location</strong>").openPopup();
+
   const markers = points.map(point => {
     return L.marker([point.lat, point.lng]).bindPopup(
       '<strong>' + escapeHtml(point.title) + '</strong><br>₹' + Number(point.price).toLocaleString("en-IN") +
@@ -130,7 +135,10 @@
   const markerLayer = L.featureGroup(markers).addTo(map);
 
   if (markers.length) {
-    map.fitBounds(markerLayer.getBounds().pad(0.15));
+    const group = L.featureGroup([userMarker, ...markers]);
+    map.fitBounds(group.getBounds().pad(0.15));
+  } else {
+    map.setView(center, 13);
   }
 
   setTimeout(() => map.invalidateSize(), 0);
