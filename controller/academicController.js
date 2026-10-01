@@ -145,7 +145,7 @@ exports.findBooks=async(req,res)=>{
 };
 
 exports.requestBook=async(req,res)=>{
- const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true});
+ const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true,verificationStatus:"verified"});
  if(!academicBook){req.flash("error","Academic book not found.");return res.redirect("/find-books");}
  const existing=await BookRequest.findOne({student:req.user._id,academicBook:academicBook._id,status:{$in:["Open","Matched"]}});
  if(existing){req.flash("success","You already have an active request for this book.");return res.redirect("/book-requests");}
@@ -206,6 +206,7 @@ exports.rejectAcademicBook=async(req,res)=>{
  res.redirect("/admin/academic");
 };
 
+// Retained only for backward compatibility with older deployments; the admin UI and route no longer expose manual catalog creation.
 exports.adminCreate=async(req,res)=>{
  const b=req.body,semester=Number(b.semester);
  if(!clean(b.college)||!clean(b.course)||!clean(b.academicYear)||!Number.isInteger(semester)||semester<1||!clean(b.subject)||!clean(b.title)){req.flash("error","College, course, year, semester, subject and title are required.");return res.redirect("/admin/academic");}
