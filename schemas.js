@@ -21,8 +21,11 @@ module.exports.userSchema = Joi.object({
     city: Joi.string()
         .allow("", null),
 
-    college: Joi.string()
-        .allow("", null),
+    college: Joi.when("accountType", {
+        is: "student",
+        then: Joi.string().trim().min(2).required(),
+        otherwise: Joi.string().allow("", null)
+    }),
 
     accountType: Joi.string().valid("student", "shop").default("student"),
     degree: Joi.when("accountType", {
