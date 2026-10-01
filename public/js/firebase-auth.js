@@ -61,16 +61,27 @@ if (
 
             async function createRecaptcha() {
                 if (recaptchaVerifier) {
-                    try {
-                        recaptchaVerifier.clear();
-                    } catch (_) {}
+                    try { recaptchaVerifier.clear(); } catch (_) {}
+                    recaptchaVerifier = null;
                 }
 
+                recaptchaContainer.innerHTML = "";
+
                 recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-                    size: "normal"
+                    size: "normal",
+                    "callback": () => {
+                        showStatus("reCAPTCHA verified. Click Send OTP to continue.", "success");
+                    },
+                    "expired-callback": () => {
+                        showStatus("reCAPTCHA expired. Please verify reCAPTCHA again.", "warning");
+                        try { recaptchaVerifier?.clear(); } catch (_) {}
+                        recaptchaVerifier = null;
+                        sendOtpButton.disabled = false;
+                    }
                 });
 
                 await recaptchaVerifier.render();
+                return recaptchaVerifier;
             }
 
             async function sendOTP() {
@@ -85,9 +96,8 @@ if (
                 showStatus("Sending OTP…", "info");
 
                 try {
-                    if (!recaptchaVerifier) {
-                        await createRecaptcha();
-                    }
+                    await createRecaptcha();
+                    await recaptchaVerifier.verify();
 
                     confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
                     window.confirmationResult = confirmationResult;
@@ -122,7 +132,9 @@ if (
                         showStatus(`${err.code || "OTP_ERROR"}: ${err.message || "Could not send OTP."}`, "danger");
                     }
 
-                    await createRecaptcha().catch(() => {});
+                    try { recaptchaVerifier?.clear(); } catch (_) {}
+                    recaptchaVerifier = null;
+                    recaptchaContainer.innerHTML = "";
                     sendOtpButton.disabled = false;
                 }
             }
@@ -194,10 +206,7 @@ if (
             sendOtpButton.addEventListener("click", sendOTP);
             verifyOtpButton.addEventListener("click", verifyOTP);
 
-            createRecaptcha().catch(err => {
-                console.error("reCAPTCHA initialization error:", err);
-                showStatus("Could not load reCAPTCHA. Check your Firebase configuration and browser connection.", "danger");
-            });
+            showStatus("Enter your phone number and complete the reCAPTCHA to request an OTP.", "info");
         } catch (err) {
             console.error("Firebase initialization error:", err);
             showStatus("Firebase could not initialize. Check the Firebase configuration.", "danger");
