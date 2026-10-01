@@ -8,6 +8,12 @@ const { attachAcademicBook } = require("../utils/academicMatcher");
 
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
+    const academicBook = await AcademicBook.findOne({
+        _id: book.academicBook,
+        active: true,
+        verificationStatus: "verified"
+    }).select("_id title").lean();
+    if (!academicBook) return;
     const requests = await BookRequest.find({ academicBook: book.academicBook, status: "Open", student: { $ne: sellerId } }).select("_id student").lean();
     if (!requests.length) return;
     await BookRequest.updateMany({ _id: { $in: requests.map(r => r._id) } }, { $set: { status: "Matched", matchedBook: book._id, matchedAt: new Date() } });
