@@ -4,11 +4,41 @@ const BookExchange = require("../models/BookExchange");
 const userId = (user) => String(user._id);
 
 module.exports.browse = async (req, res) => {
-  const books = await Book.find({ status: "Available", owner: { $ne: req.user._id } })
-    .populate("owner", "username college city")
-    .sort({ createdAt: -1 }).limit(60);
-  const myBooks = await Book.find({ owner: req.user._id, status: "Available" }).sort({ createdAt: -1 });
-  res.render("exchange/browse", { title: "Exchange Books", books, myBooks });
+  const availableBookFilter = {
+    owner: { $exists: true, $ne: req.user._id },
+    $or: [
+      { sellerType: "student" },
+      { sellerType: { $exists: false } }
+    ],
+    $and: [{ $or: [{ status: "Available" }, { status: { $exists: false } }] }]
+  };
+
+  const myBookFilter = {
+    owner: req.user._id,
+    $or: [
+      { sellerType: "student" },
+      { sellerType: { $exists: false } }
+    ],
+    $and: [{ $or: [{ status: "Available" }, { status: { $exists: false } }] }]
+  };
+
+  const [books, myBooks] = await Promise.all([
+    Book.find(availableBookFilter)
+      .populate("owner", "username college city")
+      .sort({ createdAt: -1 })
+      .limit(60),
+    Book.find(myBookFilter).sort({ createdAt: -1 })
+  ]);
+
+  const requestedBookId = String(req.query.requestedBook || "");
+  const requestedBookExists = books.some(book => String(book._id) === requestedBookId);
+
+  res.render("exchange/browse", {
+    title: "Exchange Books",
+    books,
+    myBooks,
+    requestedBookId: requestedBookExists ? requestedBookId : ""
+  });
 };
 
 module.exports.create = async (req, res) => {
@@ -20,15 +50,18 @@ module.exports.create = async (req, res) => {
   const [requested, offered] = await Promise.all([
     Book.findById(requestedBookId), Book.findById(offeredBookId)
   ]);
-  if (!requested || !offered || requested.status !== "Available" || offered.status !== "Available") {
+  const requestedAvailable = requested && (!requested.status || requested.status === "Available");
+  const offeredAvailable = offered && (!offered.status || offered.status === "Available");
+
+  if (!requested || !offered || !requestedAvailable || !offeredAvailable) {
     req.flash("error", "Both books must exist and be available.");
     return res.redirect("/exchange");
   }
-  if (!offered.owner || !offered.owner.equals(req.user._id)) {
+  if (!offered.owner || !offered.owner.equals(req.user._id) || offered.sellerType === "shop") {
     req.flash("error", "You can only offer a book you own.");
     return res.redirect("/exchange");
   }
-  if (!requested.owner || requested.owner.equals(req.user._id)) {
+  if (!requested.owner || requested.owner.equals(req.user._id) || requested.sellerType === "shop") {
     req.flash("error", "You cannot exchange with yourself.");
     return res.redirect("/exchange");
   }
@@ -71,7 +104,9 @@ module.exports.respond = async (req, res) => {
   const [offered, requested] = await Promise.all([
     Book.findById(exchange.offeredBook._id), Book.findById(exchange.requestedBook._id)
   ]);
-  if (!offered || !requested || offered.status !== "Available" || requested.status !== "Available" ||
+  if (!offered || !requested ||
+      (offered.status && offered.status !== "Available") ||
+      (requested.status && requested.status !== "Available") ||
       !offered.owner.equals(exchange.proposer) || !requested.owner.equals(exchange.recipient)) {
     req.flash("error", "One of these books is no longer available.");
     return res.redirect("/exchange/mine");

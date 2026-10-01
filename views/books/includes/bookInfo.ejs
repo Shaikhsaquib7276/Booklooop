@@ -78,6 +78,11 @@
             <% if (book.status === "Available") { %>
                 <a href="/checkout/buy/<%= book._id %>" class="btn btn-primary"><i class="bi bi-credit-card me-2"></i>Buy Now</a>
                 <form action="/cart/add/<%= book._id %>" method="POST"><button class="btn btn-outline-primary"><i class="bi bi-cart-plus me-2"></i>Add to Cart</button></form>
+                <% if (book.sellerType !== "shop") { %>
+                    <a href="/exchange?requestedBook=<%= book._id %>" class="btn btn-outline-success">
+                        <i class="bi bi-arrow-left-right me-2"></i>Exchange
+                    </a>
+                <% } %>
             <% } %>
         <% } else if (!currentUser) { %>
             <a href="/login" class="btn btn-success">Login to Request</a>

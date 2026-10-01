@@ -1,203 +1,221 @@
-require("dotenv").config({ path: ".env" });
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-
 import {
     getAuth,
     RecaptchaVerifier,
     signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-const firebaseConfig = {
-    apiKey: "firebase_API_key",
-    authDomain: "bookloop-3.firebaseapp.com",
-    projectId: "bookloop-3",
-    storageBucket: "bookloop-3.firebasestorage.app",
-    messagingSenderId: "488785421566",
-    appId: "1:488785421566:web:e6bea7118992ace1d971af",
-    measurementId: "G-4V1WBF9SM4"
-};
-
 const phoneInput = document.getElementById("phone");
 const sendOtpButton = document.getElementById("sendOTP");
 const verifyOtpButton = document.getElementById("verifyOTP");
 const recaptchaContainer = document.getElementById("recaptcha-container");
+const otpInput = document.getElementById("otp");
+const otpStatus = document.getElementById("otpStatus");
+const signupSection = document.getElementById("signupSection");
+const createAccountButton = document.getElementById("createAccount");
 
-if (phoneInput && sendOtpButton && verifyOtpButton && recaptchaContainer) {
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+if (
+    phoneInput &&
+    sendOtpButton &&
+    verifyOtpButton &&
+    recaptchaContainer &&
+    otpInput &&
+    otpStatus &&
+    signupSection &&
+    createAccountButton
+) {
+    const firebaseConfig = window.firebaseConfig || {};
+    const requiredKeys = [
+        "apiKey",
+        "authDomain",
+        "projectId",
+        "storageBucket",
+        "messagingSenderId",
+        "appId"
+    ];
 
-    window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-            size: "normal"
+    function showStatus(message, type = "info") {
+        otpStatus.innerHTML = `<div class="alert alert-${type} mt-3">${message}</div>`;
+    }
+
+    if (requiredKeys.some(key => !firebaseConfig[key])) {
+        otpStatus.innerHTML = `
+            <div class="alert alert-danger mt-3">
+                Firebase phone authentication is not configured. Check your .env Firebase settings.
+            </div>
+        `;
+    } else {
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            let recaptchaVerifier = null;
+            let confirmationResult = null;
+            let verifiedPhone = null;
+
+            function normalizePhone(value) {
+                const cleaned = String(value || "").trim().replace(/[\s()-]/g, "");
+                if (/^\d{10}$/.test(cleaned)) return "+91" + cleaned;
+                return cleaned;
+            }
+
+            async function createRecaptcha() {
+                if (recaptchaVerifier) {
+                    try { recaptchaVerifier.clear(); } catch (_) {}
+                    recaptchaVerifier = null;
+                }
+
+                recaptchaContainer.innerHTML = "";
+
+                recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+                    size: "normal",
+                    "callback": () => {
+                        showStatus("reCAPTCHA verified. Click Send OTP to continue.", "success");
+                    },
+                    "expired-callback": () => {
+                        showStatus("reCAPTCHA expired. Please verify reCAPTCHA again.", "warning");
+                        try { recaptchaVerifier?.clear(); } catch (_) {}
+                        recaptchaVerifier = null;
+                        sendOtpButton.disabled = false;
+                    }
+                });
+
+                await recaptchaVerifier.render();
+                return recaptchaVerifier;
+            }
+
+            async function sendOTP() {
+                const phone = normalizePhone(phoneInput.value);
+
+                if (!/^\+?[1-9]\d{7,14}$/.test(phone)) {
+                    showStatus("Enter a valid phone number, for example +919876543210.", "danger");
+                    return;
+                }
+
+                sendOtpButton.disabled = true;
+                showStatus("Sending OTP…", "info");
+
+                try {
+                    if (!recaptchaVerifier) {
+                        await createRecaptcha();
+                    }
+
+                    confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+                    window.confirmationResult = confirmationResult;
+                    window.pendingPhone = phone;
+
+                    otpInput.disabled = false;
+                    verifyOtpButton.disabled = false;
+                    phoneInput.value = phone;
+
+                    showStatus("OTP sent successfully. Check your phone.", "success");
+                    otpInput.focus();
+                } catch (err) {
+                    console.error("Firebase OTP error:", err.code, err.message);
+
+                    if (
+                        err.code === "auth/invalid-phone-number"
+                    ) {
+                        showStatus("Firebase rejected this phone number. Use international format such as +919876543210.", "danger");
+                    } else if (
+                        err.code === "auth/operation-not-allowed"
+                    ) {
+                        showStatus("Phone sign-in is disabled in your Firebase project. Enable Phone authentication in Firebase Console.", "danger");
+                    } else if (
+                        err.code === "auth/unauthorized-domain"
+                    ) {
+                        showStatus("This website domain is not authorized in Firebase. Add localhost to Firebase Authentication → Settings → Authorized domains.", "danger");
+                    } else if (
+                        err.code === "auth/invalid-app-credential" ||
+                        err.code === "auth/captcha-check-failed"
+                    ) {
+                        showStatus("Firebase could not validate the reCAPTCHA. On local testing, make sure your domain is allowed in Firebase, then refresh this page and solve the reCAPTCHA again. Firebase also recommends resetting the verifier after a failed OTP request.", "danger");
+                    } else if (
+                        err.code === "auth/too-many-requests"
+                    ) {
+                        showStatus("Too many OTP attempts. Wait and try again, or use a Firebase test phone number.", "danger");
+                    } else {
+                        showStatus(`${err.code || "OTP_ERROR"}: ${err.message || "Could not send OTP."}`, "danger");
+                    }
+
+                    try { recaptchaVerifier?.clear(); } catch (_) {}
+                    recaptchaVerifier = null;
+                    recaptchaContainer.innerHTML = "";
+                    sendOtpButton.disabled = false;
+                }
+            }
+
+            async function verifyOTP() {
+                const otp = otpInput.value.trim();
+
+                if (!confirmationResult) {
+                    showStatus("Send the OTP first.", "warning");
+                    return;
+                }
+
+                if (!/^\d{6}$/.test(otp)) {
+                    showStatus("Enter the 6-digit OTP.", "danger");
+                    return;
+                }
+
+                verifyOtpButton.disabled = true;
+                showStatus("Verifying OTP…", "info");
+
+                try {
+                    const credential = await confirmationResult.confirm(otp);
+                    const idToken = await credential.user.getIdToken();
+
+                    const response = await fetch("/auth/verify-phone", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "same-origin",
+                        body: JSON.stringify({
+                            idToken,
+                            phone: window.pendingPhone
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || "Server phone verification failed.");
+                    }
+
+                    verifiedPhone = data.phone;
+                    window.phoneVerified = true;
+                    window.verifiedPhone = verifiedPhone;
+
+                    phoneInput.value = verifiedPhone;
+                    phoneInput.readOnly = true;
+                    otpInput.disabled = true;
+                    verifyOtpButton.disabled = true;
+                    sendOtpButton.disabled = true;
+
+                    signupSection.classList.remove("d-none");
+
+                    const passwordInput = document.getElementById("password");
+                    if (passwordInput) passwordInput.disabled = false;
+                    createAccountButton.disabled = false;
+
+                    showStatus("Phone verified successfully. Complete your account details.", "success");
+
+                    if (recaptchaVerifier) {
+                        try { recaptchaVerifier.clear(); } catch (_) {}
+                    }
+                } catch (err) {
+                    console.error("OTP verification error:", err);
+                    showStatus(err.message || "Invalid OTP. Please try again.", "danger");
+                    verifyOtpButton.disabled = false;
+                }
+            }
+
+            sendOtpButton.addEventListener("click", sendOTP);
+            verifyOtpButton.addEventListener("click", verifyOTP);
+
+            showStatus("Enter your phone number and complete the reCAPTCHA to request an OTP.", "info");
+        } catch (err) {
+            console.error("Firebase initialization error:", err);
+            showStatus("Firebase could not initialize. Check the Firebase configuration.", "danger");
         }
-    );
-
-    await window.recaptchaVerifier.render();
-
-// ===========================
-// Send OTP
-// ===========================
-
-    sendOtpButton.addEventListener("click", sendOTP);
-
-async function sendOTP() {
-
-    const phone = document
-        .getElementById("phone")
-        .value
-        .trim();
-
-    if (!phone) {
-
-        alert("Enter phone number");
-
-        return;
-
     }
-
-    try {
-
-        const confirmationResult =
-            await signInWithPhoneNumber(
-
-                auth,
-
-                phone,
-
-                window.recaptchaVerifier
-
-            );
-
-        window.confirmationResult =
-            confirmationResult;
-
-        document
-            .getElementById("otp")
-            .disabled = false;
-
-        document
-            .getElementById("verifyOTP")
-            .disabled = false;
-
-        document
-            .getElementById("sendOTP")
-            .disabled = true;
-
-        document
-            .getElementById("otpStatus")
-            .innerHTML = `
-                <div class="alert alert-success mt-3">
-                    OTP Sent Successfully
-                </div>
-            `;
-
-    }
-
-    catch(err){
-
-    console.error("Firebase Error:", err);
-
-    console.log("Code:", err.code);
-
-    console.log("Message:", err.message);
-
-    document.getElementById("otpStatus").innerHTML = `
-        <div class="alert alert-danger mt-3">
-            ${err.code}<br>
-            ${err.message}
-        </div>
-    `;
-
-}
-
-}
-
-// ===========================
-// Verify OTP
-// ===========================
-
-    verifyOtpButton.addEventListener("click", verifyOTP);
-
-async function verifyOTP(){
-
-    const otp =
-    document
-    .getElementById("otp")
-    .value
-    .trim();
-
-    if(!otp){
-
-        alert("Enter OTP");
-
-        return;
-
-    }
-
-    try{
-
-        const result =
-        await window
-        .confirmationResult
-        .confirm(otp);
-
-        console.log(result.user);
-
-        // document
-        // .getElementById("phoneVerified")
-        // .value="true";
-
-        document
-        .getElementById("otpStatus")
-        .innerHTML=`
-        <div class="alert alert-success mt-3">
-            ✅ Phone Verified Successfully
-        </div>
-        `;
-
-        document
-        .getElementById("phone")
-        .disabled=true;
-
-        document
-        .getElementById("otp")
-        .disabled=true;
-
-        document
-        .getElementById("verifyOTP")
-        .disabled=true;
-
-        document
-        .getElementById("signupSection")
-        .classList.remove("d-none");
-
-        document
-        .getElementById("password")
-        .disabled=false;
-
-        document
-        .getElementById("createAccount")
-        .disabled=false;
-
-    }
-
-    catch(err){
-
-        console.log(err);
-
-        document
-        .getElementById("otpStatus")
-        .innerHTML=`
-        <div class="alert alert-danger mt-3">
-            Invalid OTP
-        </div>
-        `;
-
-    }
-
-}
-
 }
