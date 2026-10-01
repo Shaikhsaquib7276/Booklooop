@@ -1,4 +1,5 @@
 <% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <div class="book-form-page">
   <div class="book-form-header">
@@ -7,7 +8,7 @@
     <p class="book-form-subtitle">Update your listing details, condition, status or add more book photos.</p>
   </div>
 
-  <form action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation book-form-card" novalidate enctype="multipart/form-data" data-loader-icon="📚" data-loader-title="Updating Book" data-loader-message="Saving your changes...">
+  <form id="bookForm" action="/books/<%= book._id %>?_method=PUT" method="POST" class="needs-validation book-form-card" data-pickup-location-form novalidate enctype="multipart/form-data" data-loader-icon="📚" data-loader-title="Updating Book" data-loader-message="Saving your changes...">
     <div class="book-form-grid">
       <div class="book-form-field">
         <label for="editTitle">Title</label>
@@ -47,8 +48,34 @@
           <option value="Sold" <%=book.status==="Sold" ? "selected" : "" %>>Sold</option>
         </select>
       </div>
-      <div class="book-form-field"><label for="editLatitude">Pickup latitude</label><input id="editLatitude" type="number" step="any" name="latitude" class="form-control" value="<%= book.location && book.location.coordinates ? book.location.coordinates[1] : '' %>"></div>
-      <div class="book-form-field"><label for="editLongitude">Pickup longitude</label><input id="editLongitude" type="number" step="any" name="longitude" class="form-control" value="<%= book.location && book.location.coordinates ? book.location.coordinates[0] : '' %>"></div>
+      <div class="book-form-field full pickup-location-field">
+        <div class="pickup-location-header">
+          <div>
+            <label for="pickupAddress">Pickup address line</label>
+            <div class="book-form-help">Search the pickup place, select the correct result, then drag the pin or click the map to fine-tune it.</div>
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="useCurrentPickupLocation"><i class="bi bi-crosshair me-1"></i>Use my location</button>
+        </div>
+
+        <div class="pickup-location-search">
+          <input id="pickupLocationSearch" type="text" class="form-control" placeholder="Search building, college, area, street or landmark">
+          <button type="button" class="btn btn-primary" id="pickupLocationSearchButton"><i class="bi bi-search me-1"></i>Find</button>
+          <div id="pickupLocationSuggestions" class="pickup-location-suggestions" role="listbox"></div>
+        </div>
+
+        <input id="pickupAddress" name="addressLine" class="form-control mt-2" maxlength="300" value="<%= book.addressLine || '' %>" placeholder="e.g. ABC College, Main Road, Boisar" required>
+
+        <div id="pickupLocationMap" class="pickup-location-map" aria-label="Select pickup location on map"></div>
+
+        <div class="pickup-location-coordinates-row">
+          <span id="pickupLocationCoordinates" class="book-form-help">No precise pickup location selected yet.</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="centerPickupMap">Center map on selected pin</button>
+        </div>
+
+        <input id="bookLatitude" type="hidden" name="latitude" value="<%= book.location && book.location.coordinates ? book.location.coordinates[1] : '' %>">
+        <input id="bookLongitude" type="hidden" name="longitude" value="<%= book.location && book.location.coordinates ? book.location.coordinates[0] : '' %>">
+        <div id="pickupLocationStatus" class="book-form-help" aria-live="polite"></div>
+      </div>
       <% if (currentUser && currentUser.accountType === "shop") { %><div class="book-form-field full"><label for="editStock">Available stock</label><input id="editStock" type="number" name="stock" min="0" value="<%= book.stock || 0 %>" class="form-control" required></div><% } %>
       <div class="book-form-field full">
         <label>Current Photos</label>
@@ -74,6 +101,9 @@
   </form>
 </div>
 
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/pickup-location.js"></script>
 
 <script>
 (() => {
