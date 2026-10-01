@@ -34,7 +34,8 @@ module.exports.index = async (req, res) => {
             const safeQuery = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             filter.$or = [
                 { title: { $regex: safeQuery, $options: "i" } },
-                { author: { $regex: safeQuery, $options: "i" } }
+                { author: { $regex: safeQuery, $options: "i" } },
+                { category: { $regex: safeQuery, $options: "i" } }
             ];
         }
 
