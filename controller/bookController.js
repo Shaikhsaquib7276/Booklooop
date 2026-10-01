@@ -4,9 +4,16 @@ const Reservation = require("../models/Reservation");
 const AcademicBook = require("../models/AcademicBook");
 const BookRequest = require("../models/BookRequest");
 const Notification = require("../models/Notification");
+const { attachAcademicBook } = require("../utils/academicMatcher");
 
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
+    const academicBook = await AcademicBook.findOne({
+        _id: book.academicBook,
+        active: true,
+        verificationStatus: "verified"
+    }).select("_id title").lean();
+    if (!academicBook) return;
     const requests = await BookRequest.find({ academicBook: book.academicBook, status: "Open", student: { $ne: sellerId } }).select("_id student").lean();
     if (!requests.length) return;
     await BookRequest.updateMany({ _id: { $in: requests.map(r => r._id) } }, { $set: { status: "Matched", matchedBook: book._id, matchedAt: new Date() } });
@@ -132,7 +139,7 @@ module.exports.showBook = async (req, res) => {
 
 module.exports.renderEditForm = async (req, res) => {
     const { id } = req.params;
-    const book = await Book.findById(id);
+    const book = await Book.findById(id).populate("academicBook");
     if (!book) {
         req.flash("error", "Book not found.");
         return res.redirect("/books");
@@ -152,6 +159,7 @@ module.exports.updateBook = async (req, res) => {
 
     Object.assign(book, req.body);
     book.academicBook = req.body.academicBook || null;
+    await attachAcademicBook(book, req);
     book.sellerType = req.user.accountType === "shop" ? "shop" : "student";
     book.stock = book.sellerType === "shop" ? Math.max(0, Number.parseInt(req.body.stock, 10) || 0) : (book.status === "Sold" ? 0 : 1);
     const latitude = Number(req.body.latitude);
@@ -211,7 +219,7 @@ module.exports.createBook = async (req, res) => {
     } else if (req.user.accountType === "shop" && req.user.shopLocation?.coordinates?.length === 2) {
         book.location = req.user.shopLocation;
     }
-    book.academicBook = req.body.academicBook || null;
+    await attachAcademicBook(book, req);
 
     const newImages = uploadedImages(req.files);
     const legacyImage = req.files?.image?.[0];

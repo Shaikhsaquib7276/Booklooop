@@ -45,6 +45,50 @@
             <option value="shop">Bookshop</option>
           </select>
         </div>
+        <div id="studentAcademicFields" class="mb-3">
+          <div class="border rounded-3 p-3">
+            <div class="d-flex align-items-start gap-2 mb-3">
+              <i class="bi bi-mortarboard text-primary fs-5"></i>
+              <div>
+                <h5 class="mb-1">Academic profile</h5>
+                <p class="text-secondary small mb-0">BookLoop will use these details to automatically find books for your semester.</p>
+              </div>
+            </div>
+            <div class="row g-2">
+              <div class="col-12">
+                <label for="signupCollege" class="form-label">College</label>
+                <input id="signupCollege" name="college" class="form-control" placeholder="e.g. ABC College" required>
+              </div>
+              <div class="col-md-6">
+                <label for="signupDegree" class="form-label">Degree</label>
+                <input id="signupDegree" name="degree" class="form-control" placeholder="e.g. BSc" required>
+              </div>
+              <div class="col-md-6">
+                <label for="signupCourse" class="form-label">Course</label>
+                <input id="signupCourse" name="course" class="form-control" placeholder="e.g. Computer Science" required>
+              </div>
+              <div class="col-md-6">
+                <label for="signupAcademicYear" class="form-label">Academic Year</label>
+                <input id="signupAcademicYear" name="academicYear" class="form-control" placeholder="e.g. 2026-27" required>
+              </div>
+              <div class="col-md-3">
+                <label for="signupYear" class="form-label">Year</label>
+                <select id="signupYear" name="year" class="form-select" required>
+                  <option value="">Select</option>
+                  <option value="1">First</option><option value="2">Second</option><option value="3">Third</option>
+                  <option value="4">Fourth</option><option value="5">Fifth</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="signupSemester" class="form-label">Semester</label>
+                <select id="signupSemester" name="semester" class="form-select" required>
+                  <option value="">Select</option>
+                  <% for(let n=1;n<=10;n++){ %><option value="<%= n %>"><%= n %></option><% } %>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="shopSignupFields" class="d-none">
           <div class="mb-3"><label for="shopName" class="form-label">Shop name</label><input id="shopName" name="shopName" class="form-control" maxlength="120" placeholder="Your bookstore name"></div>
           <div class="mb-3"><label for="shopAddress" class="form-label">Shop address</label><input id="shopAddress" name="shopAddress" class="form-control" maxlength="300" placeholder="Full shop address"></div>
@@ -104,7 +148,21 @@
   const firebaseConfig = <%- JSON.stringify(firebaseConfig || {}) %>;
   const accountType = document.getElementById("accountType");
   const shopFields = document.getElementById("shopSignupFields");
-  accountType?.addEventListener("change", () => shopFields.classList.toggle("d-none", accountType.value !== "shop"));
+  const studentAcademicFields = document.getElementById("studentAcademicFields");
+  const studentAcademicInputs = studentAcademicFields?.querySelectorAll("input, select") || [];
+
+  function updateAccountTypeFields() {
+    const isStudent = accountType?.value !== "shop";
+    shopFields?.classList.toggle("d-none", isStudent);
+    studentAcademicFields?.classList.toggle("d-none", !isStudent);
+    studentAcademicInputs.forEach(input => {
+      input.required = isStudent;
+      input.disabled = !isStudent;
+    });
+  }
+
+  accountType?.addEventListener("change", updateAccountTypeFields);
+  updateAccountTypeFields();
   document.getElementById("shopUseLocation")?.addEventListener("click", () => {
     const status = document.getElementById("otpStatus");
     if (!navigator.geolocation) { status.textContent = "Location is not supported."; return; }

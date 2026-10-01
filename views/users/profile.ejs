@@ -83,6 +83,45 @@
           </div>
         </div>
 
+        <div class="profile-form-section">
+          <div class="profile-form-heading">
+            <h4>Academic profile</h4>
+            <span>Used by Smart Semester Finder</span>
+          </div>
+          <p class="text-secondary small">Keep these details current so BookLoop can automatically show books for your current semester.</p>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="degree" class="form-label">Degree</label>
+              <input type="text" class="form-control" id="degree" name="degree" value="<%= user.degree || '' %>" placeholder="e.g. BSc">
+            </div>
+            <div class="col-md-6">
+              <label for="course" class="form-label">Course</label>
+              <input type="text" class="form-control" id="course" name="course" value="<%= user.course || '' %>" placeholder="e.g. Computer Science">
+            </div>
+            <div class="col-md-6">
+              <label for="academicYear" class="form-label">Academic Year</label>
+              <input type="text" class="form-control" id="academicYear" name="academicYear" value="<%= user.academicYear || '' %>" placeholder="e.g. 2026-27">
+            </div>
+            <div class="col-md-3">
+              <label for="year" class="form-label">Year</label>
+              <select class="form-select" id="year" name="year">
+                <option value="">Select</option>
+                <% for(let n=1;n<=5;n++){ %>
+                  <option value="<%= n %>" <%= Number(user.year)===n?"selected":"" %>><%= ["First","Second","Third","Fourth","Fifth"][n-1] %></option>
+                <% } %>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="semester" class="form-label">Semester</label>
+              <select class="form-select" id="semester" name="semester">
+                <option value="">Select</option>
+                <% for(let n=1;n<=10;n++){ %><option value="<%= n %>" <%= Number(user.semester)===n?"selected":"" %>><%= n %></option><% } %>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="profile-form-actions">
           <a href="/users/<%= user._id %>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>Cancel</a>
           <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>Save Changes</button>

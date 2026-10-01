@@ -1,1 +1,122 @@
-<% layout("/layouts/boilerplate") %><div class="admin-page"><section class="admin-section"><div class="admin-section-head"><div><h2>Academic Catalog</h2><p>Add the prescribed and reference books for each course and semester.</p></div><a href="/admin" class="btn btn-outline-primary btn-sm">Dashboard</a></div><div class="academic-admin-card mb-4"><h4>Add academic book</h4><form method="POST" action="/admin/academic"><div class="row g-3"><% [["college","College"],["course","Course"],["academicYear","Academic year"],["semester","Semester"],["subject","Subject"],["subjectCode","Subject code"],["title","Book title"],["author","Author"],["isbn","ISBN"],["edition","Edition"]].forEach(([n,l])=>{ %><div class="col-md-6 col-lg-4"><label class="form-label"><%= l %></label><input class="form-control" name="<%= n %>" <%= ["college","course","academicYear","semester","subject","title"].includes(n)?"required":"" %> <%= n==="semester"?'type=number min=1':"" %>></div><% }) %><div class="col-md-4"><label class="form-label">Type</label><select class="form-select" name="type"><option>Prescribed</option><option>Reference</option></select></div></div><button class="btn btn-primary mt-3">Add to catalog</button></form></div><div class="academic-admin-card"><h4>Catalog records (<%= academicBooks.length %>)</h4><div class="table-responsive"><table class="table"><thead><tr><th>College/course</th><th>Year/sem</th><th>Subject</th><th>Book</th><th></th></tr></thead><tbody><% academicBooks.forEach(b=>{ %><tr><td><%= b.college %><br><%= b.course %></td><td><%= b.academicYear %> / <%= b.semester %></td><td><%= b.subject %></td><td><%= b.title %></td><td><form method="POST" action="/admin/academic/<%= b._id %>?_method=DELETE"><button class="btn btn-sm btn-outline-danger">Archive</button></form></td></tr><% }) %></tbody></table></div></div></section></div>
+<% layout("/layouts/boilerplate") %>
+<div class="admin-page">
+  <section class="admin-section">
+    <div class="admin-section-head">
+      <div>
+        <span class="admin-eyebrow">Academic moderation</span>
+        <h2>Academic Catalog Review</h2>
+        <p>Students and sellers submit academic mappings while listing books. Review them here before they power Smart Semester Finder.</p>
+      </div>
+      <a href="/admin" class="btn btn-outline-primary btn-sm">Dashboard</a>
+    </div>
+
+    <div class="academic-review-note">
+      <i class="bi bi-info-circle"></i>
+      <div><strong>No manual catalog entry required.</strong><span>BookLoop creates academic records from marketplace listings. Admins only verify or reject the submitted information.</span></div>
+    </div>
+
+    <div class="academic-review-section">
+      <div class="academic-review-section-head">
+        <div><h3>Pending verification</h3><span class="badge text-bg-warning"><%= pending.length %></span></div>
+        <small>These records are not visible in Smart Semester Finder yet.</small>
+      </div>
+
+      <% if(!pending.length){ %>
+        <div class="academic-review-empty"><i class="bi bi-check2-circle"></i><strong>Nothing waiting for review.</strong><span>New academic mappings submitted by sellers will appear here.</span></div>
+      <% } else { %>
+        <div class="academic-review-list">
+          <% pending.forEach(record=>{ %>
+            <article class="academic-review-card">
+              <div class="academic-review-main">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                  <div>
+                    <span class="badge text-bg-primary"><%= record.type %></span>
+                    <h4><%= record.title %></h4>
+                    <p class="mb-0"><%= record.author || "Author not provided" %><%= record.edition ? " · "+record.edition : "" %></p>
+                  </div>
+                  <% if(record.sourceBook){ %><span class="small text-secondary">Listing ₹<%= record.sourceBook.price %></span><% } %>
+                </div>
+
+                <div class="academic-review-details">
+                  <div><span>College</span><strong><%= record.college %></strong></div>
+                  <div><span>Degree</span><strong><%= record.degree %></strong></div>
+                  <div><span>Course</span><strong><%= record.course %></strong></div>
+                  <div><span>Academic year</span><strong><%= record.academicYear %></strong></div>
+                  <div><span>Year / Semester</span><strong><%= record.year %> / <%= record.semester %></strong></div>
+                  <div><span>Subject</span><strong><%= record.subject %><%= record.subjectCode ? " · "+record.subjectCode : "" %></strong></div>
+                  <% if(record.isbn){ %><div><span>ISBN</span><strong><%= record.isbn %></strong></div><% } %>
+                </div>
+
+                <% if(record.submittedBy){ %>
+                  <div class="small text-secondary mt-2">Submitted by <strong><%= record.submittedBy.username %></strong> · <%= record.submittedBy.email || "" %></div>
+                <% } %>
+              </div>
+
+              <div class="academic-review-actions">
+                <% if(record.sourceBook){ %><a href="/books/<%= record.sourceBook._id %>" class="btn btn-sm btn-outline-secondary">View listing</a><% } %>
+                <form method="POST" action="/admin/academic/<%= record._id %>/verify">
+                  <button class="btn btn-sm btn-success"><i class="bi bi-check2 me-1"></i>Verify</button>
+                </form>
+                <form method="POST" action="/admin/academic/<%= record._id %>/reject">
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg me-1"></i>Reject</button>
+                </form>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="academic-review-section">
+      <div class="academic-review-section-head">
+        <div><h3>Verified catalog</h3><span class="badge text-bg-success"><%= verified.length %></span></div>
+        <small>These records power Smart Semester Finder.</small>
+      </div>
+
+      <% if(!verified.length){ %>
+        <div class="academic-review-empty"><i class="bi bi-journal-text"></i><strong>No verified academic records yet.</strong><span>Verify a seller submission to start building the catalog.</span></div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table admin-table align-middle">
+            <thead><tr><th>Book</th><th>Academic mapping</th><th>Subject</th><th>Verified</th></tr></thead>
+            <tbody>
+              <% verified.forEach(record=>{ %>
+                <tr>
+                  <td><strong><%= record.title %></strong><br><small><%= record.author || "Author not provided" %></small></td>
+                  <td><%= record.college %><br><small><%= record.degree %> · <%= record.course %> · <%= record.academicYear %> · Year <%= record.year %> · Sem <%= record.semester %></small></td>
+                  <td><%= record.subject %><%= record.subjectCode ? " · "+record.subjectCode : "" %></td>
+                  <td><%= record.verifiedBy ? record.verifiedBy.username : "Admin" %><br><small><%= record.verifiedAt ? new Date(record.verifiedAt).toLocaleDateString("en-IN") : "" %></small></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="academic-review-section">
+      <div class="academic-review-section-head">
+        <div><h3>Rejected submissions</h3><span class="badge text-bg-secondary"><%= rejected.length %></span></div>
+        <small>Recent rejected records are kept for moderation history.</small>
+      </div>
+      <% if(rejected.length){ %>
+        <div class="table-responsive">
+          <table class="table admin-table align-middle">
+            <thead><tr><th>Book</th><th>Academic mapping</th><th>Status</th></tr></thead>
+            <tbody>
+              <% rejected.forEach(record=>{ %>
+                <tr>
+                  <td><strong><%= record.title %></strong><br><small><%= record.author || "" %></small></td>
+                  <td><%= record.college %> · <%= record.degree %> · <%= record.course %><br><small><%= record.academicYear %> · Year <%= record.year %> · Sem <%= record.semester %> · <%= record.subject %></small></td>
+                  <td><span class="badge text-bg-secondary">Rejected</span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-secondary mb-0">No rejected submissions.</p>
+      <% } %>
+    </div>
+  </section>
+</div>
