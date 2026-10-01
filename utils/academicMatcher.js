@@ -53,14 +53,20 @@ async function findExistingAcademicBook(data) {
     const wantedTitle = normalize(data.title);
     const wantedIsbn = normalize(data.isbn);
     const wantedAuthor = normalize(data.author);
+    const wantedSubject = normalize(data.subject);
+    const wantedSubjectCode = normalize(data.subjectCode);
 
     return candidates.find(candidate => {
         if (wantedIsbn && normalize(candidate.isbn) && wantedIsbn === normalize(candidate.isbn)) {
             return true;
         }
 
-        return normalize(candidate.title) === wantedTitle &&
-            (!wantedAuthor || !normalize(candidate.author) || normalize(candidate.author) === wantedAuthor);
+        const titleMatches = normalize(candidate.title) === wantedTitle;
+        const authorMatches = !wantedAuthor || !normalize(candidate.author) || normalize(candidate.author) === wantedAuthor;
+        const subjectMatches = !wantedSubject || !normalize(candidate.subject) || normalize(candidate.subject) === wantedSubject;
+        const subjectCodeMatches = !wantedSubjectCode || !normalize(candidate.subjectCode) || normalize(candidate.subjectCode) === wantedSubjectCode;
+
+        return titleMatches && authorMatches && subjectMatches && subjectCodeMatches;
     }) || null;
 }
 
