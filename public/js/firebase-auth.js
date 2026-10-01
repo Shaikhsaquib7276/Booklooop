@@ -96,8 +96,9 @@ if (
                 showStatus("Sending OTP…", "info");
 
                 try {
-                    await createRecaptcha();
-                    await recaptchaVerifier.verify();
+                    if (!recaptchaVerifier) {
+                        await createRecaptcha();
+                    }
 
                     confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
                     window.confirmationResult = confirmationResult;
@@ -124,6 +125,11 @@ if (
                         err.code === "auth/unauthorized-domain"
                     ) {
                         showStatus("This website domain is not authorized in Firebase. Add localhost to Firebase Authentication → Settings → Authorized domains.", "danger");
+                    } else if (
+                        err.code === "auth/invalid-app-credential" ||
+                        err.code === "auth/captcha-check-failed"
+                    ) {
+                        showStatus("Firebase could not validate the reCAPTCHA. On local testing, make sure your domain is allowed in Firebase, then refresh this page and solve the reCAPTCHA again. Firebase also recommends resetting the verifier after a failed OTP request.", "danger");
                     } else if (
                         err.code === "auth/too-many-requests"
                     ) {
