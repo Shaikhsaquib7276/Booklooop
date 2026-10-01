@@ -18,25 +18,23 @@ module.exports.index = async (req, res) => {
 
     if (hasLocation) {
         const filter = {
-            $and: [
-                { $or: [{ status: "Available" }, { status: { $exists: false } }] },
-                { $or: [{ stock: { $gt: 0 } }, { stock: { $exists: false } }] }
-            ],
             location: {
                 $near: {
                     $geometry: { type: "Point", coordinates: [lng, lat] },
                     $maxDistance: radius * 1000
                 }
-            }
+            },
+            $and: [
+                { $or: [{ status: "Available" }, { status: { $exists: false } }] },
+                { $or: [{ stock: { $gt: 0 } }, { stock: { $exists: false } }] }
+            ]
         };
 
         if (q) {
-            const safeQuery = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            filter.$or = [
-                { title: { $regex: safeQuery, $options: "i" } },
-                { author: { $regex: safeQuery, $options: "i" } },
-                { category: { $regex: safeQuery, $options: "i" } }
-            ];
+            filter.title = {
+                $regex: q.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&"),
+                $options: "i"
+            };
         }
 
         books = await Book.find(filter)

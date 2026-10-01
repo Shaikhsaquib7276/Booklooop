@@ -37,6 +37,10 @@
       </div>
       <div class="book-form-field"><label for="bookLatitude">Pickup latitude</label><input id="bookLatitude" type="number" step="any" name="latitude" class="form-control" placeholder="Optional"></div>
       <div class="book-form-field"><label for="bookLongitude">Pickup longitude</label><input id="bookLongitude" type="number" step="any" name="longitude" class="form-control" placeholder="Optional"></div>
+      <div class="book-form-field full">
+        <button type="button" class="btn btn-outline-primary" id="useBookLocation"><i class="bi bi-crosshair me-2"></i>Use my current pickup location</button>
+        <div class="book-form-help" id="bookLocationStatus">Adding a pickup location helps nearby students find this listing.</div>
+      </div>
       <% if (currentUser && currentUser.accountType === "shop") { %><div class="book-form-field full"><label for="bookStock">Available stock</label><input id="bookStock" type="number" name="stock" min="1" value="1" class="form-control" required></div><% } %>
       <div class="book-form-field full">
         <label for="bookImages">Book Photos</label>
@@ -52,3 +56,36 @@
     </div>
   </form>
 </div>
+
+<script>
+(() => {
+  const button = document.getElementById("useBookLocation");
+  const status = document.getElementById("bookLocationStatus");
+  const lat = document.getElementById("bookLatitude");
+  const lng = document.getElementById("bookLongitude");
+  if (!button || !status || !lat || !lng) return;
+
+  button.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      status.textContent = "Geolocation is not supported by this browser.";
+      return;
+    }
+    button.disabled = true;
+    status.textContent = "Getting your pickup location…";
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        lat.value = position.coords.latitude.toFixed(6);
+        lng.value = position.coords.longitude.toFixed(6);
+        status.textContent = "Pickup location added.";
+        button.disabled = false;
+      },
+      error => {
+        console.error("Book location error:", error);
+        status.textContent = "Location permission was denied or unavailable. Enter coordinates manually.";
+        button.disabled = false;
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  });
+})();
+</script>

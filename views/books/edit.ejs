@@ -49,6 +49,10 @@
       </div>
       <div class="book-form-field"><label for="editLatitude">Pickup latitude</label><input id="editLatitude" type="number" step="any" name="latitude" class="form-control" value="<%= book.location && book.location.coordinates ? book.location.coordinates[1] : '' %>"></div>
       <div class="book-form-field"><label for="editLongitude">Pickup longitude</label><input id="editLongitude" type="number" step="any" name="longitude" class="form-control" value="<%= book.location && book.location.coordinates ? book.location.coordinates[0] : '' %>"></div>
+      <div class="book-form-field full">
+        <button type="button" class="btn btn-outline-primary" id="useEditBookLocation"><i class="bi bi-crosshair me-2"></i>Use my current pickup location</button>
+        <div class="book-form-help" id="editBookLocationStatus">Nearby search uses this pickup location. Existing coordinates are kept unless you change them.</div>
+      </div>
       <% if (currentUser && currentUser.accountType === "shop") { %><div class="book-form-field full"><label for="editStock">Available stock</label><input id="editStock" type="number" name="stock" min="0" value="<%= book.stock || 0 %>" class="form-control" required></div><% } %>
       <div class="book-form-field full">
         <label>Current Photos</label>
@@ -107,6 +111,39 @@
       image.onload = () => URL.revokeObjectURL(url);
       preview.appendChild(image);
     });
+  });
+})();
+</script>
+
+<script>
+(() => {
+  const button = document.getElementById("useEditBookLocation");
+  const status = document.getElementById("editBookLocationStatus");
+  const lat = document.getElementById("editLatitude");
+  const lng = document.getElementById("editLongitude");
+  if (!button || !status || !lat || !lng) return;
+
+  button.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      status.textContent = "Geolocation is not supported by this browser.";
+      return;
+    }
+    button.disabled = true;
+    status.textContent = "Getting your pickup location…";
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        lat.value = position.coords.latitude.toFixed(6);
+        lng.value = position.coords.longitude.toFixed(6);
+        status.textContent = "Pickup location updated. Click Update Book to save it.";
+        button.disabled = false;
+      },
+      error => {
+        console.error("Edit book location error:", error);
+        status.textContent = "Location permission was denied or unavailable. Enter coordinates manually.";
+        button.disabled = false;
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
   });
 })();
 </script>
