@@ -5,8 +5,8 @@ const StudentBook=require("../models/StudentBook");
 const Notification=require("../models/Notification");
 const clean=v=>String(v||"").trim();
 async function options(filters={}) {
- const f={active:true};
- ["college","course","academicYear"].forEach(k=>{if(clean(filters[k]))f[k]=clean(filters[k]);});
+ const f={active:true, verificationStatus:"verified"};
+ ["college","degree","course","academicYear"].forEach(k=>{if(clean(filters[k]))f[k]=clean(filters[k]);});
  const [colleges,courses,academicYears,semesters]=await Promise.all([
   AcademicBook.distinct("college",{active:true}),AcademicBook.distinct("course",f),
   AcademicBook.distinct("academicYear",f),AcademicBook.distinct("semester",f)]);
@@ -16,8 +16,10 @@ exports.options=async(req,res)=>res.json(await options(req.query));
 exports.findBooks=async(req,res)=>{
  const filters={
   college:clean(req.query.college),
+  degree:clean(req.query.degree),
   course:clean(req.query.course),
   academicYear:clean(req.query.academicYear),
+  year:Number(req.query.year),
   semester:Number(req.query.semester)
  };
  const radiusValue=Number.parseInt(req.query.radius,10);
@@ -25,12 +27,19 @@ exports.findBooks=async(req,res)=>{
  const lat=Number(req.query.lat);
  const lng=Number(req.query.lng);
  const hasLocation=Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
- const complete=!!(filters.college&&filters.course&&filters.academicYear&&Number.isInteger(filters.semester)&&filters.semester>0);
+ const complete=!!(
+  filters.college &&
+  filters.degree &&
+  filters.course &&
+  filters.academicYear &&
+  Number.isInteger(filters.year) && filters.year>0 &&
+  Number.isInteger(filters.semester) && filters.semester>0
+ );
 
  let subjects=[];
  let summary={required:0,available:0,requested:0};
  if(complete){
-  const rows=await AcademicBook.find({...filters,active:true}).sort({subject:1,title:1}).lean();
+  const rows=await AcademicBook.find({...filters,active:true,verificationStatus:"verified"}).sort({subject:1,title:1}).lean();
   summary.required=rows.length;
   const ids=rows.map(x=>x._id);
 
