@@ -3,155 +3,89 @@
   <section class="academic-hero">
     <span class="academic-eyebrow">BookLoop Smart Semester Finder</span>
     <h1>Find every book you need for your semester.</h1>
-    <p>Select your academic details once. BookLoop matches the official academic catalog with real second-hand listings and, when you share your location, shows only nearby copies.</p>
+    <p>Your academic profile is used automatically. BookLoop checks verified academic mappings, then finds real second-hand listings and optionally narrows them to your nearby area.</p>
   </section>
 
-  <section class="academic-selector-card">
-    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+  <% if(!complete){ %>
+    <section class="academic-empty">
+      <i class="bi bi-mortarboard"></i>
+      <h3>Complete your academic profile</h3>
+      <p>BookLoop needs your college, degree, course, academic year, year and semester before it can build your semester book list.</p>
+      <a href="/profile/edit" class="btn btn-primary mt-2">Update Academic Profile</a>
+    </section>
+  <% } else { %>
+
+    <section class="academic-profile-card">
       <div>
-        <h2 class="h4 mb-1">Your academic details</h2>
-        <p class="text-secondary mb-0">These details determine which books BookLoop looks for.</p>
+        <span class="academic-eyebrow">Current academic profile</span>
+        <h2><%= profile.college %></h2>
+        <p><%= profile.degree %> · <%= profile.course %> · <%= profile.academicYear %> · Year <%= profile.year %> · Semester <%= profile.semester %></p>
       </div>
+      <a href="/profile/edit" class="btn btn-outline-primary btn-sm">Change Profile</a>
+    </section>
+
+    <section class="academic-location-bar mt-3">
+      <div>
+        <strong>Nearby mode</strong>
+        <span class="small text-secondary d-block">Without a location, all verified marketplace matches are shown. Use your location to limit results by distance.</span>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <select class="form-select form-select-sm academic-radius" id="academicRadius" aria-label="Nearby search radius">
+          <% [1,5,10,20,50].forEach(value=>{ %>
+            <option value="<%= value %>" <%= radius===value?"selected":"" %>><%= value %> km</option>
+          <% }) %>
+        </select>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="useAcademicLocation">
+          <i class="bi bi-crosshair me-1"></i><%= hasLocation ? "Update my location" : "Use my location" %>
+        </button>
+      </div>
+    </section>
+
+    <div class="academic-location-status mt-2" id="academicLocationStatus" aria-live="polite">
+      <%= hasLocation ? "Nearby mode is active." : "All available matching listings are shown." %>
     </div>
 
-    <form method="GET" action="/find-books" id="academicFinderForm" class="mt-3">
-      <div class="row g-3">
-        <div class="col-md-6 col-lg-3">
-          <label class="form-label" for="academicCollege">College</label>
-          <select class="form-select" id="academicCollege" name="college" required>
-            <option value="">Select college</option>
-            <% options.colleges.forEach(x=>{ %>
-              <option value="<%= x %>" <%= filters.college===x?"selected":"" %>><%= x %></option>
-            <% }) %>
-          </select>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-          <label class="form-label" for="academicCourse">Course</label>
-          <select class="form-select" id="academicCourse" name="course" required>
-            <option value="">Select course</option>
-            <% options.courses.forEach(x=>{ %>
-              <option value="<%= x %>" <%= filters.course===x?"selected":"" %>><%= x %></option>
-            <% }) %>
-          </select>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-          <label class="form-label" for="academicYear">Academic Year</label>
-          <select class="form-select" id="academicYear" name="academicYear" required>
-            <option value="">Select year</option>
-            <% options.academicYears.forEach(x=>{ %>
-              <option value="<%= x %>" <%= filters.academicYear===x?"selected":"" %>><%= x %></option>
-            <% }) %>
-          </select>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-          <label class="form-label" for="academicSemester">Semester</label>
-          <select class="form-select" id="academicSemester" name="semester" required>
-            <option value="">Select semester</option>
-            <% options.semesters.forEach(x=>{ %>
-              <option value="<%= x %>" <%= Number(filters.semester)===x?"selected":"" %>>Semester <%= x %></option>
-            <% }) %>
-          </select>
-        </div>
-      </div>
-
-      <div class="academic-location-bar mt-3">
-        <div>
-          <strong>Nearby mode</strong>
-          <span class="small text-secondary d-block">Use your current location to compare local copies. Without it, BookLoop shows all available copies.</span>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <select class="form-select form-select-sm academic-radius" name="radius" aria-label="Nearby search radius">
-            <% [1,5,10,20,50].forEach(value=>{ %>
-              <option value="<%= value %>" <%= radius===value?"selected":"" %>><%= value %> km</option>
-            <% }) %>
-          </select>
-          <button type="button" class="btn btn-outline-primary btn-sm" id="useAcademicLocation">
-            <i class="bi bi-crosshair me-1"></i>Use my location
-          </button>
-        </div>
-      </div>
-
+    <form method="GET" action="/find-books" id="academicFinderForm">
       <input type="hidden" name="lat" id="academicLat" value="<%= searchLat %>">
       <input type="hidden" name="lng" id="academicLng" value="<%= searchLng %>">
-
-      <div class="academic-location-status mt-2" id="academicLocationStatus" aria-live="polite">
-        <%= hasLocation ? "Nearby mode is active." : "Nearby mode is optional. Enable it to filter results by distance." %>
-      </div>
-
-      <div class="academic-selector-actions">
-        <button class="btn btn-primary btn-lg" type="submit"><i class="bi bi-search me-2"></i>Find My Books</button>
-        <a href="/find-books" class="btn btn-outline-secondary">Reset</a>
-        <% if(complete){ %>
-          <a href="/book-requests" class="btn btn-outline-primary ms-auto">My Requests</a>
-        <% } %>
-      </div>
+      <input type="hidden" name="radius" id="academicRadiusHidden" value="<%= radius %>">
+      <button type="submit" class="d-none">Refresh</button>
     </form>
-  </section>
 
-  <% if(complete){ %>
     <section class="academic-progress-card mt-4">
       <div class="academic-results-heading">
         <div>
-          <span class="academic-eyebrow">Your semester</span>
-          <h2 class="h3 mb-1"><%= filters.college %> · <%= filters.course %></h2>
-          <p class="mb-0"><%= filters.academicYear %> · Semester <%= filters.semester %><% if(hasLocation){ %> · within <%= radius %> km<% } %></p>
+          <span class="academic-eyebrow">Semester inventory</span>
+          <h2 class="h3 mb-1">Your required books</h2>
+          <p class="mb-0"><%= summary.required %> catalog books · <%= summary.available %> currently matched · <%= summary.requested %> requested</p>
         </div>
+        <a href="/book-requests" class="btn btn-outline-primary btn-sm">My Requests</a>
       </div>
 
       <div class="row g-3 mt-1">
-        <div class="col-6 col-lg-3">
-          <div class="academic-stat-card">
-            <span>Required</span>
-            <strong><%= summary.required %></strong>
-            <small>catalog books</small>
-          </div>
-        </div>
-        <div class="col-6 col-lg-3">
-          <div class="academic-stat-card">
-            <span>Found</span>
-            <strong><%= summary.available %></strong>
-            <small>with a listing</small>
-          </div>
-        </div>
-        <div class="col-6 col-lg-3">
-          <div class="academic-stat-card">
-            <span>Requested</span>
-            <strong><%= summary.requested %></strong>
-            <small>waiting for sellers</small>
-          </div>
-        </div>
-        <div class="col-6 col-lg-3">
-          <div class="academic-stat-card">
-            <span>Progress</span>
-            <strong><%= summary.required ? Math.round((summary.available / summary.required) * 100) : 0 %>%</strong>
-            <small>books found</small>
-          </div>
-        </div>
+        <div class="col-6 col-lg-3"><div class="academic-stat-card"><span>Required</span><strong><%= summary.required %></strong><small>catalog books</small></div></div>
+        <div class="col-6 col-lg-3"><div class="academic-stat-card"><span>Found</span><strong><%= summary.available %></strong><small>with listings</small></div></div>
+        <div class="col-6 col-lg-3"><div class="academic-stat-card"><span>Requested</span><strong><%= summary.requested %></strong><small>waiting</small></div></div>
+        <div class="col-6 col-lg-3"><div class="academic-stat-card"><span>Coverage</span><strong><%= summary.required ? Math.round(summary.available / summary.required * 100) : 0 %>%</strong><small>currently matched</small></div></div>
       </div>
 
       <div class="academic-progress-track mt-3" aria-label="Semester book availability progress">
-        <span style="width:<%= summary.required ? Math.min(100, Math.round((summary.available / summary.required) * 100)) : 0 %>%"></span>
+        <span style="width:<%= summary.required ? Math.min(100, Math.round(summary.available / summary.required * 100)) : 0 %>%"></span>
       </div>
     </section>
 
     <% if(!subjects.length){ %>
       <div class="academic-empty mt-3">
         <i class="bi bi-journal-x"></i>
-        <h3>No syllabus records found</h3>
-        <p>An admin needs to add this college, course and semester to the academic catalog.</p>
+        <h3>No verified academic records found</h3>
+        <p>There are no verified academic mappings for your exact college, degree, course, academic year, year and semester yet.</p>
       </div>
     <% } %>
 
     <% subjects.forEach(s=>{ %>
       <section class="academic-subject-card">
         <div class="academic-subject-heading">
-          <div>
-            <span class="academic-subject-label">Subject</span>
-            <h3><%= s.name %></h3>
-          </div>
+          <div><span class="academic-subject-label">Subject</span><h3><%= s.name %></h3></div>
           <% if(s.code){ %><span class="badge text-bg-light"><%= s.code %></span><% } %>
         </div>
 
@@ -165,7 +99,7 @@
                 </div>
 
                 <h4><%= b.title %></h4>
-                <p class="academic-book-meta mb-2"><%= b.author||"Author not specified" %><%= b.edition?" · "+b.edition:"" %></p>
+                <p class="academic-book-meta mb-2"><%= b.author || "Author not specified" %><%= b.edition ? " · "+b.edition : "" %></p>
 
                 <% if(b.listings.length){ %>
                   <div class="academic-availability-row">
@@ -177,10 +111,7 @@
                     <% b.listings.slice(0,4).forEach(x=>{ %>
                       <a class="academic-listing-chip" href="/books/<%= x._id %>">
                         <span>₹<%= Number(x.price).toLocaleString("en-IN") %></span>
-                        <small>
-                          <%= x.condition || "Used" %>
-                          <% if(x.distanceKm !== null){ %> · <%= x.distanceKm.toFixed(1) %> km<% } %>
-                        </small>
+                        <small><%= x.condition || "Used" %><%= x.distanceKm !== null ? " · "+x.distanceKm.toFixed(1)+" km" : "" %></small>
                       </a>
                     <% }) %>
                   </div>
@@ -201,13 +132,9 @@
                     <strong><i class="bi bi-hourglass-split me-1"></i>No second-hand copy available</strong>
                     <span>Request this academic book and wait for a seller.</span>
                   </div>
-                  <% if(currentUser){ %>
-                    <form method="POST" action="/book-requests/<%= b._id %>" class="mt-2">
-                      <button class="btn btn-warning btn-sm"><i class="bi bi-bell me-1"></i>Request this book</button>
-                    </form>
-                  <% } else { %>
-                    <a href="/login" class="btn btn-outline-primary btn-sm mt-2">Login to request</a>
-                  <% } %>
+                  <form method="POST" action="/book-requests/<%= b._id %>" class="mt-2">
+                    <button class="btn btn-warning btn-sm"><i class="bi bi-bell me-1"></i>Request this book</button>
+                  </form>
                 <% } %>
               </article>
             </div>
@@ -215,109 +142,53 @@
         </div>
       </section>
     <% }) %>
-
-  <% }else{ %>
-    <section class="academic-how-card">
-      <div class="academic-how-icon"><i class="bi bi-magic"></i></div>
-      <div>
-        <h2 class="h4">How Smart Semester Finder works</h2>
-        <p class="mb-0">Choose your academics → BookLoop loads the books from the academic catalog → it checks real marketplace listings → nearby mode narrows them by distance → missing books can be requested automatically.</p>
-      </div>
-    </section>
   <% } %>
 </div>
 
 <script>
 (() => {
-  const college = document.getElementById("academicCollege");
-  const course = document.getElementById("academicCourse");
-  const year = document.getElementById("academicYear");
-  const semester = document.getElementById("academicSemester");
-  const form = document.getElementById("academicFinderForm");
-  const lat = document.getElementById("academicLat");
-  const lng = document.getElementById("academicLng");
   const locationButton = document.getElementById("useAcademicLocation");
   const status = document.getElementById("academicLocationStatus");
+  const lat = document.getElementById("academicLat");
+  const lng = document.getElementById("academicLng");
+  const radius = document.getElementById("academicRadius");
+  const hiddenRadius = document.getElementById("academicRadiusHidden");
+  const form = document.getElementById("academicFinderForm");
 
-  const validCoordinates = (a,b) =>
-    Number.isFinite(a) && Number.isFinite(b) &&
-    Math.abs(a) <= 90 && Math.abs(b) <= 180;
+  if (!locationButton || !status || !lat || !lng || !radius || !hiddenRadius || !form) return;
 
-  const saveLocation = (a,b) => {
-    lat.value = Number(a).toFixed(6);
-    lng.value = Number(b).toFixed(6);
-  };
-
-  const fill = (el, values, label, prefix = "") => {
-    el.replaceChildren(new Option(label, ""));
-    values.forEach(v => el.add(new Option(prefix + v, v)));
-  };
-
-  async function load(params){
-    const url = new URL("/academic/options", location.origin);
-    Object.entries(params).forEach(([key,value]) => {
-      if(value) url.searchParams.set(key,value);
-    });
-    const response = await fetch(url);
-    if(!response.ok) throw new Error("Options unavailable");
-    return response.json();
-  }
-
-  college?.addEventListener("change", async()=>{
-    try{
-      const data = await load({college:college.value});
-      fill(course,data.courses,"Select course");
-      fill(year,[],"Select year");
-      fill(semester,[],"Select semester");
-    }catch(error){ console.error(error); }
+  radius.addEventListener("change", () => {
+    hiddenRadius.value = radius.value;
+    if (lat.value && lng.value) form.requestSubmit();
   });
 
-  course?.addEventListener("change", async()=>{
-    try{
-      const data = await load({college:college.value,course:course.value});
-      fill(year,data.academicYears,"Select year");
-      fill(semester,[],"Select semester");
-    }catch(error){ console.error(error); }
-  });
-
-  year?.addEventListener("change", async()=>{
-    try{
-      const data = await load({college:college.value,course:course.value,academicYear:year.value});
-      fill(semester,data.semesters,"Select semester","Semester ");
-    }catch(error){ console.error(error); }
-  });
-
-  locationButton?.addEventListener("click",()=>{
-    if(!navigator.geolocation){
-      status.textContent="Your browser does not support location access.";
+  locationButton.addEventListener("click", () => {
+    if (!navigator.geolocation) {
+      status.textContent = "Your browser does not support location access.";
       status.classList.add("text-danger");
       return;
     }
 
-    status.textContent="Getting your location…";
+    status.textContent = "Getting your location…";
     status.classList.remove("text-danger");
 
     navigator.geolocation.getCurrentPosition(
-      position=>{
-        saveLocation(position.coords.latitude,position.coords.longitude);
-        status.textContent="Location ready. Click Find My Books to use nearby mode.";
+      position => {
+        lat.value = position.coords.latitude.toFixed(6);
+        lng.value = position.coords.longitude.toFixed(6);
+        hiddenRadius.value = radius.value;
+        status.textContent = "Location ready. Refreshing nearby results…";
+        form.requestSubmit();
       },
-      error=>{
-        console.error("Academic finder geolocation error:",error);
-        status.textContent = error.code===1
+      error => {
+        console.error("Academic finder geolocation error:", error);
+        status.textContent = error.code === 1
           ? "Location permission is blocked. Allow it in the browser and try again."
-          : "Could not determine your location. You can continue without nearby mode.";
+          : "Could not determine your location. Continue without nearby mode.";
         status.classList.add("text-danger");
       },
-      {enableHighAccuracy:false,timeout:10000,maximumAge:300000}
+      { enableHighAccuracy:false, timeout:10000, maximumAge:300000 }
     );
-  });
-
-  form?.addEventListener("submit",(event)=>{
-    const a=Number(lat.value), b=Number(lng.value);
-    if(validCoordinates(a,b)) return;
-    lat.value="";
-    lng.value="";
   });
 })();
 </script>
