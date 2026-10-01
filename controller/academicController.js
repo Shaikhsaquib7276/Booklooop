@@ -26,33 +26,40 @@ async function options(filters={}) {
 }
 exports.options=async(req,res)=>res.json(await options(req.query));
 exports.findBooks=async(req,res)=>{
- const user=req.user||{};
- const filters={
-  college:clean(req.query.college||user.college),
-  degree:clean(req.query.degree||user.degree),
-  course:clean(req.query.course||user.course),
-  academicYear:clean(req.query.academicYear||user.academicYear),
-  year:Number(req.query.year||user.year),
-  semester:Number(req.query.semester||user.semester)
+ const user=req.user;
+ const profile={
+  college:clean(user.college),
+  degree:clean(user.degree),
+  course:clean(user.course),
+  academicYear:clean(user.academicYear),
+  year:Number(user.year),
+  semester:Number(user.semester)
  };
  const radiusValue=Number.parseInt(req.query.radius,10);
  const radius=[1,5,10,20,50].includes(radiusValue)?radiusValue:10;
  const lat=Number(req.query.lat);
  const lng=Number(req.query.lng);
  const hasLocation=Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
- const complete=!!(
-  filters.college &&
-  filters.degree &&
-  filters.course &&
-  filters.academicYear &&
-  Number.isInteger(filters.year) && filters.year>0 &&
-  Number.isInteger(filters.semester) && filters.semester>0
+
+ const complete=Boolean(
+  profile.college &&
+  profile.degree &&
+  profile.course &&
+  profile.academicYear &&
+  Number.isInteger(profile.year) && profile.year>0 &&
+  Number.isInteger(profile.semester) && profile.semester>0
  );
 
  let subjects=[];
  let summary={required:0,available:0,requested:0};
+
  if(complete){
-  const rows=await AcademicBook.find({...filters,active:true,verificationStatus:"verified"}).sort({subject:1,title:1}).lean();
+  const rows=await AcademicBook.find({
+   ...profile,
+   active:true,
+   verificationStatus:"verified"
+  }).sort({subject:1,title:1}).lean();
+
   summary.required=rows.length;
   const ids=rows.map(x=>x._id);
 
@@ -61,10 +68,10 @@ exports.findBooks=async(req,res)=>{
    $and:[
     {$or:[{status:"Available"},{status:{$exists:false}}]},
     {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
-   ]
+   ],
+   owner:{$ne:req.user._id}
   };
 
-  if(req.user?._id) listingFilter.owner={$ne:req.user._id};
   if(hasLocation){
    listingFilter.location={
     $near:{
@@ -88,7 +95,7 @@ exports.findBooks=async(req,res)=>{
   });
 
   const requestMap=new Map();
-  if(req.user?._id&&ids.length){
+  if(ids.length){
    const requests=await BookRequest.find({
     student:req.user._id,
     academicBook:{$in:ids},
@@ -113,19 +120,20 @@ exports.findBooks=async(req,res)=>{
    if(!groups.has(book.subject)){
     groups.set(book.subject,{name:book.subject,code:book.subjectCode,books:[]});
    }
+
    groups.get(book.subject).books.push({
     ...book,
     listings:list,
     requestStatus:requestMap.get(String(book._id))||null
    });
   });
+
   subjects=[...groups.values()];
  }
 
  res.render("academic/find",{
-  title:"Find My Semester Books",
-  options:await options(filters),
-  filters,
+  title:"Smart Semester Finder",
+  profile,
   complete,
   subjects,
   radius,
@@ -136,23 +144,23 @@ exports.findBooks=async(req,res)=>{
  });
 };
 
-function haversineKm(lat1,lng1,lat2,lng2){
- const toRad=value=>value*Math.PI/180;
- const dLat=toRad(lat2-lat1);
- const dLng=toRad(lng2-lng1);
- const a=Math.sin(dLat/2)**2+
-  Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
- return 6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
 exports.requestBook=async(req,res)=>{
- const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true});
+ const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true,verificationStatus:"verified"});
  if(!academicBook){req.flash("error","Academic book not found.");return res.redirect("/find-books");}
  const existing=await BookRequest.findOne({student:req.user._id,academicBook:academicBook._id,status:{$in:["Open","Matched"]}});
  if(existing){req.flash("success","You already have an active request for this book.");return res.redirect("/book-requests");}
  const listing=await Book.findOne({academicBook:academicBook._id,status:"Available",owner:{$ne:req.user._id}});
  if(listing){await Notification.create({recipient:req.user._id,type:"book_match",title:"A requested book is available",message:academicBook.title+" is listed on BookLoop.",link:"/books/"+listing._id});return res.redirect("/books/"+listing._id);}
- await BookRequest.create({student:req.user._id,academicBook:academicBook._id,college:academicBook.college,course:academicBook.course,academicYear:academicBook.academicYear,semester:academicBook.semester});
+ await BookRequest.create({
+  student:req.user._id,
+  academicBook:academicBook._id,
+  college:academicBook.college,
+  degree:academicBook.degree,
+  course:academicBook.course,
+  academicYear:academicBook.academicYear,
+  year:academicBook.year,
+  semester:academicBook.semester
+ });
  req.flash("success","Request created. We'll notify you when a matching book is listed.");res.redirect("/book-requests");
 };
 exports.myRequests=async(req,res)=>res.render("academic/requests",{title:"My Book Requests",requests:await BookRequest.find({student:req.user._id}).populate("academicBook").populate("matchedBook").sort({createdAt:-1})});
@@ -198,6 +206,7 @@ exports.rejectAcademicBook=async(req,res)=>{
  res.redirect("/admin/academic");
 };
 
+// Retained only for backward compatibility with older deployments; the admin UI and route no longer expose manual catalog creation.
 exports.adminCreate=async(req,res)=>{
  const b=req.body,semester=Number(b.semester);
  if(!clean(b.college)||!clean(b.course)||!clean(b.academicYear)||!Number.isInteger(semester)||semester<1||!clean(b.subject)||!clean(b.title)){req.flash("error","College, course, year, semester, subject and title are required.");return res.redirect("/admin/academic");}
