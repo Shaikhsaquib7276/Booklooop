@@ -4,6 +4,7 @@ const Reservation = require("../models/Reservation");
 const AcademicBook = require("../models/AcademicBook");
 const BookRequest = require("../models/BookRequest");
 const Notification = require("../models/Notification");
+const { attachAcademicBook } = require("../utils/academicMatcher");
 
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
@@ -211,7 +212,7 @@ module.exports.createBook = async (req, res) => {
     } else if (req.user.accountType === "shop" && req.user.shopLocation?.coordinates?.length === 2) {
         book.location = req.user.shopLocation;
     }
-    book.academicBook = req.body.academicBook || null;
+    await attachAcademicBook(book, req);
 
     const newImages = uploadedImages(req.files);
     const legacyImage = req.files?.image?.[0];
