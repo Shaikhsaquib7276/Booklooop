@@ -4,6 +4,11 @@ const BookRequest=require("../models/BookRequest");
 const StudentBook=require("../models/StudentBook");
 const Notification=require("../models/Notification");
 const clean=v=>String(v||"").trim();
+const academicRegex=value=>{
+ const parts=clean(value).split(/[^a-z0-9]+/i).filter(Boolean);
+ if(!parts.length)return null;
+ return new RegExp(parts.map(part=>part.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\const clean=v=>String(v||"").trim();")).join("[^a-z0-9]+"),"i");
+};
 async function options(filters={}) {
  const f={active:true, verificationStatus:"verified"};
  ["college","degree","course","academicYear"].forEach(k=>{if(clean(filters[k]))f[k]=clean(filters[k]);});
@@ -55,9 +60,9 @@ exports.findBooks=async(req,res)=>{
 
  if(complete){
   const rows=await AcademicBook.find({
-   college:profile.college,
-   degree:profile.degree,
-   course:profile.course,
+   college:academicRegex(profile.college),
+   degree:academicRegex(profile.degree),
+   course:academicRegex(profile.course),
    year:profile.year,
    semester:profile.semester,
    active:true,
