@@ -67,11 +67,19 @@ exports.findBooks=async(req,res)=>{
  let summary={required:0,available:0,requested:0};
 
  if(complete){
-  const rows=await AcademicBook.find({
-   ...profile,
+  const academicFilter={
+   college:academicRegex(profile.college),
+   course:academicRegex(profile.course),
+   year:profile.year,
+   semester:profile.semester,
    active:true,
    verificationStatus:"verified"
-  }).sort({subject:1,title:1}).lean();
+  };
+  if(profile.degree) academicFilter.degree=academicRegex(profile.degree);
+
+  const rows=await AcademicBook.find(academicFilter)
+   .sort({subject:1,title:1,academicYear:-1})
+   .lean();
 
   summary.required=rows.length;
   const ids=rows.map(x=>x._id);
