@@ -101,4 +101,10 @@ const bookSchema = new mongoose.Schema(
 
 bookSchema.index({ location: "2dsphere" });
 
+// Full-text index used only by the marketplace search.
+bookSchema.index(
+    { title: "text", author: "text", category: "text", description: "text" },
+    { weights: { title: 10, author: 7, category: 4, description: 1 }, name: "book_search" }
+);
+
 module.exports = mongoose.model("Book", bookSchema);

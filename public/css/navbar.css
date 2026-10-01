@@ -204,3 +204,80 @@ body.dark #themeToggle:hover {
 body.dark .navbar-toggler-icon {
   filter: invert(1) grayscale(1) brightness(2);
 }
+
+
+.search-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 6px;
+}
+
+.search-suggestion {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.search-suggestion:hover,
+.search-suggestion.active {
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
+.search-suggestion-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
+.search-suggestion-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.search-suggestion-type {
+  color: var(--text-light);
+  font-size: .72rem;
+  white-space: nowrap;
+}
+
+body.dark .search-suggestions {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .3);
+}
+
+@media (max-width: 991.98px) {
+  .search-suggestions {
+    top: calc(100% + 5px);
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+}
