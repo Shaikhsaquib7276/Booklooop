@@ -5,15 +5,21 @@ const userId = (user) => String(user._id);
 
 module.exports.browse = async (req, res) => {
   const availableBookFilter = {
-    sellerType: "student",
     owner: { $exists: true, $ne: req.user._id },
-    $or: [{ status: "Available" }, { status: { $exists: false } }]
+    $or: [
+      { sellerType: "student" },
+      { sellerType: { $exists: false } }
+    ],
+    $and: [{ $or: [{ status: "Available" }, { status: { $exists: false } }] }]
   };
 
   const myBookFilter = {
-    sellerType: "student",
     owner: req.user._id,
-    $or: [{ status: "Available" }, { status: { $exists: false } }]
+    $or: [
+      { sellerType: "student" },
+      { sellerType: { $exists: false } }
+    ],
+    $and: [{ $or: [{ status: "Available" }, { status: { $exists: false } }] }]
   };
 
   const [books, myBooks] = await Promise.all([
