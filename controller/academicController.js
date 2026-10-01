@@ -55,10 +55,14 @@ exports.findBooks=async(req,res)=>{
 
  if(complete){
   const rows=await AcademicBook.find({
-   ...profile,
+   college:profile.college,
+   degree:profile.degree,
+   course:profile.course,
+   year:profile.year,
+   semester:profile.semester,
    active:true,
    verificationStatus:"verified"
-  }).sort({subject:1,title:1}).lean();
+  }).sort({subject:1,title:1,academicYear:-1}).lean();
 
   summary.required=rows.length;
   const ids=rows.map(x=>x._id);
@@ -69,7 +73,6 @@ exports.findBooks=async(req,res)=>{
     {$or:[{status:"Available"},{status:{$exists:false}}]},
     {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
    ],
-   owner:{$ne:req.user._id}
   };
 
   if(hasLocation){
