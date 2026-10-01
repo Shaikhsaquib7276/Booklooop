@@ -70,6 +70,14 @@ const bookSchema = new mongoose.Schema(
         },
         sellerType: { type: String, enum: ["student", "shop"], default: "student", index: true },
         stock: { type: Number, min: 0, default: 1 },
+
+        // Human-readable pickup address shown to buyers alongside the map location.
+        addressLine: {
+            type: String,
+            trim: true,
+            maxlength: 300
+        },
+
         location: {
             type: { type: String, enum: ["Point"], default: "Point" },
             coordinates: { type: [Number], default: undefined }
