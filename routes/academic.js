@@ -15,7 +15,6 @@ router.get("/my-academic-books", isLoggedIn, wrapAsync(academicController.myBook
 router.post("/my-academic-books/:id/relist", isLoggedIn, wrapAsync(academicController.relist));
 
 router.get("/admin/academic", isAdmin, wrapAsync(academicController.adminIndex));
-router.post("/admin/academic", isAdmin, wrapAsync(academicController.adminCreate));
 router.delete("/admin/academic/:id", isAdmin, wrapAsync(academicController.adminDelete));
 
 module.exports = router;
