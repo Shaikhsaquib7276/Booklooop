@@ -4,6 +4,19 @@ const BookRequest=require("../models/BookRequest");
 const StudentBook=require("../models/StudentBook");
 const Notification=require("../models/Notification");
 const clean=v=>String(v||"").trim();
+const academicRegex=value=>{
+ const parts=clean(value).split(/[^a-z0-9]+/i).filter(Boolean);
+ if(!parts.length)return null;
+ return new RegExp(parts.map(part=>part.replace(/[.*+?^${}()|[\\]\\]/g,"\\$&")).join("[^a-z0-9]+"),"i");
+};
+const haversineKm=(lat1,lon1,lat2,lon2)=>{
+ const toRad=value=>value*Math.PI/180;
+ const R=6371;
+ const dLat=toRad(lat2-lat1);
+ const dLon=toRad(lon2-lon1);
+ const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+ return 2*R*Math.asin(Math.sqrt(a));
+};
 async function options(filters={}) {
  const f={active:true, verificationStatus:"verified"};
  ["college","degree","course","academicYear"].forEach(k=>{if(clean(filters[k]))f[k]=clean(filters[k]);});
