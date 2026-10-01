@@ -7,20 +7,33 @@ const clean=v=>String(v||"").trim();
 async function options(filters={}) {
  const f={active:true, verificationStatus:"verified"};
  ["college","degree","course","academicYear"].forEach(k=>{if(clean(filters[k]))f[k]=clean(filters[k]);});
- const [colleges,courses,academicYears,semesters]=await Promise.all([
-  AcademicBook.distinct("college",{active:true}),AcademicBook.distinct("course",f),
-  AcademicBook.distinct("academicYear",f),AcademicBook.distinct("semester",f)]);
- return {colleges:colleges.sort(),courses:courses.sort(),academicYears:academicYears.sort(),semesters:semesters.sort((a,b)=>a-b)};
+ const [colleges,degrees,courses,academicYears,years,semesters]=await Promise.all([
+  AcademicBook.distinct("college",f),
+  AcademicBook.distinct("degree",f),
+  AcademicBook.distinct("course",f),
+  AcademicBook.distinct("academicYear",f),
+  AcademicBook.distinct("year",f),
+  AcademicBook.distinct("semester",f)
+ ]);
+ return {
+  colleges:colleges.filter(Boolean).sort(),
+  degrees:degrees.filter(Boolean).sort(),
+  courses:courses.filter(Boolean).sort(),
+  academicYears:academicYears.filter(Boolean).sort(),
+  years:years.filter(Number.isFinite).sort((a,b)=>a-b),
+  semesters:semesters.filter(Number.isFinite).sort((a,b)=>a-b)
+ };
 }
 exports.options=async(req,res)=>res.json(await options(req.query));
 exports.findBooks=async(req,res)=>{
+ const user=req.user||{};
  const filters={
-  college:clean(req.query.college),
-  degree:clean(req.query.degree),
-  course:clean(req.query.course),
-  academicYear:clean(req.query.academicYear),
-  year:Number(req.query.year),
-  semester:Number(req.query.semester)
+  college:clean(req.query.college||user.college),
+  degree:clean(req.query.degree||user.degree),
+  course:clean(req.query.course||user.course),
+  academicYear:clean(req.query.academicYear||user.academicYear),
+  year:Number(req.query.year||user.year),
+  semester:Number(req.query.semester||user.semester)
  };
  const radiusValue=Number.parseInt(req.query.radius,10);
  const radius=[1,5,10,20,50].includes(radiusValue)?radiusValue:10;
@@ -153,7 +166,14 @@ exports.relist=async(req,res)=>{
  owned.status="Relisted";owned.relistedBook=book._id;owned.relistedAt=new Date();await owned.save();
  req.flash("success","Book relisted. Review the listing before sharing it.");res.redirect("/books/"+book._id+"/edit");
 };
-exports.adminIndex=async(req,res)=>res.render("admin/academic",{title:"Academic Catalog",academicBooks:await AcademicBook.find({active:true}).sort({college:1,course:1,academicYear:1,semester:1,subject:1,title:1})});
+exports.adminIndex=async(req,res)=>{
+ const [pending,verified,rejected]=await Promise.all([
+  AcademicBook.find({verificationStatus:"pending",active:true}).populate("submittedBy","username email college course degree").populate("sourceBook","title price").sort({createdAt:-1}),
+  AcademicBook.find({verificationStatus:"verified",active:true}).populate("verifiedBy","username").sort({college:1,course:1,academicYear:1,year:1,semester:1,subject:1,title:1}),
+  AcademicBook.find({verificationStatus:"rejected"}).populate("submittedBy","username").sort({createdAt:-1}).limit(50)
+ ]);
+ res.render("admin/academic",{title:"Academic Catalog Review",pending,verified,rejected});
+};
 exports.adminCreate=async(req,res)=>{
  const b=req.body,semester=Number(b.semester);
  if(!clean(b.college)||!clean(b.course)||!clean(b.academicYear)||!Number.isInteger(semester)||semester<1||!clean(b.subject)||!clean(b.title)){req.flash("error","College, course, year, semester, subject and title are required.");return res.redirect("/admin/academic");}
