@@ -6,7 +6,7 @@ on:
       - "feature/smart-semester-book-finder"
   pull_request:
     branches:
-      - "feature/smart-semester-book-finder"
+      - "feature/nearby-book-radar"
 
 jobs:
   test:
