@@ -100,7 +100,6 @@ module.exports.searchSuggestions = async (req, res) => {
     res.json({ suggestions });
 };
 
-const escapeRegex = (value = "") => String(value).split("").map(ch => "\\.^$*+?()[]{}|".includes(ch) ? "\\" + ch : ch).join("");
 
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
