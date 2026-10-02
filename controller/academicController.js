@@ -82,10 +82,13 @@ exports.findBooks=async(req,res)=>{
    .lean();
 
   summary.required=rows.length;
-  const ids=rows.map(x=>x._id);
 
-  const listingFilter={
-   academicBook:{$in:ids},
+  const ids=rows.map(row=>row._id);
+  const sourceBookIds=rows
+   .map(row=>row.sourceBook)
+   .filter(Boolean);
+
+  const availabilityFilter={
    $and:[
     {$or:[{status:"Available"},{status:{$exists:false}}]},
     {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
@@ -94,7 +97,7 @@ exports.findBooks=async(req,res)=>{
   };
 
   if(hasLocation){
-   listingFilter.location={
+   availabilityFilter.location={
     $near:{
      $geometry:{type:"Point",coordinates:[lng,lat]},
      $maxDistance:radius*1000
@@ -102,17 +105,43 @@ exports.findBooks=async(req,res)=>{
    };
   }
 
-  let listings=ids.length?await Book.find(listingFilter)
-   .sort(hasLocation?{}:{price:1})
-   .populate("owner","username college")
-   .lean():[];
+  const listingOr=[];
+  if(ids.length) listingOr.push({academicBook:{$in:ids}});
+  if(sourceBookIds.length) listingOr.push({_id:{$in:sourceBookIds}});
 
-  listings=listings.map(book=>{
-   const coords=book.location?.coordinates;
-   const distanceKm=hasLocation&&Array.isArray(coords)&&coords.length===2
-    ? haversineKm(lat,lng,coords[1],coords[0])
+  let listings=[];
+  if(listingOr.length){
+   listings=await Book.find({
+    ...availabilityFilter,
+    $or:listingOr
+   })
+    .sort(hasLocation?{}:{price:1})
+    .populate("owner","username college")
+    .lean();
+  }
+
+  const rowById=new Map(rows.map(row=>[String(row._id),row]));
+  const rowBySourceBook=new Map(
+   rows.filter(row=>row.sourceBook).map(row=>[String(row.sourceBook),row])
+  );
+  const listingMap=new Map();
+
+  listings.forEach(book=>{
+   let academicId=book.academicBook && rowById.has(String(book.academicBook))
+    ? String(book.academicBook)
     : null;
-   return {...book,distanceKm};
+
+   if(!academicId && rowBySourceBook.has(String(book._id))){
+    academicId=String(rowBySourceBook.get(String(book._id))._id);
+   }
+
+   if(!academicId) return;
+
+   const current=listingMap.get(academicId)||[];
+   if(!current.some(item=>String(item._id)===String(book._id))){
+    current.push(book);
+   }
+   listingMap.set(academicId,current);
   });
 
   const requestMap=new Map();
@@ -121,22 +150,21 @@ exports.findBooks=async(req,res)=>{
     student:req.user._id,
     academicBook:{$in:ids},
     status:{$in:["Open","Matched"]}
-   }).select("academicBook status").lean();
-   requests.forEach(r=>requestMap.set(String(r.academicBook),r.status));
+   }).select("academicBook status matchedBook").lean();
+   requests.forEach(r=>requestMap.set(String(r.academicBook),r));
   }
-
-  const listingMap=new Map();
-  listings.forEach(book=>{
-   const key=String(book.academicBook);
-   if(!listingMap.has(key))listingMap.set(key,[]);
-   listingMap.get(key).push(book);
-  });
 
   const groups=new Map();
   rows.forEach(book=>{
-   const list=listingMap.get(String(book._id))||[];
-   if(list.length)summary.available++;
-   else if(requestMap.has(String(book._id)))summary.requested++;
+   const key=String(book._id);
+   const list=listingMap.get(key)||[];
+   const request=requestMap.get(key);
+
+   if(list.length){
+    summary.available++;
+   }else if(request){
+    summary.requested++;
+   }
 
    if(!groups.has(book.subject)){
     groups.set(book.subject,{name:book.subject,code:book.subjectCode,books:[]});
@@ -145,7 +173,8 @@ exports.findBooks=async(req,res)=>{
    groups.get(book.subject).books.push({
     ...book,
     listings:list,
-    requestStatus:requestMap.get(String(book._id))||null
+    requestStatus:request?.status||null,
+    matchedBookId:request?.matchedBook ? String(request.matchedBook) : null
    });
   });
 
@@ -168,10 +197,51 @@ exports.findBooks=async(req,res)=>{
 exports.requestBook=async(req,res)=>{
  const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true,verificationStatus:"verified"});
  if(!academicBook){req.flash("error","Academic book not found.");return res.redirect("/find-books");}
- const existing=await BookRequest.findOne({student:req.user._id,academicBook:academicBook._id,status:{$in:["Open","Matched"]}});
+
+ const existing=await BookRequest.findOne({
+  student:req.user._id,
+  academicBook:academicBook._id,
+  status:{$in:["Open","Matched"]}
+ });
  if(existing){req.flash("success","You already have an active request for this book.");return res.redirect("/book-requests");}
- const listing=await Book.findOne({academicBook:academicBook._id,status:"Available",owner:{$ne:req.user._id}});
- if(listing){await notifyUser({recipient:req.user._id,type:"book_match",title:"A requested book is available",message:academicBook.title+" is listed on BookLoop.",link:"/books/"+listing._id});return res.redirect("/books/"+listing._id);}
+
+ const listingQuery={
+  $and:[
+   {$or:[{status:"Available"},{status:{$exists:false}}]},
+   {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+  ],
+  owner:{$ne:req.user._id},
+  $or:[
+   {academicBook:academicBook._id},
+   {_id:academicBook.sourceBook}
+  ]
+ };
+
+ const listing=await Book.findOne(listingQuery);
+ if(listing){
+  await BookRequest.create({
+   student:req.user._id,
+   academicBook:academicBook._id,
+   college:academicBook.college,
+   degree:academicBook.degree,
+   course:academicBook.course,
+   academicYear:academicBook.academicYear,
+   year:academicBook.year,
+   semester:academicBook.semester,
+   status:"Matched",
+   matchedBook:listing._id,
+   matchedAt:new Date()
+  });
+  await notifyUser({
+   recipient:req.user._id,
+   type:"book_match",
+   title:"A requested book is available",
+   message:academicBook.title+" is available on BookLoop.",
+   link:"/books/"+listing._id
+  });
+  return res.redirect("/books/"+listing._id);
+ }
+
  await BookRequest.create({
   student:req.user._id,
   academicBook:academicBook._id,
@@ -182,7 +252,8 @@ exports.requestBook=async(req,res)=>{
   year:academicBook.year,
   semester:academicBook.semester
  });
- req.flash("success","Request created. We'll notify you when a matching book is listed.");res.redirect("/book-requests");
+ req.flash("success","Request created. We'll notify you when a matching listing is available.");
+ res.redirect("/book-requests");
 };
 exports.myRequests=async(req,res)=>{
  const openRequests=await BookRequest.find({
@@ -191,20 +262,39 @@ exports.myRequests=async(req,res)=>{
  }).select("_id academicBook").lean();
 
  if(openRequests.length){
-  const academicIds=[...new Set(openRequests.map(request=>String(request.academicBook)))];
-  const matches=await Book.find({
-   academicBook:{$in:academicIds},
-   status:"Available",
+  const academicIds=openRequests.map(request=>request.academicBook);
+  const academicRows=await AcademicBook.find({_id:{$in:academicIds}})
+   .select("_id sourceBook")
+   .lean();
+
+  const sourceMap=new Map(academicRows.filter(row=>row.sourceBook).map(row=>[
+   String(row._id),String(row.sourceBook)
+  ]));
+
+  const matchOr=[];
+  academicIds.forEach(id=>{
+   matchOr.push({academicBook:id});
+   const sourceBook=sourceMap.get(String(id));
+   if(sourceBook) matchOr.push({_id:sourceBook});
+  });
+
+  const matches=matchOr.length?await Book.find({
+   $and:[
+    {$or:[{status:"Available"},{status:{$exists:false}}]},
+    {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+   ],
    owner:{$ne:req.user._id},
-   $or:[{stock:{$gt:0}},{stock:{$exists:false}}]
-  }).select("_id title academicBook").sort({createdAt:-1}).lean();
+   $or:matchOr
+  }).select("_id title academicBook owner").sort({createdAt:-1}).lean():[];
 
   const matchedUpdates=[];
   for(const request of openRequests){
-   const match=matches.find(book=>String(book.academicBook)===String(request.academicBook));
-   if(match){
-    matchedUpdates.push({request,match});
-   }
+   const sourceBook=sourceMap.get(String(request.academicBook));
+   const match=matches.find(book =>
+    String(book.academicBook||"")===String(request.academicBook) ||
+    String(book._id)===String(sourceBook||"")
+   );
+   if(match) matchedUpdates.push({request,match});
   }
 
   if(matchedUpdates.length){
@@ -214,6 +304,7 @@ exports.myRequests=async(req,res)=>{
      {$set:{status:"Matched",matchedBook:match._id,matchedAt:new Date()}}
     )
    ));
+
    await Promise.all(matchedUpdates.map(({match})=>
     notifyUser({
      recipient:req.user._id,
