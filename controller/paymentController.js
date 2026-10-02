@@ -4,6 +4,7 @@ const Book = require("../models/Book");
 const Order = require("../models/Order");
 const StudentBook = require("../models/StudentBook");
 const BookRequest = require("../models/BookRequest");
+const { notifyUser } = require("../utils/notificationService");
 function cashfreeRequest(pathname, method, payload) {
   return new Promise((resolve, reject) => {
     const appId = process.env.CASHFREE_APP_ID;
@@ -242,6 +243,7 @@ exports.verifyPayment = async (req, res) => {
     await BookRequest.updateMany({ matchedBook: item.book, status: "Matched", student: { $ne: req.user._id } }, { $set: { status: "Open", matchedBook: null, matchedAt: null } });
   }
   req.session.cart = (req.session.cart || []).filter(id => !order.items.some(item => String(item.book) === id));
+  await notifyUser({recipient:req.user._id,type:"payment_update",title:"Payment successful",message:"Your BookLoop order has been paid successfully.",link:"/payments/success/"+order._id});
   res.json({ success: true, redirect: `/payments/success/${order._id}` });
 };
 
@@ -390,6 +392,7 @@ exports.cashfreeSuccess = async (req, res) => {
       await BookRequest.updateMany({ matchedBook: item.book, status: "Matched", student: { $ne: req.user._id } }, { $set: { status: "Open", matchedBook: null, matchedAt: null } });
     }
     req.session.cart = (req.session.cart || []).filter(id => !order.items.some(item => String(item.book) === id));
+    await notifyUser({recipient:req.user._id,type:"payment_update",title:"Payment successful",message:"Your Cashfree payment for the BookLoop order was successful.",link:"/payments/success/"+order._id});
     return res.redirect(`/payments/success/${order._id}`);
   } catch (error) {
     req.flash("error", error.message || "Unable to verify Cashfree payment.");

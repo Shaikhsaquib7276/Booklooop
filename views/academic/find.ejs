@@ -103,17 +103,35 @@
 
                 <% if(b.listings.length){ %>
                   <div class="academic-availability-row">
-                    <strong class="text-success"><i class="bi bi-check-circle me-1"></i><%= b.listings.length %> listing<%= b.listings.length===1?"":"s" %> found</strong>
-                    <span>from ₹<%= Math.min(...b.listings.map(x=>Number(x.price))).toFixed(0) %></span>
+                    <strong class="text-success"><i class="bi bi-check-circle me-1"></i>Book available</strong>
+                    <span><%= b.listings.length %> listing<%= b.listings.length===1?"":"s" %> · from ₹<%= Math.min(...b.listings.map(x=>Number(x.price))).toFixed(0) %></span>
                   </div>
 
                   <div class="academic-listings">
                     <% b.listings.slice(0,4).forEach(x=>{ %>
                       <a class="academic-listing-chip" href="/books/<%= x._id %>">
-                        <span>₹<%= Number(x.price).toLocaleString("en-IN") %></span>
-                        <small><%= x.condition || "Used" %><%= x.distanceKm !== null ? " · "+x.distanceKm.toFixed(1)+" km" : "" %></small>
+                        <span>
+                          <%= x.isOwnListing ? "Your Listing" : "₹"+Number(x.price).toLocaleString("en-IN") %>
+                        </span>
+                        <small>
+                          <%= x.isOwnListing ? "View your book" : (x.condition || "Used") %><%= !x.isOwnListing && Number.isFinite(Number(x.distanceKm)) ? " · "+Number(x.distanceKm).toFixed(1)+" km" : "" %>
+                        </small>
                       </a>
                     <% }) %>
+                  </div>
+
+                  <div class="d-flex flex-wrap gap-2 mt-2">
+                    <% if(b.listings.length===1){ %>
+                      <a class="btn <%= b.listings[0].isOwnListing ? "btn-outline-primary" : "btn-success" %> btn-sm" href="/books/<%= b.listings[0]._id %>">
+                        <i class="bi bi-eye me-1"></i><%= b.listings[0].isOwnListing ? "View Your Listing" : "View Book" %>
+                      </a>
+                    <% } else { %>
+                      <% b.listings.slice(0,4).forEach(x=>{ %>
+                        <a class="btn <%= x.isOwnListing ? "btn-outline-primary" : "btn-outline-success" %> btn-sm" href="/books/<%= x._id %>">
+                          <i class="bi bi-eye me-1"></i><%= x.isOwnListing ? "Your Listing" : "View ₹"+Number(x.price).toLocaleString("en-IN") %>
+                        </a>
+                      <% }) %>
+                    <% } %>
                   </div>
                 <% } else if(b.requestStatus==="Open"){ %>
                   <div class="academic-unavailable">
@@ -121,16 +139,18 @@
                     <span>We'll notify you when a matching listing is added.</span>
                   </div>
                   <a class="btn btn-outline-primary btn-sm mt-2" href="/book-requests">View request</a>
-                <% } else if(b.requestStatus==="Matched"){ %>
-                  <div class="academic-unavailable academic-matched">
-                    <strong><i class="bi bi-check2-circle me-1"></i>Matching book found</strong>
-                    <span>Check My Requests for the matching listing.</span>
+                <% } else if(b.requestStatus==="Matched" && b.matchedBookId){ %>
+                  <div class="academic-availability-row">
+                    <strong class="text-success"><i class="bi bi-check-circle me-1"></i>Book matched</strong>
+                    <span>Your request has a seller match.</span>
                   </div>
-                  <a class="btn btn-success btn-sm mt-2" href="/book-requests">View match</a>
+                  <a class="btn btn-success btn-sm mt-2" href="/books/<%= b.matchedBookId %>">
+                    <i class="bi bi-eye me-1"></i>View Book
+                  </a>
                 <% } else { %>
                   <div class="academic-unavailable">
                     <strong><i class="bi bi-hourglass-split me-1"></i>No second-hand copy available</strong>
-                    <span>Request this academic book and wait for a seller.</span>
+                    <span>Request this academic book and we'll notify you when a matching seller lists it.</span>
                   </div>
                   <form method="POST" action="/book-requests/<%= b._id %>" class="mt-2">
                     <button class="btn btn-warning btn-sm"><i class="bi bi-bell me-1"></i>Request this book</button>

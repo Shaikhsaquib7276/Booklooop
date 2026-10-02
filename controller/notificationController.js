@@ -15,3 +15,11 @@ module.exports.index = async (req, res) => {
     notifications
   });
 };
+
+module.exports.unreadCount = async (req, res) => {
+  const count = await Notification.countDocuments({
+    recipient: req.user._id,
+    readAt: null
+  });
+  res.json({ count });
+};

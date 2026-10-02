@@ -2,7 +2,7 @@ const AcademicBook=require("../models/AcademicBook");
 const Book=require("../models/Book");
 const BookRequest=require("../models/BookRequest");
 const StudentBook=require("../models/StudentBook");
-const Notification=require("../models/Notification");
+const { notifyUser } = require("../utils/notificationService");
 const clean=v=>String(v||"").trim();
 const academicRegex=value=>{
  const parts=clean(value).split(/[^a-z0-9]+/i).filter(Boolean);
@@ -82,19 +82,21 @@ exports.findBooks=async(req,res)=>{
    .lean();
 
   summary.required=rows.length;
-  const ids=rows.map(x=>x._id);
 
-  const listingFilter={
-   academicBook:{$in:ids},
+  const ids=rows.map(row=>row._id);
+  const sourceBookIds=rows
+   .map(row=>row.sourceBook)
+   .filter(Boolean);
+
+  const availabilityFilter={
    $and:[
     {$or:[{status:"Available"},{status:{$exists:false}}]},
     {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
-   ],
-   owner:{$ne:req.user._id}
+   ]
   };
 
   if(hasLocation){
-   listingFilter.location={
+   availabilityFilter.location={
     $near:{
      $geometry:{type:"Point",coordinates:[lng,lat]},
      $maxDistance:radius*1000
@@ -102,10 +104,20 @@ exports.findBooks=async(req,res)=>{
    };
   }
 
-  let listings=ids.length?await Book.find(listingFilter)
-   .sort(hasLocation?{}:{price:1})
-   .populate("owner","username college")
-   .lean():[];
+  const listingOr=[];
+  if(ids.length) listingOr.push({academicBook:{$in:ids}});
+  if(sourceBookIds.length) listingOr.push({_id:{$in:sourceBookIds}});
+
+  let listings=[];
+  if(listingOr.length){
+   listings=await Book.find({
+    ...availabilityFilter,
+    $or:listingOr
+   })
+    .sort(hasLocation?{}:{price:1})
+    .populate("owner","username college")
+    .lean();
+  }
 
   listings=listings.map(book=>{
    const coords=book.location?.coordinates;
@@ -115,28 +127,52 @@ exports.findBooks=async(req,res)=>{
    return {...book,distanceKm};
   });
 
+  const rowById=new Map(rows.map(row=>[String(row._id),row]));
+  const rowBySourceBook=new Map(
+   rows.filter(row=>row.sourceBook).map(row=>[String(row.sourceBook),row])
+  );
+  const listingMap=new Map();
+
+  listings.forEach(book=>{
+   let academicId=book.academicBook && rowById.has(String(book.academicBook))
+    ? String(book.academicBook)
+    : null;
+
+   if(!academicId && rowBySourceBook.has(String(book._id))){
+    academicId=String(rowBySourceBook.get(String(book._id))._id);
+   }
+
+   if(!academicId) return;
+
+   const current=listingMap.get(academicId)||[];
+   if(!current.some(item=>String(item._id)===String(book._id))){
+    book.isOwnListing=String(book.owner?._id||book.owner)===String(req.user._id);
+    current.push(book);
+   }
+   listingMap.set(academicId,current);
+  });
+
   const requestMap=new Map();
   if(ids.length){
    const requests=await BookRequest.find({
     student:req.user._id,
     academicBook:{$in:ids},
     status:{$in:["Open","Matched"]}
-   }).select("academicBook status").lean();
-   requests.forEach(r=>requestMap.set(String(r.academicBook),r.status));
+   }).select("academicBook status matchedBook").lean();
+   requests.forEach(r=>requestMap.set(String(r.academicBook),r));
   }
-
-  const listingMap=new Map();
-  listings.forEach(book=>{
-   const key=String(book.academicBook);
-   if(!listingMap.has(key))listingMap.set(key,[]);
-   listingMap.get(key).push(book);
-  });
 
   const groups=new Map();
   rows.forEach(book=>{
-   const list=listingMap.get(String(book._id))||[];
-   if(list.length)summary.available++;
-   else if(requestMap.has(String(book._id)))summary.requested++;
+   const key=String(book._id);
+   const list=listingMap.get(key)||[];
+   const request=requestMap.get(key);
+
+   if(list.length){
+    summary.available++;
+   }else if(request){
+    summary.requested++;
+   }
 
    if(!groups.has(book.subject)){
     groups.set(book.subject,{name:book.subject,code:book.subjectCode,books:[]});
@@ -145,7 +181,8 @@ exports.findBooks=async(req,res)=>{
    groups.get(book.subject).books.push({
     ...book,
     listings:list,
-    requestStatus:requestMap.get(String(book._id))||null
+    requestStatus:request?.status||null,
+    matchedBookId:request?.matchedBook ? String(request.matchedBook) : null
    });
   });
 
@@ -168,10 +205,51 @@ exports.findBooks=async(req,res)=>{
 exports.requestBook=async(req,res)=>{
  const academicBook=await AcademicBook.findOne({_id:req.params.id,active:true,verificationStatus:"verified"});
  if(!academicBook){req.flash("error","Academic book not found.");return res.redirect("/find-books");}
- const existing=await BookRequest.findOne({student:req.user._id,academicBook:academicBook._id,status:{$in:["Open","Matched"]}});
+
+ const existing=await BookRequest.findOne({
+  student:req.user._id,
+  academicBook:academicBook._id,
+  status:{$in:["Open","Matched"]}
+ });
  if(existing){req.flash("success","You already have an active request for this book.");return res.redirect("/book-requests");}
- const listing=await Book.findOne({academicBook:academicBook._id,status:"Available",owner:{$ne:req.user._id}});
- if(listing){await Notification.create({recipient:req.user._id,type:"book_match",title:"A requested book is available",message:academicBook.title+" is listed on BookLoop.",link:"/books/"+listing._id});return res.redirect("/books/"+listing._id);}
+
+ const listingQuery={
+  $and:[
+   {$or:[{status:"Available"},{status:{$exists:false}}]},
+   {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+  ],
+  owner:{$ne:req.user._id},
+  $or:[
+   {academicBook:academicBook._id},
+   {_id:academicBook.sourceBook}
+  ]
+ };
+
+ const listing=await Book.findOne(listingQuery);
+ if(listing){
+  await BookRequest.create({
+   student:req.user._id,
+   academicBook:academicBook._id,
+   college:academicBook.college,
+   degree:academicBook.degree,
+   course:academicBook.course,
+   academicYear:academicBook.academicYear,
+   year:academicBook.year,
+   semester:academicBook.semester,
+   status:"Matched",
+   matchedBook:listing._id,
+   matchedAt:new Date()
+  });
+  await notifyUser({
+   recipient:req.user._id,
+   type:"book_match",
+   title:"A requested book is available",
+   message:academicBook.title+" is available on BookLoop.",
+   link:"/books/"+listing._id
+  });
+  return res.redirect("/books/"+listing._id);
+ }
+
  await BookRequest.create({
   student:req.user._id,
   academicBook:academicBook._id,
@@ -182,9 +260,115 @@ exports.requestBook=async(req,res)=>{
   year:academicBook.year,
   semester:academicBook.semester
  });
- req.flash("success","Request created. We'll notify you when a matching book is listed.");res.redirect("/book-requests");
+ req.flash("success","Request created. We'll notify you when a matching listing is available.");
+ res.redirect("/book-requests");
 };
-exports.myRequests=async(req,res)=>res.render("academic/requests",{title:"My Book Requests",requests:await BookRequest.find({student:req.user._id}).populate("academicBook").populate("matchedBook").sort({createdAt:-1})});
+exports.myRequests=async(req,res)=>{
+ const openRequests=await BookRequest.find({
+  student:req.user._id,
+  status:"Open"
+ }).select("_id academicBook").lean();
+
+ if(openRequests.length){
+  const academicIds=openRequests.map(request=>request.academicBook);
+  const academicRows=await AcademicBook.find({_id:{$in:academicIds}})
+   .select("_id sourceBook")
+   .lean();
+
+  const sourceMap=new Map(academicRows.filter(row=>row.sourceBook).map(row=>[
+   String(row._id),String(row.sourceBook)
+  ]));
+
+  const matchOr=[];
+  academicIds.forEach(id=>{
+   matchOr.push({academicBook:id});
+   const sourceBook=sourceMap.get(String(id));
+   if(sourceBook) matchOr.push({_id:sourceBook});
+  });
+
+  const matches=matchOr.length?await Book.find({
+   $and:[
+    {$or:[{status:"Available"},{status:{$exists:false}}]},
+    {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+   ],
+   owner:{$ne:req.user._id},
+   $or:matchOr
+  }).select("_id title academicBook owner").sort({createdAt:-1}).lean():[];
+
+  const matchedUpdates=[];
+  for(const request of openRequests){
+   const sourceBook=sourceMap.get(String(request.academicBook));
+   const match=matches.find(book =>
+    String(book.academicBook||"")===String(request.academicBook) ||
+    String(book._id)===String(sourceBook||"")
+   );
+   if(match) matchedUpdates.push({request,match});
+  }
+
+  if(matchedUpdates.length){
+   await Promise.all(matchedUpdates.map(({request,match})=>
+    BookRequest.updateOne(
+     {_id:request._id,status:"Open"},
+     {$set:{status:"Matched",matchedBook:match._id,matchedAt:new Date()}}
+    )
+   ));
+
+   await Promise.all(matchedUpdates.map(({match})=>
+    notifyUser({
+     recipient:req.user._id,
+     type:"book_match",
+     title:"A book you requested is now available",
+     message:match.title+" is available on BookLoop.",
+     link:"/books/"+match._id
+    })
+   ));
+  }
+ }
+
+ const requests=await BookRequest.find({student:req.user._id})
+  .populate("academicBook")
+  .populate({path:"matchedBook",populate:{path:"owner",select:"username college"}})
+  .sort({createdAt:-1});
+
+ const ownAcademicIds=requests
+  .filter(request=>request.status==="Open" && request.academicBook)
+  .map(request=>String(request.academicBook._id));
+
+ if(ownAcademicIds.length){
+  const ownAcademicRows=await AcademicBook.find({_id:{$in:ownAcademicIds}})
+   .select("_id sourceBook")
+   .lean();
+
+  const ownOr=[];
+  ownAcademicRows.forEach(row=>{
+   ownOr.push({academicBook:row._id,owner:req.user._id});
+   if(row.sourceBook) ownOr.push({_id:row.sourceBook,owner:req.user._id});
+  });
+
+  const ownListings=ownOr.length
+   ? await Book.find({
+      $and:[
+       {$or:[{status:"Available"},{status:{$exists:false}}]},
+       {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+      ],
+      $or:ownOr
+     }).select("_id title academicBook owner").lean()
+   : [];
+
+  requests.forEach(request=>{
+   if(request.status!=="Open" || !request.academicBook) return;
+   const row=ownAcademicRows.find(item=>String(item._id)===String(request.academicBook._id));
+   const sourceBook=String(row?.sourceBook||"");
+   const ownListing=ownListings.find(book=>
+    String(book.academicBook||"")===String(request.academicBook._id) ||
+    String(book._id)===sourceBook
+   );
+   if(ownListing) request.ownMatchingBook=ownListing;
+  });
+ }
+
+ res.render("academic/requests",{title:"My Book Requests",requests});
+};
 exports.myBooks=async(req,res)=>res.render("academic/my-books",{title:"My Academic Books",books:await StudentBook.find({student:req.user._id}).populate("book").populate("academicBook").sort({purchasedAt:-1})});
 exports.relist=async(req,res)=>{
  const owned=await StudentBook.findOne({_id:req.params.id,student:req.user._id,status:"Owned"}).populate("book").populate("academicBook");
@@ -211,7 +395,51 @@ exports.verifyAcademicBook=async(req,res)=>{
  record.verifiedBy=req.user._id;
  record.verifiedAt=new Date();
  await record.save();
- req.flash("success","Academic book verified and added to Smart Semester Finder.");
+
+ // A request may have been created before this academic mapping was verified.
+ // Match already-listed available books immediately after verification.
+ const listings=await Book.find({
+  academicBook:record._id,
+  status:"Available",
+  $or:[{stock:{$gt:0}},{stock:{$exists:false}}]
+ }).select("_id title owner").lean();
+
+ if(listings.length){
+  const listing=listings[0];
+  const requests=await BookRequest.find({
+   academicBook:record._id,
+   status:"Open",
+   student:{$ne:listing.owner}
+  }).select("_id student").lean();
+
+  if(requests.length){
+   await BookRequest.updateMany(
+    {_id:{$in:requests.map(request=>request._id)}},
+    {$set:{status:"Matched",matchedBook:listing._id,matchedAt:new Date()}}
+   );
+
+   await Promise.all(requests.map(request=>notifyUser({
+    recipient:request.student,
+    type:"book_match",
+    title:"A book you requested is now available",
+    message:record.title+" is now available on BookLoop.",
+    link:"/books/"+listing._id
+   })));
+  }
+ }
+
+ if(record.submittedBy){
+  await notifyUser({
+   recipient:record.submittedBy,
+   type:"listing_update",
+   title:"Academic mapping verified",
+   message:record.title+" is now verified and available in Smart Semester Finder.",
+   link:"/find-books"
+  });
+ }
+ req.flash("success", listings.length
+  ?"Academic book verified and matching requests updated."
+  :"Academic book verified and added to Smart Semester Finder.");
  res.redirect("/admin/academic");
 };
 
@@ -223,6 +451,9 @@ exports.rejectAcademicBook=async(req,res)=>{
  record.verifiedBy=req.user._id;
  record.verifiedAt=new Date();
  await record.save();
+ if(record.submittedBy){
+  await notifyUser({recipient:record.submittedBy,type:"listing_update",title:"Academic mapping rejected",message:record.title+" was not approved for Smart Semester Finder.",link:"/books"});
+ }
  req.flash("success","Academic submission rejected.");
  res.redirect("/admin/academic");
 };
@@ -234,4 +465,34 @@ exports.adminCreate=async(req,res)=>{
  await AcademicBook.create({college:clean(b.college),course:clean(b.course),academicYear:clean(b.academicYear),semester,subject:clean(b.subject),subjectCode:clean(b.subjectCode),title:clean(b.title),author:clean(b.author),isbn:clean(b.isbn),edition:clean(b.edition),type:b.type==="Reference"?"Reference":"Prescribed"});
  req.flash("success","Academic book added.");res.redirect("/admin/academic");
 };
-exports.adminDelete=async(req,res)=>{await AcademicBook.findByIdAndUpdate(req.params.id,{active:false});req.flash("success","Academic book archived.");res.redirect("/admin/academic");};
+exports.adminDelete=async(req,res)=>{
+ const record=await AcademicBook.findById(req.params.id);
+ if(!record){
+  req.flash("error","Academic book not found.");
+  return res.redirect("/admin/academic");
+ }
+ const affectedRequests=await BookRequest.find({
+  academicBook:record._id,
+  status:{$in:["Open","Matched"]}
+ }).select("student").lean();
+
+ await BookRequest.updateMany(
+  {academicBook:record._id,status:{$in:["Open","Matched"]}},
+  {$set:{status:"Cancelled",matchedBook:null,matchedAt:null}}
+ );
+ record.active=false;
+ await record.save();
+
+ await Promise.all(affectedRequests.map(request=>notifyUser({
+  recipient:request.student,
+  type:"request_update",
+  title:"Academic book request closed",
+  message:record.title+" is no longer part of the verified academic catalog, so your request was closed.",
+  link:"/book-requests"
+ })));
+
+ req.flash("success",affectedRequests.length
+  ?"Academic book archived and affected requests were closed."
+  :"Academic book archived.");
+ res.redirect("/admin/academic");
+};

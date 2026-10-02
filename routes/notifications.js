@@ -5,5 +5,6 @@ const isLoggedIn = require("../middleware/isLoggedIn");
 const notificationController = require("../controller/notificationController");
 
 router.get("/notifications", isLoggedIn, wrapAsync(notificationController.index));
+router.get("/notifications/unread-count", isLoggedIn, wrapAsync(notificationController.unreadCount));
 
 module.exports = router;
