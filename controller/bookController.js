@@ -5,6 +5,7 @@ const AcademicBook = require("../models/AcademicBook");
 const BookRequest = require("../models/BookRequest");
 const Notification = require("../models/Notification");
 const { attachAcademicBook } = require("../utils/academicMatcher");
+const { notifyUsers } = require("../utils/notificationService");
 
 const escapeRegex = (value = "") => String(value).split("").map(ch => "\\.^$*+?()[]{}|".includes(ch) ? "\\" + ch : ch).join("");
 
@@ -111,7 +112,12 @@ async function notifyAcademicMatches(book, sellerId) {
     const requests = await BookRequest.find({ academicBook: book.academicBook, status: "Open", student: { $ne: sellerId } }).select("_id student").lean();
     if (!requests.length) return;
     await BookRequest.updateMany({ _id: { $in: requests.map(r => r._id) } }, { $set: { status: "Matched", matchedBook: book._id, matchedAt: new Date() } });
-    await Notification.insertMany(requests.map(r => ({ recipient: r.student, type: "book_match", title: "A book you requested is now available", message: book.title + " has been listed on BookLoop.", link: "/books/" + book._id })));
+    await notifyUsers({
+        type: "book_match",
+        title: "A book you requested is now available",
+        message: book.title + " has been listed on BookLoop.",
+        link: "/books/" + book._id
+    }, requests.map(r => r.student));
 }
 
 const uploadedImages = (files = {}) => (files.images || []).map((file) => ({
@@ -315,9 +321,35 @@ module.exports.renderNewForm = async (req, res) => {
 
 module.exports.deleteBook = async (req, res) => {
     const { id } = req.params;
-    await Book.findByIdAndDelete(id);
-    await Reservation.deleteMany({ book: id });
-    req.flash("success", "Book deleted successfully.");
+    const book = await Book.findById(id);
+    if (!book) {
+        req.flash("error", "Book not found.");
+        return res.redirect("/books");
+    }
+
+    const matchedRequests = await BookRequest.find({
+        matchedBook: book._id,
+        status: "Matched"
+    }).select("_id student academicBook").lean();
+
+    await BookRequest.updateMany(
+        { matchedBook: book._id, status: "Matched" },
+        { $set: { status: "Open", matchedBook: null, matchedAt: null } }
+    );
+
+    await Book.findByIdAndDelete(book._id);
+    await Reservation.deleteMany({ book: book._id });
+
+    await notifyUsers({
+        type: "listing_update",
+        title: "A book listing was removed",
+        message: book.title + " was removed before your request could be fulfilled. Your request is open again.",
+        link: "/book-requests"
+    }, matchedRequests.map(request => request.student));
+
+    req.flash("success", matchedRequests.length
+        ? "Book deleted and affected requests were reopened."
+        : "Book deleted successfully.");
     res.redirect("/books");
 };
 
