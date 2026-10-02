@@ -211,10 +211,51 @@ exports.verifyAcademicBook=async(req,res)=>{
  record.verifiedBy=req.user._id;
  record.verifiedAt=new Date();
  await record.save();
- if(record.submittedBy){
-  await notifyUser({recipient:record.submittedBy,type:"listing_update",title:"Academic mapping verified",message:record.title+" is now verified and available in Smart Semester Finder.",link:"/find-books"});
+
+ // A request may have been created before this academic mapping was verified.
+ // Match already-listed available books immediately after verification.
+ const listings=await Book.find({
+  academicBook:record._id,
+  status:"Available",
+  $or:[{stock:{$gt:0}},{stock:{$exists:false}}]
+ }).select("_id title owner").lean();
+
+ if(listings.length){
+  const listing=listings[0];
+  const requests=await BookRequest.find({
+   academicBook:record._id,
+   status:"Open",
+   student:{$ne:listing.owner}
+  }).select("_id student").lean();
+
+  if(requests.length){
+   await BookRequest.updateMany(
+    {_id:{$in:requests.map(request=>request._id)}},
+    {$set:{status:"Matched",matchedBook:listing._id,matchedAt:new Date()}}
+   );
+
+   await Promise.all(requests.map(request=>notifyUser({
+    recipient:request.student,
+    type:"book_match",
+    title:"A book you requested is now available",
+    message:record.title+" is now available on BookLoop.",
+    link:"/books/"+listing._id
+   })));
+  }
  }
- req.flash("success","Academic book verified and added to Smart Semester Finder.");
+
+ if(record.submittedBy){
+  await notifyUser({
+   recipient:record.submittedBy,
+   type:"listing_update",
+   title:"Academic mapping verified",
+   message:record.title+" is now verified and available in Smart Semester Finder.",
+   link:"/find-books"
+  });
+ }
+ req.flash("success", listings.length
+  ?"Academic book verified and matching requests updated."
+  :"Academic book verified and added to Smart Semester Finder.");
  res.redirect("/admin/academic");
 };
 
