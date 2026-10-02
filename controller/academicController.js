@@ -184,7 +184,7 @@ exports.requestBook=async(req,res)=>{
  });
  req.flash("success","Request created. We'll notify you when a matching book is listed.");res.redirect("/book-requests");
 };
-exports.myRequests=async(req,res)=>res.render("academic/requests",{title:"My Book Requests",requests:await BookRequest.find({student:req.user._id}).populate("academicBook").populate("matchedBook").sort({createdAt:-1})});
+exports.myRequests=async(req,res)=>res.render("academic/requests",{title:"My Book Requests",requests:await BookRequest.find({student:req.user._id}).populate("academicBook").populate({path:"matchedBook",populate:{path:"owner",select:"username college"}}).sort({createdAt:-1})});
 exports.myBooks=async(req,res)=>res.render("academic/my-books",{title:"My Academic Books",books:await StudentBook.find({student:req.user._id}).populate("book").populate("academicBook").sort({purchasedAt:-1})});
 exports.relist=async(req,res)=>{
  const owned=await StudentBook.findOne({_id:req.params.id,student:req.user._id,status:"Owned"}).populate("book").populate("academicBook");
