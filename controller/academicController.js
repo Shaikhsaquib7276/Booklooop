@@ -240,4 +240,34 @@ exports.adminCreate=async(req,res)=>{
  await AcademicBook.create({college:clean(b.college),course:clean(b.course),academicYear:clean(b.academicYear),semester,subject:clean(b.subject),subjectCode:clean(b.subjectCode),title:clean(b.title),author:clean(b.author),isbn:clean(b.isbn),edition:clean(b.edition),type:b.type==="Reference"?"Reference":"Prescribed"});
  req.flash("success","Academic book added.");res.redirect("/admin/academic");
 };
-exports.adminDelete=async(req,res)=>{await AcademicBook.findByIdAndUpdate(req.params.id,{active:false});req.flash("success","Academic book archived.");res.redirect("/admin/academic");};
+exports.adminDelete=async(req,res)=>{
+ const record=await AcademicBook.findById(req.params.id);
+ if(!record){
+  req.flash("error","Academic book not found.");
+  return res.redirect("/admin/academic");
+ }
+ const affectedRequests=await BookRequest.find({
+  academicBook:record._id,
+  status:{$in:["Open","Matched"]}
+ }).select("student").lean();
+
+ await BookRequest.updateMany(
+  {academicBook:record._id,status:{$in:["Open","Matched"]}},
+  {$set:{status:"Cancelled",matchedBook:null,matchedAt:null}}
+ );
+ record.active=false;
+ await record.save();
+
+ await Promise.all(affectedRequests.map(request=>notifyUser({
+  recipient:request.student,
+  type:"request_update",
+  title:"Academic book request closed",
+  message:record.title+" is no longer part of the verified academic catalog, so your request was closed.",
+  link:"/book-requests"
+ })));
+
+ req.flash("success",affectedRequests.length
+  ?"Academic book archived and affected requests were closed."
+  :"Academic book archived.");
+ res.redirect("/admin/academic");
+};
