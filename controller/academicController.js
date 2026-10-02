@@ -2,7 +2,7 @@ const AcademicBook=require("../models/AcademicBook");
 const Book=require("../models/Book");
 const BookRequest=require("../models/BookRequest");
 const StudentBook=require("../models/StudentBook");
-const Notification=require("../models/Notification");
+const { notifyUser } = require("../utils/notificationService");
 const clean=v=>String(v||"").trim();
 const academicRegex=value=>{
  const parts=clean(value).split(/[^a-z0-9]+/i).filter(Boolean);
@@ -171,7 +171,7 @@ exports.requestBook=async(req,res)=>{
  const existing=await BookRequest.findOne({student:req.user._id,academicBook:academicBook._id,status:{$in:["Open","Matched"]}});
  if(existing){req.flash("success","You already have an active request for this book.");return res.redirect("/book-requests");}
  const listing=await Book.findOne({academicBook:academicBook._id,status:"Available",owner:{$ne:req.user._id}});
- if(listing){await Notification.create({recipient:req.user._id,type:"book_match",title:"A requested book is available",message:academicBook.title+" is listed on BookLoop.",link:"/books/"+listing._id});return res.redirect("/books/"+listing._id);}
+ if(listing){await notifyUser({recipient:req.user._id,type:"book_match",title:"A requested book is available",message:academicBook.title+" is listed on BookLoop.",link:"/books/"+listing._id});return res.redirect("/books/"+listing._id);}
  await BookRequest.create({
   student:req.user._id,
   academicBook:academicBook._id,
