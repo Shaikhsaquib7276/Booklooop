@@ -114,7 +114,7 @@
                           <%= x.isOwnListing ? "Your Listing" : "₹"+Number(x.price).toLocaleString("en-IN") %>
                         </span>
                         <small>
-                          <%= x.isOwnListing ? "View your book" : (x.condition || "Used") %><%= !x.isOwnListing && x.distanceKm !== null ? " · "+x.distanceKm.toFixed(1)+" km" : "" %>
+                          <%= x.isOwnListing ? "View your book" : (x.condition || "Used") %><%= !x.isOwnListing && Number.isFinite(Number(x.distanceKm)) ? " · "+Number(x.distanceKm).toFixed(1)+" km" : "" %>
                         </small>
                       </a>
                     <% }) %>
