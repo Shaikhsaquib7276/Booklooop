@@ -6,7 +6,6 @@ const BookRequest = require("../models/BookRequest");
 const { attachAcademicBook } = require("../utils/academicMatcher");
 const { notifyUsers } = require("../utils/notificationService");
 
-const escapeRegex = (value = "") => String(value).split("").map(ch => "\\.^$*+?()[]{}|".includes(ch) ? "\\" + ch : ch).join("");
 
 const levenshtein = (a, b) => {
     const left = String(a || "").toLowerCase();
