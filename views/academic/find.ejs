@@ -110,9 +110,11 @@
                   <div class="academic-listings">
                     <% b.listings.slice(0,4).forEach(x=>{ %>
                       <a class="academic-listing-chip" href="/books/<%= x._id %>">
-                        <span>₹<%= Number(x.price).toLocaleString("en-IN") %></span>
+                        <span>
+                          <%= x.isOwnListing ? "Your Listing" : "₹"+Number(x.price).toLocaleString("en-IN") %>
+                        </span>
                         <small>
-                          <%= x.condition || "Used" %><%= x.distanceKm !== null ? " · "+x.distanceKm.toFixed(1)+" km" : "" %>
+                          <%= x.isOwnListing ? "View your book" : (x.condition || "Used") %><%= !x.isOwnListing && x.distanceKm !== null ? " · "+x.distanceKm.toFixed(1)+" km" : "" %>
                         </small>
                       </a>
                     <% }) %>
@@ -120,13 +122,13 @@
 
                   <div class="d-flex flex-wrap gap-2 mt-2">
                     <% if(b.listings.length===1){ %>
-                      <a class="btn btn-success btn-sm" href="/books/<%= b.listings[0]._id %>">
-                        <i class="bi bi-eye me-1"></i>View Book
+                      <a class="btn <%= b.listings[0].isOwnListing ? "btn-outline-primary" : "btn-success" %> btn-sm" href="/books/<%= b.listings[0]._id %>">
+                        <i class="bi bi-eye me-1"></i><%= b.listings[0].isOwnListing ? "View Your Listing" : "View Book" %>
                       </a>
                     <% } else { %>
                       <% b.listings.slice(0,4).forEach(x=>{ %>
-                        <a class="btn btn-outline-success btn-sm" href="/books/<%= x._id %>">
-                          <i class="bi bi-eye me-1"></i>View ₹<%= Number(x.price).toLocaleString("en-IN") %>
+                        <a class="btn <%= x.isOwnListing ? "btn-outline-primary" : "btn-outline-success" %> btn-sm" href="/books/<%= x._id %>">
+                          <i class="bi bi-eye me-1"></i><%= x.isOwnListing ? "Your Listing" : "View ₹"+Number(x.price).toLocaleString("en-IN") %>
                         </a>
                       <% }) %>
                     <% } %>
