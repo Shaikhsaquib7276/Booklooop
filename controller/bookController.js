@@ -100,6 +100,100 @@ module.exports.searchSuggestions = async (req, res) => {
     res.json({ suggestions });
 };
 
+const escapeRegex = (value = "") => String(value).split("").map(ch => "\\.^$*+?()[]{}|".includes(ch) ? "\\" + ch : ch).join("");
+
+const levenshtein = (a, b) => {
+    const left = String(a || "").toLowerCase();
+    const right = String(b || "").toLowerCase();
+    if (!left) return right.length;
+    if (!right) return left.length;
+    let previous = Array.from({ length: right.length + 1 }, (_, i) => i);
+    for (let i = 0; i < left.length; i += 1) {
+        const current = [i + 1];
+        for (let j = 0; j < right.length; j += 1) {
+            const insert = current[j] + 1;
+            const remove = previous[j + 1] + 1;
+            const replace = previous[j] + (left[i] === right[j] ? 0 : 1);
+            current.push(Math.min(insert, remove, replace));
+        }
+        previous = current;
+    }
+    return previous[right.length];
+};
+
+const fuzzySimilarity = (query, value) => {
+    const queryTokens = String(query || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    const valueTokens = String(value || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+    if (!queryTokens.length || !valueTokens.length) return 0;
+    let best = 0;
+    queryTokens.forEach(queryToken => {
+        valueTokens.forEach(valueToken => {
+            const distance = levenshtein(queryToken, valueToken);
+            const score = 1 - distance / Math.max(queryToken.length, valueToken.length);
+            if (score > best) best = score;
+        });
+    });
+    return best;
+};
+
+module.exports.searchSuggestions = async (req, res) => {
+    const query = String(req.query.q || "").trim().slice(0, 80);
+    if (query.length < 2) return res.json({ suggestions: [] });
+
+    const safeQuery = escapeRegex(query);
+    const startsWith = new RegExp("^" + safeQuery, "i");
+    const contains = new RegExp(safeQuery, "i");
+    const normalizedQuery = query.toLowerCase();
+
+    const books = await Book.find({
+        $or: [{ title: contains }, { author: contains }, { category: contains }]
+    }).select("title author category").limit(60).lean();
+
+    const seen = new Set();
+    const suggestions = [];
+    const addSuggestion = (value, type) => {
+        const text = String(value || "").trim();
+        const key = text.toLowerCase();
+        if (!text || seen.has(key) || suggestions.length >= 8) return;
+        seen.add(key);
+        suggestions.push({ text, type });
+    };
+    const score = book => [
+        [book.title, 30], [book.author, 20], [book.category, 10]
+    ].reduce((total, [value, weight]) => {
+        const field = String(value || "").toLowerCase();
+        if (field.startsWith(normalizedQuery)) return total + weight + 10;
+        if (field.includes(normalizedQuery)) return total + weight;
+        return total;
+    }, 0);
+
+    books.sort((a, b) => score(b) - score(a)).forEach(book => {
+        if (startsWith.test(book.title || "")) addSuggestion(book.title, "Book");
+        if (startsWith.test(book.author || "")) addSuggestion(book.author, "Author");
+        if (startsWith.test(book.category || "")) addSuggestion(book.category, "Category");
+    });
+
+    if (suggestions.length < 8) {
+        books.forEach(book => {
+            if (suggestions.length < 8) addSuggestion(book.title, "Book");
+        });
+    }
+
+    if (suggestions.length === 0) {
+        const firstCharacter = new RegExp(escapeRegex(query.charAt(0)), "i");
+        const fuzzyBooks = await Book.find({
+            $or: [{ title: firstCharacter }, { author: firstCharacter }, { category: firstCharacter }]
+        }).select("title author category").limit(200).lean();
+        fuzzyBooks.map(book => ({
+            book,
+            score: Math.max(fuzzySimilarity(query, book.title), fuzzySimilarity(query, book.author), fuzzySimilarity(query, book.category))
+        })).filter(item => item.score >= 0.55).sort((a, b) => b.score - a.score).forEach(item => {
+            if (suggestions.length < 8) addSuggestion(item.book.title, "Book");
+        });
+    }
+    res.json({ suggestions });
+};
+
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
     const academicBook = await AcademicBook.findOne({
