@@ -302,7 +302,7 @@ exports.cashfreeCreateOrder = async (req, res) => {
   });
 
   try {
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const baseUrl = process.env.BOOKLOOP_BASE_URL || `${req.protocol}://${req.get("host")}`;
     const cashfreeOrderId = `bl_${String(order._id)}_${Date.now()}`;
     const response = await cashfreeRequest("/pg/orders", "POST", {
       order_id: cashfreeOrderId,
@@ -329,7 +329,8 @@ exports.cashfreeCreateOrder = async (req, res) => {
       paymentSessionId: order.cashfreePaymentSessionId,
       amount: order.amount,
       currency: order.currency,
-      localOrderId: String(order._id)
+      localOrderId: String(order._id),
+      mode: process.env.CASHFREE_ENV === "production" ? "production" : "sandbox"
     });
   } catch (error) {
     if (!existingOrder) await Order.findByIdAndDelete(order._id);
