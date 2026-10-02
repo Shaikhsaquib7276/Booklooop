@@ -1,6 +1,8 @@
 const Book = require("../models/Book");
 const User = require("../models/user");
 const Order = require("../models/Order");
+const BookRequest = require("../models/BookRequest");
+const { notifyUsers } = require("../utils/notificationService");
 
 module.exports.dashboard = async (req, res) => {
     const [bookCount, userCount, orderCount, soldCount, paidOrders] = await Promise.all([
@@ -23,12 +25,36 @@ module.exports.books = async (req, res) => {
 };
 
 module.exports.deleteBook = async (req, res) => {
-    const book = await Book.findByIdAndDelete(req.params.id);
+    const book = await Book.findById(req.params.id);
     if (!book) {
         req.flash("error", "Book not found.");
         return res.redirect("/admin/books");
     }
-    req.flash("success", "Book deleted successfully.");
+
+    // A marketplace listing is one physical copy; the academic catalog is
+    // independent. Re-open any student requests that were matched to this copy.
+    const matchedRequests = await BookRequest.find({
+        matchedBook: book._id,
+        status: "Matched"
+    }).select("_id student").lean();
+
+    await BookRequest.updateMany(
+        { matchedBook: book._id, status: "Matched" },
+        { $set: { status: "Open", matchedBook: null, matchedAt: null } }
+    );
+
+    await Book.findByIdAndDelete(book._id);
+
+    await notifyUsers({
+        type: "listing_update",
+        title: "A matched book listing was removed",
+        message: book.title + " was removed by an administrator. Your book request is open again.",
+        link: "/book-requests"
+    }, matchedRequests.map(request => request.student));
+
+    req.flash("success", matchedRequests.length
+        ? "Book deleted and affected requests were reopened."
+        : "Book deleted successfully.");
     res.redirect("/admin/books");
 };
 
