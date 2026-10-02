@@ -119,6 +119,14 @@ exports.findBooks=async(req,res)=>{
     .lean();
   }
 
+  listings=listings.map(book=>{
+   const coords=book.location?.coordinates;
+   const distanceKm=hasLocation&&Array.isArray(coords)&&coords.length===2
+    ? haversineKm(lat,lng,coords[1],coords[0])
+    : null;
+   return {...book,distanceKm};
+  });
+
   const rowById=new Map(rows.map(row=>[String(row._id),row]));
   const rowBySourceBook=new Map(
    rows.filter(row=>row.sourceBook).map(row=>[String(row.sourceBook),row])
