@@ -290,7 +290,8 @@ exports.cashfreeCreateOrder = async (req, res) => {
       paymentSessionId: existingOrder.cashfreePaymentSessionId,
       amount: existingOrder.amount,
       currency: existingOrder.currency,
-      localOrderId: String(existingOrder._id)
+      localOrderId: String(existingOrder._id),
+      mode: process.env.CASHFREE_ENV === "production" ? "production" : "sandbox"
     });
   }
 
