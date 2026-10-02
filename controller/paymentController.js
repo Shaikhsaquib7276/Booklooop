@@ -83,7 +83,8 @@ exports.checkout = async (req, res) => {
   res.render("payments/checkout", {
     title: "Checkout",
     books,
-    keyId: process.env.RAZORPAY_KEY_ID || ""
+    keyId: process.env.RAZORPAY_KEY_ID || "",
+    cashfreeConfigured: Boolean(process.env.CASHFREE_APP_ID && process.env.CASHFREE_SECRET_KEY)
   });
 };
 
