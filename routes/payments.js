@@ -13,6 +13,8 @@ router.get("/checkout/buy/:id", isLoggedIn, (req, res) => {
 });
 router.post("/payments/create-order", isLoggedIn, wrapAsync(paymentController.createOrder));
 router.post("/payments/verify", isLoggedIn, wrapAsync(paymentController.verifyPayment));
+router.post("/payments/cashfree/create-order", isLoggedIn, wrapAsync(paymentController.cashfreeCreateOrder));
+router.get("/payments/cashfree/success", isLoggedIn, wrapAsync(paymentController.cashfreeSuccess));
 router.get("/payments/success/:id", isLoggedIn, wrapAsync(paymentController.success));
 
 module.exports = router;
