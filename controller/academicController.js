@@ -92,8 +92,7 @@ exports.findBooks=async(req,res)=>{
    $and:[
     {$or:[{status:"Available"},{status:{$exists:false}}]},
     {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
-   ],
-   owner:{$ne:req.user._id}
+   ]
   };
 
   if(hasLocation){
@@ -139,6 +138,7 @@ exports.findBooks=async(req,res)=>{
 
    const current=listingMap.get(academicId)||[];
    if(!current.some(item=>String(item._id)===String(book._id))){
+    book.isOwnListing=String(book.owner?._id||book.owner)===String(req.user._id);
     current.push(book);
    }
    listingMap.set(academicId,current);
