@@ -11,8 +11,12 @@ const orderSchema = new mongoose.Schema({
   amount: { type: Number, required: true, min: 1 },
   currency: { type: String, default: "INR", enum: ["INR"] },
   status: { type: String, enum: ["created", "paid", "failed"], default: "created", index: true },
+  paymentProvider: { type: String, enum: ["razorpay", "cashfree"], default: "razorpay", index: true },
   razorpayOrderId: { type: String, unique: true, sparse: true, index: true },
   razorpayPaymentId: String,
+  cashfreeOrderId: { type: String, unique: true, sparse: true, index: true },
+  cashfreePaymentSessionId: String,
+  cashfreePaymentId: String,
   paidAt: Date
 }, { timestamps: true });
 
