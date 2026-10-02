@@ -1,1 +1,76 @@
-<% layout("/layouts/boilerplate") %><div class="academic-page"><div class="academic-results-heading"><div><h1>My Book Requests</h1><p>Track books you need for your semester.</p></div><a href="/find-books" class="btn btn-primary">Find Books</a></div><% if(!requests.length){ %><div class="academic-empty"><h3>No requests yet</h3><p>Request unavailable books from your semester book map.</p></div><% }else{ %><div class="academic-request-list"><% requests.forEach(r=>{ %><article class="academic-request-card"><div><span class="badge <%= r.status==="Matched"?"text-bg-success":"text-bg-secondary" %>"><%= r.status %></span><h3><%= r.academicBook?r.academicBook.title:"Book removed" %></h3><p><%= r.college %> · <%= r.course %> · <%= r.academicYear %> · Sem <%= r.semester %></p></div><% if(r.matchedBook){ %><a class="btn btn-success btn-sm" href="/books/<%= r.matchedBook._id %>">View matching book</a><% }else{ %><small>Waiting for a seller.</small><% } %></article><% }) %></div><% } %></div>
+<% layout("/layouts/boilerplate") %>
+<div class="academic-page">
+  <div class="academic-results-heading">
+    <div>
+      <h1>My Book Requests</h1>
+      <p>Track books you need for your semester.</p>
+    </div>
+    <a href="/find-books" class="btn btn-primary">Find Books</a>
+  </div>
+
+  <% if(!requests.length){ %>
+    <div class="academic-empty">
+      <h3>No requests yet</h3>
+      <p>Request unavailable books from your semester book map.</p>
+    </div>
+  <% }else{ %>
+    <div class="academic-request-list">
+      <% requests.forEach(r=>{ %>
+        <article class="academic-request-card">
+          <div>
+            <span class="badge <%= r.status === "Matched" ? "text-bg-success" : r.status === "Fulfilled" ? "text-bg-primary" : r.status === "Cancelled" ? "text-bg-secondary" : "text-bg-secondary" %>">
+              <%= r.status === "Matched" ? "Seller Found" : r.status %>
+            </span>
+
+            <h3><%= r.academicBook ? r.academicBook.title : "Book removed" %></h3>
+
+            <p>
+              <%= r.college %> · <%= r.course %> · <%= r.academicYear %> · Sem <%= r.semester %>
+            </p>
+          </div>
+
+          <div class="text-end">
+            <% if(r.matchedBook && r.matchedBook.owner){ %>
+              <div class="mb-2">
+                <strong class="d-block text-success">
+                  <i class="bi bi-check-circle me-1"></i>Seller Found
+                </strong>
+                <a
+                  href="/users/<%= r.matchedBook.owner._id %>"
+                  class="text-decoration-none fw-semibold"
+                >
+                  <i class="bi bi-person-circle me-1"></i>
+                  <%= r.matchedBook.owner.username %>
+                </a>
+                <% if(r.matchedBook.owner.college){ %>
+                  <small class="text-muted d-block"><%= r.matchedBook.owner.college %></small>
+                <% } %>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2">
+                <a href="/users/<%= r.matchedBook.owner._id %>" class="btn btn-outline-primary btn-sm">
+                  View Seller
+                </a>
+                <a href="/books/<%= r.matchedBook._id %>" class="btn btn-success btn-sm">
+                  View Book
+                </a>
+              </div>
+            <% } else if(r.status === "Fulfilled"){ %>
+              <span class="text-primary fw-semibold">
+                <i class="bi bi-check2-circle me-1"></i>Request fulfilled
+              </span>
+            <% } else if(r.status === "Cancelled"){ %>
+              <span class="text-muted">
+                Request cancelled.
+              </span>
+            <% } else { %>
+              <small class="text-muted">
+                <i class="bi bi-hourglass-split me-1"></i>Waiting for a seller.
+              </small>
+            <% } %>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
