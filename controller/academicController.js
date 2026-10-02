@@ -322,6 +322,43 @@ exports.myRequests=async(req,res)=>{
   .populate({path:"matchedBook",populate:{path:"owner",select:"username college"}})
   .sort({createdAt:-1});
 
+ const ownAcademicIds=requests
+  .filter(request=>request.status==="Open" && request.academicBook)
+  .map(request=>String(request.academicBook._id));
+
+ if(ownAcademicIds.length){
+  const ownAcademicRows=await AcademicBook.find({_id:{$in:ownAcademicIds}})
+   .select("_id sourceBook")
+   .lean();
+
+  const ownOr=[];
+  ownAcademicRows.forEach(row=>{
+   ownOr.push({academicBook:row._id,owner:req.user._id});
+   if(row.sourceBook) ownOr.push({_id:row.sourceBook,owner:req.user._id});
+  });
+
+  const ownListings=ownOr.length
+   ? await Book.find({
+      $and:[
+       {$or:[{status:"Available"},{status:{$exists:false}}]},
+       {$or:[{stock:{$gt:0}},{stock:{$exists:false}}]}
+      ],
+      $or:ownOr
+     }).select("_id title academicBook owner").lean()
+   : [];
+
+  requests.forEach(request=>{
+   if(request.status!=="Open" || !request.academicBook) return;
+   const row=ownAcademicRows.find(item=>String(item._id)===String(request.academicBook._id));
+   const sourceBook=String(row?.sourceBook||"");
+   const ownListing=ownListings.find(book=>
+    String(book.academicBook||"")===String(request.academicBook._id) ||
+    String(book._id)===sourceBook
+   );
+   if(ownListing) request.ownMatchingBook=ownListing;
+  });
+ }
+
  res.render("academic/requests",{title:"My Book Requests",requests});
 };
 exports.myBooks=async(req,res)=>res.render("academic/my-books",{title:"My Academic Books",books:await StudentBook.find({student:req.user._id}).populate("book").populate("academicBook").sort({purchasedAt:-1})});
