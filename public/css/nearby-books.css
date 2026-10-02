@@ -1,1 +1,90 @@
 .nearby-page{padding:1rem 0 3rem}.nearby-header{max-width:780px;margin:0 auto 1.5rem;text-align:center}.nearby-eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--bs-primary)}.nearby-header h1{font-size:clamp(2rem,5vw,3rem);font-weight:750;margin:.4rem 0}.nearby-header p,.nearby-results-heading p{color:var(--bs-secondary-color)}.nearby-search{border:1px solid var(--bs-border-color);border-radius:1rem;background:var(--bs-body-bg)}.nearby-results-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:1.5rem 0 1rem}.nearby-results-heading h2{font-size:1.35rem;font-weight:700;margin:0}.nearby-results-heading p{margin:.25rem 0 0}.nearby-map{height:380px;border:1px solid var(--bs-border-color);border-radius:1rem;z-index:0}.nearby-table-wrap{border:1px solid var(--bs-border-color);border-radius:1rem;background:var(--bs-body-bg)}.nearby-table{margin:0;min-width:760px}.nearby-table th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--bs-secondary-color);background:var(--bs-tertiary-bg)}.nearby-book-title{font-weight:650;text-decoration:none}.nearby-book-title:hover{text-decoration:underline}.nearby-empty{text-align:center;padding:3rem 1rem;border:1px dashed var(--bs-border-color);border-radius:1rem}.nearby-empty>i{font-size:2rem;color:var(--bs-primary)}.nearby-empty h3{font-size:1.15rem;font-weight:700;margin:.75rem 0 .3rem}.nearby-empty p{color:var(--bs-secondary-color);margin:0}@media(max-width:767px){.nearby-results-heading{align-items:flex-start}.nearby-map{height:300px}.nearby-header{text-align:left}}
+
+/* ---------- Theme-safe colors for Nearby Books ---------- */
+body.dark .nearby-page,
+body.dark .nearby-page h1,
+body.dark .nearby-page h2,
+body.dark .nearby-page h3,
+body.dark .nearby-page strong {
+  color: var(--text);
+}
+
+body.dark .nearby-header p,
+body.dark .nearby-results-heading p,
+body.dark .nearby-empty p,
+body.dark .nearby-table th,
+body.dark .nearby-table td,
+body.dark .nearby-page .text-muted,
+body.dark .nearby-page .text-secondary {
+  color: var(--text-light) !important;
+}
+
+body.dark .nearby-search,
+body.dark .nearby-table-wrap,
+body.dark .nearby-empty {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+body.dark .nearby-table {
+  color: var(--text);
+  --bs-table-bg: var(--card);
+  --bs-table-color: var(--text);
+  --bs-table-border-color: var(--border);
+}
+
+body.dark .nearby-table tbody tr,
+body.dark .nearby-table tbody tr td {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+body.dark .nearby-table th {
+  background: var(--surface-soft);
+  color: var(--text-light);
+}
+
+body.dark .nearby-book-title {
+  color: #93c5fd;
+}
+
+body.dark .nearby-book-title:hover {
+  color: #bfdbfe;
+}
+
+body.dark .nearby-map {
+  border-color: var(--border);
+}
+
+body.dark .nearby-empty > i {
+  color: #60a5fa;
+}
+
+body.dark .nearby-page .form-control,
+body.dark .nearby-page .form-select {
+  background: var(--input-bg);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+body.dark .nearby-page .form-control::placeholder {
+  color: var(--text-light);
+}
+
+body.dark .nearby-page .btn-outline-primary {
+  color: #93c5fd;
+  border-color: #3b82f6;
+}
+
+body.dark .nearby-page .btn-outline-primary:hover,
+body.dark .nearby-page .btn-outline-primary:focus-visible {
+  color: #fff;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+body.dark .nearby-page .badge {
+  color: #e5edf8;
+}
