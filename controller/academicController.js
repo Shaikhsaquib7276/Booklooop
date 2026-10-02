@@ -226,6 +226,9 @@ exports.rejectAcademicBook=async(req,res)=>{
  record.verifiedBy=req.user._id;
  record.verifiedAt=new Date();
  await record.save();
+ if(record.submittedBy){
+  await notifyUser({recipient:record.submittedBy,type:"listing_update",title:"Academic mapping rejected",message:record.title+" was not approved for Smart Semester Finder.",link:"/books"});
+ }
  req.flash("success","Academic submission rejected.");
  res.redirect("/admin/academic");
 };
