@@ -4,3 +4,124 @@
 
 .academic-review-note{display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1rem;border:1px solid var(--bs-primary-border-subtle);background:var(--bs-primary-bg-subtle);border-radius:.8rem;margin-bottom:1.25rem}.academic-review-note i{color:var(--bs-primary);font-size:1.1rem}.academic-review-note strong,.academic-review-note span{display:block}.academic-review-note span{font-size:.78rem;color:var(--bs-secondary-color);margin-top:.15rem}.academic-review-section{margin-top:1.5rem}.academic-review-section-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.8rem}.academic-review-section-head>div{display:flex;align-items:center;gap:.55rem}.academic-review-section-head h3{font-size:1.05rem;margin:0}.academic-review-section-head small{color:var(--bs-secondary-color)}.academic-review-list{display:grid;gap:1rem}.academic-review-card{display:flex;justify-content:space-between;gap:1.25rem;padding:1.15rem;border:1px solid var(--bs-border-color);border-radius:1rem;background:var(--bs-body-bg)}.academic-review-main{min-width:0;flex:1}.academic-review-main h4{font-size:1.05rem;margin:.55rem 0 .2rem}.academic-review-main p{color:var(--bs-secondary-color);font-size:.85rem}.academic-review-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;margin-top:.9rem}.academic-review-details>div{padding:.55rem .65rem;background:var(--bs-tertiary-bg);border-radius:.65rem}.academic-review-details span,.academic-review-details strong{display:block}.academic-review-details span{font-size:.65rem;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:.04em}.academic-review-details strong{font-size:.78rem;margin-top:.15rem}.academic-review-actions{display:flex;flex-direction:column;gap:.5rem;flex:0 0 110px}.academic-review-actions form{margin:0}.academic-review-actions .btn{width:100%}.academic-review-empty{display:flex;align-items:center;gap:.65rem;padding:1rem;border:1px dashed var(--bs-border-color);border-radius:.8rem;color:var(--bs-secondary-color);font-size:.82rem}.academic-review-empty i{color:var(--bs-primary);font-size:1.15rem}.academic-review-empty strong{color:var(--bs-body-color)}@media(max-width:767px){.academic-review-section-head{align-items:flex-start;flex-direction:column}.academic-review-card{flex-direction:column}.academic-review-details{grid-template-columns:1fr 1fr}.academic-review-actions{display:grid;grid-template-columns:1fr 1fr;flex:initial}.academic-review-actions .btn{width:100%}}@media(max-width:480px){.academic-review-details{grid-template-columns:1fr}.academic-review-actions{grid-template-columns:1fr}}
 .academic-profile-card{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.2rem 1.4rem;border:1px solid var(--bs-border-color);border-radius:1rem;background:var(--bs-body-bg);box-shadow:0 10px 30px rgba(13,110,253,.04)}.academic-profile-card h2{font-size:1.15rem;margin:.2rem 0}.academic-profile-card p{margin:0;color:var(--bs-secondary-color);font-size:.82rem}@media(max-width:767px){.academic-profile-card{align-items:flex-start;flex-direction:column;padding:1rem}}
+
+
+/* ---------- Theme-safe colors for Academic Finder ---------- */
+body.dark .academic-page,
+body.dark .academic-page h1,
+body.dark .academic-page h2,
+body.dark .academic-page h3,
+body.dark .academic-page h4,
+body.dark .academic-page strong,
+body.dark .academic-page label {
+  color: var(--text);
+}
+
+body.dark .academic-hero p,
+body.dark .academic-results-heading p,
+body.dark .academic-profile-card p,
+body.dark .academic-location-status,
+body.dark .academic-stat-card span,
+body.dark .academic-stat-card small,
+body.dark .academic-book-card p,
+body.dark .academic-listing-chip small,
+body.dark .academic-unavailable span,
+body.dark .academic-review-section-head small,
+body.dark .academic-review-details span,
+body.dark .academic-review-empty {
+  color: var(--text-light) !important;
+}
+
+body.dark .academic-selector-card,
+body.dark .academic-how-card,
+body.dark .academic-subject-card,
+body.dark .academic-admin-card,
+body.dark .academic-progress-card,
+body.dark .academic-profile-card,
+body.dark .academic-request-card,
+body.dark .academic-book-card,
+body.dark .academic-empty,
+body.dark .academic-review-card {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+body.dark .academic-location-bar,
+body.dark .academic-stat-card,
+body.dark .academic-availability-row,
+body.dark .academic-unavailable,
+body.dark .academic-review-details > div {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+body.dark .academic-listing-chip {
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+body.dark .academic-listing-chip:hover {
+  background: var(--surface-soft);
+  border-color: #60a5fa;
+  color: var(--text);
+}
+
+body.dark .academic-subject-label,
+body.dark .academic-eyebrow,
+body.dark .academic-review-note i,
+body.dark .academic-how-icon {
+  color: #60a5fa;
+}
+
+body.dark .academic-how-icon {
+  background: #172033;
+}
+
+body.dark .academic-review-note {
+  background: #172033;
+  border-color: #334155;
+  color: var(--text);
+}
+
+body.dark .academic-review-note span {
+  color: var(--text-light);
+}
+
+body.dark .academic-matched {
+  border-color: rgba(134, 239, 172, .28);
+}
+
+body.dark .academic-page .text-bg-light {
+  background-color: var(--surface-soft) !important;
+  color: var(--text) !important;
+}
+
+body.dark .academic-page .text-success {
+  color: #86efac !important;
+}
+
+body.dark .academic-page .text-danger {
+  color: #fca5a5 !important;
+}
+
+body.dark .academic-page .btn-outline-primary {
+  color: #93c5fd;
+  border-color: #3b82f6;
+}
+
+body.dark .academic-page .btn-outline-primary:hover,
+body.dark .academic-page .btn-outline-primary:focus-visible {
+  color: #fff;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+body.dark .academic-progress-track {
+  background: #1e293b;
+}
+
+body.dark .academic-progress-track span {
+  background: #60a5fa;
+}
