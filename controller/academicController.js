@@ -184,7 +184,55 @@ exports.requestBook=async(req,res)=>{
  });
  req.flash("success","Request created. We'll notify you when a matching book is listed.");res.redirect("/book-requests");
 };
-exports.myRequests=async(req,res)=>res.render("academic/requests",{title:"My Book Requests",requests:await BookRequest.find({student:req.user._id}).populate("academicBook").populate({path:"matchedBook",populate:{path:"owner",select:"username college"}}).sort({createdAt:-1})});
+exports.myRequests=async(req,res)=>{
+ const openRequests=await BookRequest.find({
+  student:req.user._id,
+  status:"Open"
+ }).select("_id academicBook").lean();
+
+ if(openRequests.length){
+  const academicIds=[...new Set(openRequests.map(request=>String(request.academicBook)))];
+  const matches=await Book.find({
+   academicBook:{$in:academicIds},
+   status:"Available",
+   owner:{$ne:req.user._id},
+   $or:[{stock:{$gt:0}},{stock:{$exists:false}}]
+  }).select("_id title academicBook").sort({createdAt:-1}).lean();
+
+  const matchedUpdates=[];
+  for(const request of openRequests){
+   const match=matches.find(book=>String(book.academicBook)===String(request.academicBook));
+   if(match){
+    matchedUpdates.push({request,match});
+   }
+  }
+
+  if(matchedUpdates.length){
+   await Promise.all(matchedUpdates.map(({request,match})=>
+    BookRequest.updateOne(
+     {_id:request._id,status:"Open"},
+     {$set:{status:"Matched",matchedBook:match._id,matchedAt:new Date()}}
+    )
+   ));
+   await Promise.all(matchedUpdates.map(({match})=>
+    notifyUser({
+     recipient:req.user._id,
+     type:"book_match",
+     title:"A book you requested is now available",
+     message:match.title+" is available on BookLoop.",
+     link:"/books/"+match._id
+    })
+   ));
+  }
+ }
+
+ const requests=await BookRequest.find({student:req.user._id})
+  .populate("academicBook")
+  .populate({path:"matchedBook",populate:{path:"owner",select:"username college"}})
+  .sort({createdAt:-1});
+
+ res.render("academic/requests",{title:"My Book Requests",requests});
+};
 exports.myBooks=async(req,res)=>res.render("academic/my-books",{title:"My Academic Books",books:await StudentBook.find({student:req.user._id}).populate("book").populate("academicBook").sort({purchasedAt:-1})});
 exports.relist=async(req,res)=>{
  const owned=await StudentBook.findOne({_id:req.params.id,student:req.user._id,status:"Owned"}).populate("book").populate("academicBook");
