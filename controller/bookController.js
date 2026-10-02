@@ -100,6 +100,7 @@ module.exports.searchSuggestions = async (req, res) => {
     res.json({ suggestions });
 };
 
+
 async function notifyAcademicMatches(book, sellerId) {
     if (!book.academicBook) return;
     const academicBook = await AcademicBook.findOne({
