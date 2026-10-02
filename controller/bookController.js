@@ -3,7 +3,6 @@ const Book = require("../models/Book");
 const Reservation = require("../models/Reservation");
 const AcademicBook = require("../models/AcademicBook");
 const BookRequest = require("../models/BookRequest");
-const Notification = require("../models/Notification");
 const { attachAcademicBook } = require("../utils/academicMatcher");
 const { notifyUsers } = require("../utils/notificationService");
 
