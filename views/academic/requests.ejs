@@ -63,9 +63,19 @@
               <span class="text-muted">
                 Request cancelled.
               </span>
+            <% } else if(r.ownMatchingBook){ %>
+              <div class="mb-2">
+                <strong class="d-block text-primary">
+                  <i class="bi bi-book me-1"></i>Your matching listing
+                </strong>
+                <small class="text-muted d-block">This book belongs to your account, so it cannot be matched to your own request.</small>
+              </div>
+              <a href="/books/<%= r.ownMatchingBook._id %>" class="btn btn-outline-primary btn-sm">
+                View Your Listing
+              </a>
             <% } else { %>
               <small class="text-muted">
-                <i class="bi bi-hourglass-split me-1"></i>Waiting for a seller.
+                <i class="bi bi-hourglass-split me-1"></i>Waiting for another seller.
               </small>
             <% } %>
           </div>
