@@ -10,10 +10,13 @@
 
     <div class="collapse navbar-collapse" id="navbar">
       <div class="navbar-content">
-        <form class="search-form" action="/books" method="GET">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input class="form-control" name="q" placeholder="Search books..." value="<%= typeof q !== 'undefined' ? q : '' %>">
+        <form class="search-form" action="/books" method="GET" autocomplete="off">
+          <div class="search-autocomplete" data-search-autocomplete>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input id="bookSearchInput" class="form-control" name="q" placeholder="Search books..." value="<%= typeof q !== 'undefined' ? q : '' %>" autocomplete="off" aria-label="Search books" aria-autocomplete="list" aria-controls="bookSearchSuggestions">
+            </div>
+            <div id="bookSearchSuggestions" class="search-suggestions" role="listbox" aria-label="Search suggestions" hidden></div>
           </div>
         </form>
 
@@ -32,6 +35,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="/my-academic-books"><i class="bi bi-journal-bookmark me-2"></i>My Academic Books</a></li>
+                <li><a class="dropdown-item" href="/notifications"><i class="bi bi-bell me-2"></i>Notifications <span id="notificationBadge" class="badge rounded-pill text-bg-danger ms-1 d-none">0</span></a></li>
                 <li><a class="dropdown-item" href="/book-requests"><i class="bi bi-bell me-2"></i>My Book Requests</a></li>
                 <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a></li>
                 <li><a class="dropdown-item" href="/wishlist"><i class="bi bi-heart me-2"></i>Wishlist (<%= wishlistCount %>)</a></li>
@@ -60,4 +64,6 @@
       </div>
     </div>
   </div>
+  <script src="/js/search-autocomplete.js" defer></script>
+  <% if(currentUser){ %><script src="/js/notification-badge.js" defer></script><% } %>
 </nav>

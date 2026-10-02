@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
   recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-  type: { type: String, enum: ["book_match", "relist_reminder", "system"], default: "system" },
+  type: { type: String, enum: ["book_match", "relist_reminder", "request_update", "listing_update", "payment_update", "system"], default: "system" },
   title: { type: String, required: true, trim: true },
   message: { type: String, required: true, trim: true },
   link: { type: String, trim: true, default: "/" },

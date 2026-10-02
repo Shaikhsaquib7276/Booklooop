@@ -54,6 +54,8 @@ router.get(
     bookController.renderEditForm
 );
 
+router.get("/books/search-suggestions", wrapAsync(bookController.searchSuggestions));
+
 router.get("/books/:id", wrapAsync(bookController.showBook));
 
 router.put(
