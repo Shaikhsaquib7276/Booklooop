@@ -211,6 +211,9 @@ exports.verifyAcademicBook=async(req,res)=>{
  record.verifiedBy=req.user._id;
  record.verifiedAt=new Date();
  await record.save();
+ if(record.submittedBy){
+  await notifyUser({recipient:record.submittedBy,type:"listing_update",title:"Academic mapping verified",message:record.title+" is now verified and available in Smart Semester Finder.",link:"/find-books"});
+ }
  req.flash("success","Academic book verified and added to Smart Semester Finder.");
  res.redirect("/admin/academic");
 };
