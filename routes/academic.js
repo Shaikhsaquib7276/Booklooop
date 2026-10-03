@@ -5,8 +5,9 @@ const isLoggedIn = require("../middleware/isLoggedIn");
 const isAdmin = require("../middleware/isAdmin");
 const academicController = require("../controller/academicController");
 
-router.get("/find-books", isLoggedIn, wrapAsync(academicController.findBooks));
+router.get("/find-books", require("../middleware/isStudent"), wrapAsync(academicController.findBooks));
 router.get("/academic/options", wrapAsync(academicController.options));
+router.get("/academic/suggestions", isLoggedIn, wrapAsync(academicController.searchAcademicSuggestions));
 router.post("/book-requests/:id", isLoggedIn, wrapAsync(academicController.requestBook));
 router.post("/admin/academic/:id/verify", isAdmin, wrapAsync(academicController.verifyAcademicBook));
 router.post("/admin/academic/:id/reject", isAdmin, wrapAsync(academicController.rejectAcademicBook));
