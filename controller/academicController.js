@@ -40,6 +40,70 @@ async function options(filters={}) {
   semesters:semesters.filter(Number.isFinite).sort((a,b)=>a-b)
  };
 }
+async function searchAcademicSuggestions(req, res) {
+ const query = clean(req.query.q).slice(0, 100);
+ if (query.length < 2) return res.json({ suggestions: [] });
+
+ const normalizedQuery = clean(query).toLowerCase();
+ const normalizedCode = normalizedQuery.replace(/[^a-z0-9]/gi, "");
+ const first = normalizedQuery.charAt(0);
+ const firstRegex = new RegExp(first.replace(/[.*+?^$()|[\\]\\]/g, "\\exports.options=async(req,res)=>res.json(await options(req.query));"), "i");
+
+ const candidates = await AcademicBook.find({
+  active: true,
+  verificationStatus: "verified",
+  $or: [
+   { subject: firstRegex },
+   { subjectCode: firstRegex },
+   { title: firstRegex }
+  ]
+ }).select("subject subjectCode title college degree course academicYear year semester").limit(250).lean();
+
+ const ranked = candidates.map(candidate => {
+  const subjectScore = subjectSimilarity(query, candidate.subject);
+  const codeScore = normalizedCode && normalizeCode(candidate.subjectCode)
+   ? subjectCodeSimilarity(query, candidate.subjectCode)
+   : 0;
+  const titleScore = subjectSimilarity(query, candidate.title);
+  const codeExact = normalizedCode && normalizedCode === normalizeCode(candidate.subjectCode);
+  const score = Math.max(
+   subjectScore * 0.72 + titleScore * 0.28,
+   codeScore * 0.92 + subjectScore * 0.08
+  );
+  return { candidate, score, subjectScore, codeScore, codeExact };
+ })
+ .filter(item => item.codeExact || item.subjectScore >= 0.45 || item.score >= 0.55)
+ .sort((a,b) => {
+  if (b.codeExact !== a.codeExact) return b.codeExact ? 1 : -1;
+  return b.score - a.score;
+ });
+
+ const seen = new Set();
+ const suggestions = [];
+ for (const item of ranked) {
+  const c = item.candidate;
+  const key = String(c._id);
+  if (seen.has(key)) continue;
+  seen.add(key);
+  suggestions.push({
+   id: c._id,
+   subject: c.subject,
+   subjectCode: c.subjectCode,
+   title: c.title,
+   college: c.college,
+   degree: c.degree,
+   course: c.course,
+   academicYear: c.academicYear,
+   year: c.year,
+   semester: c.semester,
+   score: Number(item.score.toFixed(3))
+  });
+  if (suggestions.length >= 8) break;
+ }
+
+ res.json({ suggestions });
+}
+
 exports.options=async(req,res)=>res.json(await options(req.query));
 exports.findBooks=async(req,res)=>{
  const user=req.user;
