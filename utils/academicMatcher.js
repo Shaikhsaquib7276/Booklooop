@@ -13,7 +13,7 @@ function getAcademicSubmission(req) {
     // Students must choose a subject/code pair saved in their own academic profile.
     // Shops can continue to provide the academic fields manually.
     if (accountType === "student" && (subject || subjectCode)) {
-        const normalizeProfileValue = value => clean(value).toLowerCase().replace(/\\s+/g, " ");
+        const normalizeProfileValue = value => clean(value).toLowerCase().replace(/\s+/g, " ");
         const match = Array.isArray(user.academicSubjects)
             ? user.academicSubjects.find(item =>
                 normalizeProfileValue(item.subject) === normalizeProfileValue(subject) &&
