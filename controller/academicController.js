@@ -3,6 +3,10 @@ const Book=require("../models/Book");
 const BookRequest=require("../models/BookRequest");
 const StudentBook=require("../models/StudentBook");
 const { notifyUser } = require("../utils/notificationService");
+const {
+  academicRegex,
+  matchAcademicSubjectPair
+} = require("../utils/academicMatcher");
 const clean=v=>String(v||"").trim();
 const academicRegex=value=>{
  const parts=clean(value).split(/[^a-z0-9]+/i).filter(Boolean);
@@ -83,14 +87,18 @@ exports.findBooks=async(req,res)=>{
    verificationStatus:"verified"
   };
   if(profile.degree) academicFilter.degree=academicRegex(profile.degree);
-  academicFilter.$or=profile.academicSubjects.map(item=>({
-   subject:academicRegex(item.subject),
-   subjectCode:academicRegex(item.subjectCode)
-  }));
-
-  const rows=await AcademicBook.find(academicFilter)
+  // Query only the student's academic context first. Then match each
+  // subject/code pair in JavaScript so case, spacing, punctuation and small
+  // spelling mistakes are tolerated without mixing different subject codes.
+  const catalogRows=await AcademicBook.find(academicFilter)
    .sort({subject:1,title:1,academicYear:-1})
    .lean();
+
+  const rows=catalogRows.filter(row =>
+   profile.academicSubjects.some(item =>
+    matchAcademicSubjectPair(item,row).matched
+   )
+  );
 
   summary.required=rows.length;
 
