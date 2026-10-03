@@ -46,7 +46,12 @@ exports.findBooks=async(req,res)=>{
   course:clean(user.course),
   academicYear:clean(user.academicYear),
   year:Number(user.year),
-  semester:Number(user.semester)
+  semester:Number(user.semester),
+  academicSubjects:Array.isArray(user.academicSubjects)
+   ? user.academicSubjects
+    .map(item=>({subject:clean(item.subject),subjectCode:clean(item.subjectCode)}))
+    .filter(item=>item.subject && item.subjectCode)
+   : []
  };
  const radiusValue=Number.parseInt(req.query.radius,10);
  const radius=[1,5,10,20,50].includes(radiusValue)?radiusValue:10;
@@ -60,7 +65,8 @@ exports.findBooks=async(req,res)=>{
   profile.course &&
   profile.academicYear &&
   Number.isInteger(profile.year) && profile.year>0 &&
-  Number.isInteger(profile.semester) && profile.semester>0
+  Number.isInteger(profile.semester) && profile.semester>0 &&
+  profile.academicSubjects.length>0
  );
 
  let subjects=[];
@@ -70,12 +76,17 @@ exports.findBooks=async(req,res)=>{
   const academicFilter={
    college:academicRegex(profile.college),
    course:academicRegex(profile.course),
+   academicYear:academicRegex(profile.academicYear),
    year:profile.year,
    semester:profile.semester,
    active:true,
    verificationStatus:"verified"
   };
   if(profile.degree) academicFilter.degree=academicRegex(profile.degree);
+  academicFilter.$or=profile.academicSubjects.map(item=>({
+   subject:academicRegex(item.subject),
+   subjectCode:academicRegex(item.subjectCode)
+  }));
 
   const rows=await AcademicBook.find(academicFilter)
    .sort({subject:1,title:1,academicYear:-1})

@@ -82,11 +82,35 @@ const regularBooks = [
   { title:"Eloquent JavaScript", author:"Marijn Haverbeke", description:"A hands-on guide to JavaScript, functions, objects, asynchronous programming, and browser development. Demo listing for BookLoop testing.", category:"Web Development", price:250, condition:"Fair" }
 ];
 
+const STUDENT_ACADEMIC_SUBJECTS = academicBooks.map(item => ({
+  subject: item.subject,
+  subjectCode: item.subjectCode
+}));
+
 async function getOrCreateUser(username, name, accountType, shopName) {
   let user = await User.findOne({ username });
-  if (user) return user;
 
-  user = new User({
+  if (user) {
+    user.college = COLLEGE;
+    user.degree = "BSc";
+    user.course = "Computer Science";
+    user.academicYear = ACADEMIC_YEAR;
+    user.year = 3;
+    user.semester = 5;
+    user.accountType = accountType;
+    user.academicSubjects = accountType === "student" ? STUDENT_ACADEMIC_SUBJECTS : [];
+
+    if (accountType === "shop") {
+      user.shopName = shopName;
+      user.shopAddress = shopName + ", College Road, Nashik";
+      user.shopLocation = { type:"Point", coordinates:[73.7898,19.9975] };
+    }
+
+    await user.save();
+    return user;
+  }
+
+  const userData = new User({
     username,
     email: username + "@bookloop.test",
     phone: "9000000000",
@@ -97,6 +121,7 @@ async function getOrCreateUser(username, name, accountType, shopName) {
     academicYear: ACADEMIC_YEAR,
     year: 3,
     semester: 5,
+    academicSubjects: accountType === "student" ? STUDENT_ACADEMIC_SUBJECTS : [],
     accountType,
     ...(accountType === "shop" ? {
       shopName,
@@ -106,7 +131,7 @@ async function getOrCreateUser(username, name, accountType, shopName) {
     role:"user",
     isActive:true
   });
-  return User.register(user, PASSWORD);
+  return User.register(userData, PASSWORD);
 }
 
 async function seed() {
@@ -183,6 +208,7 @@ async function seed() {
 
   console.log("Seed completed.");
   console.log("Student accounts: 10");
+  console.log("Student academic subjects per seeded student: 3");
   console.log("Shop accounts: 10");
   console.log("Academic catalog records: "+catalog.length);
   console.log("Academic listings: 60");

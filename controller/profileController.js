@@ -23,6 +23,12 @@ module.exports.renderEditProfile = (req, res) => {
 
 module.exports.updateProfile = async (req, res) => {
     const { username, email, phone, city, college, degree, course, academicYear, year, semester } = req.body;
+    const rawSubjects = Array.isArray(req.body.academicSubject)
+        ? req.body.academicSubject
+        : (req.body.academicSubject ? [req.body.academicSubject] : []);
+    const rawSubjectCodes = Array.isArray(req.body.academicSubjectCode)
+        ? req.body.academicSubjectCode
+        : (req.body.academicSubjectCode ? [req.body.academicSubjectCode] : []);
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -61,6 +67,39 @@ module.exports.updateProfile = async (req, res) => {
     user.academicYear = String(academicYear || "").trim();
     user.year = Number.isFinite(Number(year)) ? Number(year) : undefined;
     user.semester = Number.isFinite(Number(semester)) ? Number(semester) : undefined;
+
+    if (user.accountType === "student") {
+        if (rawSubjects.length !== rawSubjectCodes.length) {
+            req.flash("error", "Each academic subject must have a subject code.");
+            return res.redirect("/profile/edit");
+        }
+
+        const academicSubjects = [];
+        const seen = new Set();
+
+        for (let index = 0; index < Math.min(rawSubjects.length, 30); index += 1) {
+            const subject = String(rawSubjects[index] || "").trim();
+            const subjectCode = String(rawSubjectCodes[index] || "").trim();
+
+            // Empty rows are allowed, but a partially completed row is invalid.
+            if (!subject && !subjectCode) continue;
+
+            if (!subject || !subjectCode) {
+                req.flash("error", "Each academic subject must have both a subject name and subject code.");
+                return res.redirect("/profile/edit");
+            }
+
+            const key = subject.toLowerCase() + "::" + subjectCode.toLowerCase();
+            if (seen.has(key)) continue;
+
+            seen.add(key);
+            academicSubjects.push({ subject, subjectCode });
+        }
+
+        user.academicSubjects = academicSubjects;
+    } else {
+        user.academicSubjects = [];
+    }
 
     if (req.file) {
         user.profileImage = {

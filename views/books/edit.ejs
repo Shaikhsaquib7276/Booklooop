@@ -72,15 +72,46 @@
             </div>
           <% } %>
 
+          <% 
+            const profileSubjects = currentUser && currentUser.accountType === "student" && Array.isArray(currentUser.academicSubjects)
+              ? currentUser.academicSubjects
+              : [];
+            const currentSubjectInProfile = book.academicBook && profileSubjects.some(item =>
+              String(item.subject || "").trim().toLowerCase() === String(book.academicBook.subject || "").trim().toLowerCase() &&
+              String(item.subjectCode || "").trim().toLowerCase() === String(book.academicBook.subjectCode || "").trim().toLowerCase()
+            );
+          %>
           <div class="row g-3 mt-1">
-            <div class="col-md-8">
-              <label for="academicSubject">Subject</label>
-              <input id="academicSubject" name="academicSubject" class="form-control" value="<%= book.academicBook ? book.academicBook.subject : '' %>" placeholder="e.g. Database Management Systems" <%= book.academicBook ? "required" : "" %>>
-            </div>
-            <div class="col-md-4">
-              <label for="academicSubjectCode">Subject code</label>
-              <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" value="<%= book.academicBook ? book.academicBook.subjectCode : '' %>" placeholder="e.g. CSC501">
-            </div>
+            <% if (currentUser && currentUser.accountType === "student") { %>
+              <div class="col-md-8">
+                <label for="academicSubject">Subject</label>
+                <select id="academicSubject" name="academicSubject" class="form-select" <%= book.academicBook && profileSubjects.length ? "required" : "" %>>
+                  <option value="">Select a subject from your profile</option>
+                  <% profileSubjects.forEach(item => { %>
+                    <option value="<%= item.subject %>" data-subject-code="<%= item.subjectCode %>"
+                      <%= book.academicBook && String(item.subject || "").trim().toLowerCase() === String(book.academicBook.subject || "").trim().toLowerCase() && String(item.subjectCode || "").trim().toLowerCase() === String(book.academicBook.subjectCode || "").trim().toLowerCase() ? "selected" : "" %>>
+                      <%= item.subject %>
+                    </option>
+                  <% }) %>
+                </select>
+                <% if (book.academicBook && !currentSubjectInProfile) { %>
+                  <div class="form-text text-warning">This listing's subject is not in your current profile. Update your academic profile before changing this academic mapping.</div>
+                <% } %>
+              </div>
+              <div class="col-md-4">
+                <label for="academicSubjectCode">Subject code</label>
+                <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" value="<%= book.academicBook ? book.academicBook.subjectCode : "" %>" placeholder="Selected automatically" readonly>
+              </div>
+            <% } else { %>
+              <div class="col-md-8">
+                <label for="academicSubject">Subject</label>
+                <input id="academicSubject" name="academicSubject" class="form-control" value="<%= book.academicBook ? book.academicBook.subject : "" %>" placeholder="e.g. Database Management Systems">
+              </div>
+              <div class="col-md-4">
+                <label for="academicSubjectCode">Subject code</label>
+                <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" value="<%= book.academicBook ? book.academicBook.subjectCode : "" %>" placeholder="e.g. CSC501">
+              </div>
+            <% } %>
           </div>
 
           <% if (currentUser && currentUser.accountType !== "student") { %>
@@ -230,11 +261,25 @@
   const toggle = document.getElementById("academicListing");
   const panel = document.getElementById("studentAcademicListing");
   const subject = document.getElementById("academicSubject");
+  const subjectCode = document.getElementById("academicSubjectCode");
   if (!toggle || !panel) return;
+
+  const syncCode = () => {
+    if (!subject || !subjectCode || subject.tagName !== "SELECT") return;
+    const option = subject.options[subject.selectedIndex];
+    subjectCode.value = option && option.dataset ? (option.dataset.subjectCode || "") : "";
+  };
+
+  if (subject && subject.tagName === "SELECT") {
+    subject.addEventListener("change", syncCode);
+    syncCode();
+  }
+
   const sync = () => {
     panel.classList.toggle("d-none", !toggle.checked);
-    if (subject) subject.required = toggle.checked && <%= currentUser && currentUser.accountType === "student" ? "true" : "false" %>;
+    if (subject) subject.required = toggle.checked && subject.tagName === "SELECT";
   };
+
   toggle.addEventListener("change", sync);
   sync();
 })();

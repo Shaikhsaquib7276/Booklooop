@@ -7,6 +7,29 @@ function getAcademicSubmission(req) {
     const user = req.user || {};
     const accountType = user.accountType === "shop" ? "shop" : "student";
 
+    let subject = clean(req.body.academicSubject);
+    let subjectCode = clean(req.body.academicSubjectCode);
+
+    // Students must choose a subject/code pair saved in their own academic profile.
+    // Shops can continue to provide the academic fields manually.
+    if (accountType === "student" && (subject || subjectCode)) {
+        const normalizeProfileValue = value => clean(value).toLowerCase().replace(/\s+/g, " ");
+        const match = Array.isArray(user.academicSubjects)
+            ? user.academicSubjects.find(item =>
+                normalizeProfileValue(item.subject) === normalizeProfileValue(subject) &&
+                normalizeProfileValue(item.subjectCode) === normalizeProfileValue(subjectCode)
+            )
+            : null;
+
+        if (!match) {
+            subject = "";
+            subjectCode = "";
+        } else {
+            subject = clean(match.subject);
+            subjectCode = clean(match.subjectCode);
+        }
+    }
+
     return {
         college: clean(req.body.academicCollege || user.college),
         degree: clean(req.body.academicDegree || user.degree),
@@ -14,8 +37,8 @@ function getAcademicSubmission(req) {
         academicYear: clean(req.body.academicYear || user.academicYear),
         year: Number(req.body.academicYearNumber || user.year),
         semester: Number(req.body.academicSemester || user.semester),
-        subject: clean(req.body.academicSubject),
-        subjectCode: clean(req.body.academicSubjectCode),
+        subject,
+        subjectCode,
         title: clean(req.body.title),
         author: clean(req.body.author),
         isbn: clean(req.body.isbn),
@@ -34,6 +57,7 @@ function isCompleteAcademicSubmission(data) {
         Number.isInteger(data.year) && data.year > 0 &&
         Number.isInteger(data.semester) && data.semester > 0 &&
         data.subject &&
+        data.subjectCode &&
         data.title
     );
 }

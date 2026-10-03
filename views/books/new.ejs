@@ -61,15 +61,34 @@
             </div>
           <% } %>
 
+          <% const profileSubjects = currentUser && currentUser.accountType === "student" && Array.isArray(currentUser.academicSubjects)
+            ? currentUser.academicSubjects
+            : []; %>
           <div class="row g-3 mt-1">
-            <div class="col-md-8">
-              <label for="academicSubject">Subject</label>
-              <input id="academicSubject" name="academicSubject" class="form-control" placeholder="e.g. Database Management Systems" <%= currentUser && currentUser.accountType === "student" ? "required" : "" %>>
-            </div>
-            <div class="col-md-4">
-              <label for="academicSubjectCode">Subject code</label>
-              <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" placeholder="e.g. CSC501">
-            </div>
+            <% if (currentUser && currentUser.accountType === "student") { %>
+              <div class="col-md-8">
+                <label for="academicSubject">Subject</label>
+                <select id="academicSubject" name="academicSubject" class="form-select" <%= profileSubjects.length ? "required" : "" %>>
+                  <option value="">Select a subject from your profile</option>
+                  <% profileSubjects.forEach(item => { %>
+                    <option value="<%= item.subject %>" data-subject-code="<%= item.subjectCode %>"><%= item.subject %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="academicSubjectCode">Subject code</label>
+                <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" placeholder="Selected automatically" readonly>
+              </div>
+            <% } else { %>
+              <div class="col-md-8">
+                <label for="academicSubject">Subject</label>
+                <input id="academicSubject" name="academicSubject" class="form-control" placeholder="e.g. Database Management Systems">
+              </div>
+              <div class="col-md-4">
+                <label for="academicSubjectCode">Subject code</label>
+                <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" placeholder="e.g. CSC501">
+              </div>
+            <% } %>
           </div>
 
           <% if (currentUser && currentUser.accountType !== "student") { %>
@@ -139,11 +158,34 @@
   const toggle = document.getElementById("academicListing");
   const panel = document.getElementById("studentAcademicListing");
   const subject = document.getElementById("academicSubject");
+  const subjectCode = document.getElementById("academicSubjectCode");
   if (!toggle || !panel) return;
+
+  const studentMode = <%= currentUser && currentUser.accountType === "student" ? "true" : "false" %>;
+  const hasSubjects = <%= currentUser && currentUser.accountType === "student" && Array.isArray(currentUser.academicSubjects) && currentUser.academicSubjects.length ? "true" : "false" %>;
+
+  if (studentMode && !hasSubjects) {
+    toggle.checked = false;
+    toggle.disabled = true;
+  }
+
+  const syncCode = () => {
+    if (!subject || !subjectCode || subject.tagName !== "SELECT") return;
+    const option = subject.options[subject.selectedIndex];
+    subjectCode.value = option && option.dataset ? (option.dataset.subjectCode || "") : "";
+  };
+
+  if (subject && subject.tagName === "SELECT") {
+    subject.addEventListener("change", syncCode);
+    syncCode();
+  }
+
   const sync = () => {
     panel.classList.toggle("d-none", !toggle.checked);
-    if (subject) subject.required = toggle.checked && <%= currentUser && currentUser.accountType === "student" ? "true" : "false" %>;
+    if (subject) subject.required = toggle.checked && studentMode && hasSubjects;
+    if (subjectCode && !subjectCode.readOnly) subjectCode.required = toggle.checked && studentMode && hasSubjects;
   };
+
   toggle.addEventListener("change", sync);
   sync();
 })();

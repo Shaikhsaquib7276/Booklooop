@@ -29,6 +29,13 @@ const userSchema = new mongoose.Schema(
         year: { type: Number, min: 1, max: 10 },
         semester: { type: Number, min: 1, max: 20 },
 
+        // Current subjects selected by the student for the Smart Semester Finder.
+        // Each entry keeps the subject/code pair together.
+        academicSubjects: [{
+            subject: { type: String, trim: true, required: true, maxlength: 150 },
+            subjectCode: { type: String, trim: true, required: true, maxlength: 50 }
+        }],
+
         profileImage: {
             url: {
                 type: String,
