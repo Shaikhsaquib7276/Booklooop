@@ -94,7 +94,7 @@ async function seed() {
           sellerType:user.accountType,
           stock:user.accountType==="shop"?4:1,
           addressLine:user.accountType==="shop"?user.shopAddress:"Nashik, Maharashtra",
-          ...(user.accountType==="shop"?{location:user.shopLocation}:{}),
+          location:user.accountType==="shop"?user.shopLocation:{type:"Point",coordinates:[73.7898,19.9975]},
           status:"Available"
         }},
         { upsert:true, new:true, runValidators:true, setDefaultsOnInsert:true }
@@ -113,7 +113,7 @@ async function seed() {
           sellerType:user.accountType,
           stock:user.accountType==="shop"?4:1,
           addressLine:user.accountType==="shop"?user.shopAddress:"Nashik, Maharashtra",
-          ...(user.accountType==="shop"?{location:user.shopLocation}:{}),
+          location:user.accountType==="shop"?user.shopLocation:{type:"Point",coordinates:[73.7898,19.9975]},
           status:"Available"
         }},
         { upsert:true, new:true, runValidators:true, setDefaultsOnInsert:true }
