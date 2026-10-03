@@ -89,7 +89,7 @@ function subjectSimilarity(a, b) {
 
     return Math.min(1, Math.max(
         0,
-        charScore * 0.45 + compactScore * 0.25 + tokenScore * 0.30
+        charScore * 0.20 + compactScore * 0.60 + tokenScore * 0.20
     ));
 }
 
