@@ -1,7 +1,202 @@
 const AcademicBook = require("../models/AcademicBook");
 
 const clean = value => String(value ?? "").trim();
-const normalize = value => clean(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+function normalizeText(value) {
+    return clean(value)
+        .normalize("NFKC")
+        .toLowerCase()
+        .replace(/['’]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function normalizeCode(value) {
+    return clean(value)
+        .normalize("NFKC")
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+}
+
+function levenshtein(a, b) {
+    a = String(a ?? "");
+    b = String(b ?? "");
+
+    if (a === b) return 0;
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+
+    if (a.length > b.length) [a, b] = [b, a];
+
+    let previous = Array.from({ length: a.length + 1 }, (_, i) => i);
+
+    for (let j = 1; j <= b.length; j += 1) {
+        const current = [j];
+
+        for (let i = 1; i <= a.length; i += 1) {
+            const insert = current[i - 1] + 1;
+            const remove = previous[i] + 1;
+            const replace = previous[i - 1] + (a[i - 1] === b[j - 1] ? 0 : 1);
+            current[i] = Math.min(insert, remove, replace);
+        }
+
+        previous = current;
+    }
+
+    return previous[a.length];
+}
+
+function similarity(a, b) {
+    const left = String(a ?? "");
+    const right = String(b ?? "");
+
+    if (left === right) return 1;
+    if (!left.length || !right.length) return 0;
+
+    return 1 - levenshtein(left, right) / Math.max(left.length, right.length);
+}
+
+function tokenSimilarity(a, b) {
+    const left = new Set(normalizeText(a).split(" ").filter(Boolean));
+    const right = new Set(normalizeText(b).split(" ").filter(Boolean));
+
+    if (!left.size || !right.size) return 0;
+
+    let intersection = 0;
+    left.forEach(token => {
+        if (right.has(token)) intersection += 1;
+    });
+
+    return intersection / Math.max(left.size, right.size);
+}
+
+function subjectSimilarity(a, b) {
+    const left = normalizeText(a);
+    const right = normalizeText(b);
+
+    if (!left || !right) return 0;
+    if (left === right) return 1;
+
+    const compactLeft = left.replace(/\s+/g, "");
+    const compactRight = right.replace(/\s+/g, "");
+
+    if (compactLeft === compactRight) return 0.99;
+
+    const charScore = similarity(left, right);
+    const compactScore = similarity(compactLeft, compactRight);
+    const tokenScore = tokenSimilarity(left, right);
+
+    return Math.min(1, Math.max(
+        0,
+        charScore * 0.20 + compactScore * 0.60 + tokenScore * 0.20
+    ));
+}
+
+function subjectCodeSimilarity(a, b) {
+    const left = normalizeCode(a);
+    const right = normalizeCode(b);
+
+    if (!left || !right) return 0;
+    if (left === right) return 1;
+
+    return similarity(left, right);
+}
+
+function matchAcademicSubjectPair(input, candidate) {
+    const subjectScore = subjectSimilarity(input?.subject, candidate?.subject);
+    const codeScore = subjectCodeSimilarity(input?.subjectCode, candidate?.subjectCode);
+    const exactCode = Boolean(
+        normalizeCode(input?.subjectCode) &&
+        normalizeCode(input?.subjectCode) === normalizeCode(candidate?.subjectCode)
+    );
+
+    let score = subjectScore * 0.65 + codeScore * 0.35;
+
+    if (exactCode) {
+        score = Math.max(score, subjectScore * 0.65 + 0.35);
+    }
+
+    const strongSubject = subjectScore >= 0.88;
+    const acceptableCode = exactCode || codeScore >= 0.70;
+
+    return {
+        score,
+        subjectScore,
+        codeScore,
+        exactCode,
+        strongSubject,
+        acceptableCode,
+        matched: strongSubject && acceptableCode && score >= 0.86
+    };
+}
+
+function findBestAcademicSubjectMatch(input, candidates = []) {
+    const ranked = candidates
+        .map(candidate => ({
+            candidate,
+            ...matchAcademicSubjectPair(input, candidate)
+        }))
+        .filter(item => item.matched)
+        .sort((a, b) => b.score - a.score);
+
+    if (!ranked.length) return null;
+
+    const best = ranked[0];
+    const second = ranked[1];
+
+    if (second && !best.exactCode && best.score - second.score < 0.05) {
+        return null;
+    }
+
+    return {
+        ...best.candidate,
+        matchScore: best.score,
+        subjectScore: best.subjectScore,
+        codeScore: best.codeScore,
+        exactCode: best.exactCode
+    };
+}
+
+function escapeRegex(value) {
+    return String(value ?? "").replace(/[.*+?^$()|[\\]\\]/g, "\\$&");
+}
+
+function academicRegex(value) {
+    const parts = clean(value)
+        .toLowerCase()
+        .split(/[^a-z0-9]+/i)
+        .filter(Boolean);
+
+    if (!parts.length) return null;
+
+    return new RegExp(
+        parts.map(part => escapeRegex(part)).join("[^a-z0-9]+"),
+        "i"
+    );
+}
+
+function buildAcademicContextFilter(data, verifiedOnly = false) {
+    const filter = {
+        active: true,
+        college: academicRegex(data.college),
+        degree: academicRegex(data.degree),
+        course: academicRegex(data.course),
+        academicYear: academicRegex(data.academicYear),
+        year: data.year,
+        semester: data.semester
+    };
+
+    if (verifiedOnly) filter.verificationStatus = "verified";
+
+    Object.keys(filter).forEach(key => {
+        if (filter[key] === null || filter[key] === undefined || filter[key] === "") {
+            delete filter[key];
+        }
+    });
+
+    return filter;
+}
 
 function getAcademicSubmission(req) {
     const user = req.user || {};
@@ -10,16 +205,15 @@ function getAcademicSubmission(req) {
     let subject = clean(req.body.academicSubject);
     let subjectCode = clean(req.body.academicSubjectCode);
 
-    // Students must choose a subject/code pair saved in their own academic profile.
-    // Shops can continue to provide the academic fields manually.
     if (accountType === "student" && (subject || subjectCode)) {
-        const normalizeProfileValue = value => clean(value).toLowerCase().replace(/\s+/g, " ");
-        const match = Array.isArray(user.academicSubjects)
-            ? user.academicSubjects.find(item =>
-                normalizeProfileValue(item.subject) === normalizeProfileValue(subject) &&
-                normalizeProfileValue(item.subjectCode) === normalizeProfileValue(subjectCode)
-            )
-            : null;
+        const profileSubjects = Array.isArray(user.academicSubjects)
+            ? user.academicSubjects
+            : [];
+
+        const match = findBestAcademicSubjectMatch(
+            { subject, subjectCode },
+            profileSubjects
+        );
 
         if (!match) {
             subject = "";
@@ -63,43 +257,42 @@ function isCompleteAcademicSubmission(data) {
 }
 
 async function findExistingAcademicBook(data) {
-    const candidates = await AcademicBook.find({
-        college: data.college,
-        degree: data.degree,
-        course: data.course,
-        academicYear: data.academicYear,
-        year: data.year,
-        semester: data.semester,
-        active: true,
-        verificationStatus: { $in: ["verified", "pending"] }
-    }).lean();
+    const candidates = await AcademicBook.find(
+        buildAcademicContextFilter(data, false)
+    ).lean();
 
-    const wantedTitle = normalize(data.title);
-    const wantedIsbn = normalize(data.isbn);
-    const wantedAuthor = normalize(data.author);
-    const wantedSubject = normalize(data.subject);
-    const wantedSubjectCode = normalize(data.subjectCode);
+    const wantedIsbn = normalizeCode(data.isbn);
+    const wantedAuthor = normalizeText(data.author);
 
-    return candidates.find(candidate => {
-        if (wantedIsbn && normalize(candidate.isbn) && wantedIsbn === normalize(candidate.isbn)) {
-            return true;
+    const ranked = candidates.map(candidate => {
+        const candidateIsbn = normalizeCode(candidate.isbn);
+
+        if (wantedIsbn && candidateIsbn && wantedIsbn === candidateIsbn) {
+            return { candidate, score: 1, isbnMatch: true };
         }
 
-        const titleMatches = normalize(candidate.title) === wantedTitle;
-        const authorMatches = !wantedAuthor || !normalize(candidate.author) || normalize(candidate.author) === wantedAuthor;
-        const subjectMatches = !wantedSubject || !normalize(candidate.subject) || normalize(candidate.subject) === wantedSubject;
-        const subjectCodeMatches = !wantedSubjectCode || !normalize(candidate.subjectCode) || normalize(candidate.subjectCode) === wantedSubjectCode;
+        const titleScore = subjectSimilarity(data.title, candidate.title);
+        const authorScore = wantedAuthor && normalizeText(candidate.author)
+            ? subjectSimilarity(data.author, candidate.author)
+            : 1;
+        const academicMatch = matchAcademicSubjectPair(data, candidate);
 
-        return titleMatches && authorMatches && subjectMatches && subjectCodeMatches;
-    }) || null;
+        return {
+            candidate,
+            score: titleScore * 0.55 + authorScore * 0.20 + academicMatch.score * 0.25,
+            isbnMatch: false
+        };
+    })
+        .filter(item => item.isbnMatch || item.score >= 0.86)
+        .sort((a, b) => b.score - a.score);
+
+    return ranked[0]?.candidate || null;
 }
 
 async function attachAcademicBook(book, req) {
     const data = getAcademicSubmission(req);
     const wantsAcademicMapping = req.body.academicListing === "yes" || Boolean(book.academicBook);
 
-    // Generic/non-academic listings remain supported. Keep an existing academic
-    // link when editing a mapped book; otherwise leave it unmapped.
     if (!wantsAcademicMapping || !isCompleteAcademicSubmission(data)) {
         return null;
     }
@@ -137,6 +330,14 @@ async function attachAcademicBook(book, req) {
 
 module.exports = {
     clean,
+    normalizeText,
+    normalizeCode,
+    subjectSimilarity,
+    subjectCodeSimilarity,
+    matchAcademicSubjectPair,
+    findBestAcademicSubjectMatch,
+    academicRegex,
+    buildAcademicContextFilter,
     getAcademicSubmission,
     isCompleteAcademicSubmission,
     attachAcademicBook
