@@ -57,6 +57,7 @@ function isCompleteAcademicSubmission(data) {
         Number.isInteger(data.year) && data.year > 0 &&
         Number.isInteger(data.semester) && data.semester > 0 &&
         data.subject &&
+        data.subjectCode &&
         data.title
     );
 }
