@@ -105,11 +105,15 @@
             <% } else { %>
               <div class="col-md-8">
                 <label for="academicSubject">Subject</label>
-                <input id="academicSubject" name="academicSubject" class="form-control" value="<%= book.academicBook ? book.academicBook.subject : "" %>" placeholder="e.g. Database Management Systems">
+                <div class="academic-autocomplete">
+                  <input id="academicSubject" name="academicSubject" class="form-control" value="<%= book.academicBook ? book.academicBook.subject : "" %>" placeholder="Type subject or code — e.g. databse, BCS501" autocomplete="off">
+                  <div id="academicSuggestions" class="academic-suggestions" hidden></div>
+                </div>
+                <div class="book-form-help">Start typing. BookLoop corrects small spelling mistakes and suggests verified academic subjects.</div>
               </div>
               <div class="col-md-4">
                 <label for="academicSubjectCode">Subject code</label>
-                <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" value="<%= book.academicBook ? book.academicBook.subjectCode : "" %>" placeholder="e.g. CSC501">
+                <input id="academicSubjectCode" name="academicSubjectCode" class="form-control" value="<%= book.academicBook ? book.academicBook.subjectCode : "" %>" placeholder="Selected from suggestion" readonly>
               </div>
             <% } %>
           </div>
@@ -282,5 +286,43 @@
 
   toggle.addEventListener("change", sync);
   sync();
+})();
+</script>
+<script>
+(() => {
+  const subject = document.getElementById("academicSubject");
+  const code = document.getElementById("academicSubjectCode");
+  const box = document.getElementById("academicSuggestions");
+  const studentMode = <%= currentUser && currentUser.accountType === "student" ? "true" : "false" %>;
+  if (!subject || !code || !box || studentMode) return;
+  let timer, controller;
+  const render = items => {
+    box.replaceChildren();
+    if (!items.length) { box.hidden = true; return; }
+    items.forEach(item => {
+      const button = document.createElement("button");
+      button.type = "button"; button.className = "academic-suggestion";
+      button.innerHTML = "<strong></strong><span></span><small></small>";
+      button.querySelector("strong").textContent = item.subject;
+      button.querySelector("span").textContent = item.subjectCode || "No subject code";
+      button.querySelector("small").textContent = [item.course, item.academicYear, item.year ? "Year " + item.year : "", item.semester ? "Semester " + item.semester : ""].filter(Boolean).join(" · ");
+      button.addEventListener("click", () => { subject.value = item.subject; code.value = item.subjectCode || ""; box.hidden = true; });
+      box.appendChild(button);
+    });
+    box.hidden = false;
+  };
+  subject.addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = subject.value.trim();
+    if (q.length < 2) { box.hidden = true; return; }
+    timer = setTimeout(async () => {
+      controller?.abort(); controller = new AbortController();
+      try {
+        const response = await fetch("/academic/suggestions?q=" + encodeURIComponent(q), { signal: controller.signal });
+        if (response.ok) render((await response.json()).suggestions || []);
+      } catch (error) { if (error.name !== "AbortError") console.error("Academic suggestion error:", error); }
+    }, 180);
+  });
+  document.addEventListener("click", event => { if (!event.target.closest(".academic-autocomplete")) box.hidden = true; });
 })();
 </script>
