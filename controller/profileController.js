@@ -1,5 +1,10 @@
 const User = require("../models/user");
 const Book = require("../models/Book");
+const AcademicBook = require("../models/AcademicBook");
+const {
+    findBestAcademicSubjectMatch,
+    buildAcademicContextFilter
+} = require("../utils/academicMatcher");
 
 module.exports.showProfile = async (req, res) => {
     const { id } = req.params;
@@ -77,19 +82,51 @@ module.exports.updateProfile = async (req, res) => {
         const academicSubjects = [];
         const seen = new Set();
 
+        const hasAcademicContext = Boolean(
+            user.college &&
+            user.degree &&
+            user.course &&
+            user.academicYear &&
+            Number.isInteger(user.year) &&
+            Number.isInteger(user.semester)
+        );
+
+        const catalogCandidates = hasAcademicContext
+            ? await AcademicBook.find(buildAcademicContextFilter(user, true))
+                .select("_id subject subjectCode title author isbn edition type")
+                .lean()
+            : [];
+
         for (let index = 0; index < Math.min(rawSubjects.length, 30); index += 1) {
-            const subject = String(rawSubjects[index] || "").trim();
-            const subjectCode = String(rawSubjectCodes[index] || "").trim();
+            const enteredSubject = String(rawSubjects[index] || "").trim();
+            const enteredCode = String(rawSubjectCodes[index] || "").trim();
 
-            // Empty rows are allowed, but a partially completed row is invalid.
-            if (!subject && !subjectCode) continue;
+            if (!enteredSubject && !enteredCode) continue;
 
-            if (!subject || !subjectCode) {
+            if (!enteredSubject || !enteredCode) {
                 req.flash("error", "Each academic subject must have both a subject name and subject code.");
                 return res.redirect("/profile/edit");
             }
 
-            const key = subject.toLowerCase() + "::" + subjectCode.toLowerCase();
+            let subject = enteredSubject;
+            let subjectCode = enteredCode;
+
+            if (catalogCandidates.length) {
+                const match = findBestAcademicSubjectMatch(
+                    { subject: enteredSubject, subjectCode: enteredCode },
+                    catalogCandidates
+                );
+
+                if (match) {
+                    subject = String(match.subject || enteredSubject).trim();
+                    subjectCode = String(match.subjectCode || enteredCode).trim();
+                }
+            }
+
+            const key = subject.toLowerCase().replace(/\s+/g, " ")
+                + "::"
+                + subjectCode.toLowerCase().replace(/[-\s]+/g, "");
+
             if (seen.has(key)) continue;
 
             seen.add(key);
