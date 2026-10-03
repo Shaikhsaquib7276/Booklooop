@@ -277,8 +277,17 @@ module.exports.updateBook = async (req, res) => {
     }
 
     Object.assign(book, req.body);
-    book.academicBook = req.body.academicBook || null;
-    await attachAcademicBook(book, req);
+
+    // Keep an existing academic mapping while editing unless the seller
+    // explicitly turns academic mapping off.
+    if (req.body.academicListing === "yes") {
+        if (book.academicBook === undefined) {
+            book.academicBook = null;
+        }
+        await attachAcademicBook(book, req);
+    } else {
+        book.academicBook = null;
+    }
     book.sellerType = req.user.accountType === "shop" ? "shop" : "student";
     book.stock = book.sellerType === "shop" ? Math.max(0, Number.parseInt(req.body.stock, 10) || 0) : (book.status === "Sold" ? 0 : 1);
     const latitude = Number(req.body.latitude);
