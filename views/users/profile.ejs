@@ -122,6 +122,42 @@
           </div>
         </div>
 
+        <% const savedAcademicSubjects = Array.isArray(user.academicSubjects) && user.academicSubjects.length
+          ? user.academicSubjects
+          : [{ subject: "", subjectCode: "" }]; %>
+        <div class="profile-form-section">
+          <div class="profile-form-heading">
+            <h4>Current subjects</h4>
+            <span>Required for Smart Semester Finder</span>
+          </div>
+          <p class="text-secondary small">Add every subject you are studying and its subject code. You can update this list when your semester changes.</p>
+
+          <div id="academicSubjectsList" class="d-grid gap-2">
+            <% savedAcademicSubjects.forEach((item, index) => { %>
+              <div class="row g-2 academic-subject-row align-items-end">
+                <div class="col-md-7">
+                  <label class="form-label">Subject</label>
+                  <input type="text" name="academicSubject" class="form-control academic-subject-input" value="<%= item.subject || '' %>" placeholder="e.g. Database Management Systems">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Subject code</label>
+                  <input type="text" name="academicSubjectCode" class="form-control academic-subject-code-input" value="<%= item.subjectCode || '' %>" placeholder="e.g. BCS501">
+                </div>
+                <div class="col-md-1 d-grid">
+                  <button type="button" class="btn btn-outline-danger remove-academic-subject" aria-label="Remove subject"><i class="bi bi-trash"></i></button>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addAcademicSubject">
+              <i class="bi bi-plus-circle me-1"></i>Add Subject
+            </button>
+            <span class="text-secondary small">Subject and code must be entered together.</span>
+          </div>
+        </div>
+
         <div class="profile-form-actions">
           <a href="/users/<%= user._id %>" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-2"></i>Cancel</a>
           <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i>Save Changes</button>
@@ -184,4 +220,64 @@
   });
 
   toggleFallback();
+
+  const subjectsList = document.getElementById("academicSubjectsList");
+  const addSubjectButton = document.getElementById("addAcademicSubject");
+
+  function syncSubjectInputs() {
+    if (!subjectsList) return;
+    subjectsList.querySelectorAll(".academic-subject-row").forEach((row) => {
+      const subject = row.querySelector(".academic-subject-input");
+      const code = row.querySelector(".academic-subject-code-input");
+      if (!subject || !code) return;
+
+      const hasSubject = subject.value.trim().length > 0;
+      const hasCode = code.value.trim().length > 0;
+      subject.required = hasCode;
+      code.required = hasSubject;
+    });
+  }
+
+  function wireSubjectRow(row) {
+    row.querySelectorAll("input").forEach(input => input.addEventListener("input", syncSubjectInputs));
+    const remove = row.querySelector(".remove-academic-subject");
+    if (remove) {
+      remove.addEventListener("click", () => {
+        const rows = subjectsList.querySelectorAll(".academic-subject-row");
+        if (rows.length === 1) {
+          row.querySelectorAll("input").forEach(input => { input.value = ""; });
+        } else {
+          row.remove();
+        }
+        syncSubjectInputs();
+      });
+    }
+  }
+
+  if (subjectsList) {
+    subjectsList.querySelectorAll(".academic-subject-row").forEach(wireSubjectRow);
+  }
+
+  if (addSubjectButton && subjectsList) {
+    addSubjectButton.addEventListener("click", () => {
+      const row = document.createElement("div");
+      row.className = "row g-2 academic-subject-row align-items-end";
+      row.innerHTML = `
+        <div class="col-md-7">
+          <label class="form-label">Subject</label>
+          <input type="text" name="academicSubject" class="form-control academic-subject-input" placeholder="e.g. Database Management Systems">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Subject code</label>
+          <input type="text" name="academicSubjectCode" class="form-control academic-subject-code-input" placeholder="e.g. BCS501">
+        </div>
+        <div class="col-md-1 d-grid">
+          <button type="button" class="btn btn-outline-danger remove-academic-subject" aria-label="Remove subject"><i class="bi bi-trash"></i></button>
+        </div>`;
+      subjectsList.appendChild(row);
+      wireSubjectRow(row);
+    });
+  }
+
+  syncSubjectInputs();
 </script>
