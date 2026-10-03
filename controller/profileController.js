@@ -77,23 +77,24 @@ module.exports.updateProfile = async (req, res) => {
         const academicSubjects = [];
         const seen = new Set();
 
-        rawSubjects.slice(0, 30).forEach((subjectValue, index) => {
-            const subject = String(subjectValue || "").trim();
+        for (let index = 0; index < Math.min(rawSubjects.length, 30); index += 1) {
+            const subject = String(rawSubjects[index] || "").trim();
             const subjectCode = String(rawSubjectCodes[index] || "").trim();
 
-            // Empty rows are allowed so the subject list itself remains optional.
-            if (!subject && !subjectCode) return;
+            // Empty rows are allowed, but a partially completed row is invalid.
+            if (!subject && !subjectCode) continue;
 
             if (!subject || !subjectCode) {
-                throw new Error("Each academic subject must have both a subject name and subject code.");
+                req.flash("error", "Each academic subject must have both a subject name and subject code.");
+                return res.redirect("/profile/edit");
             }
 
             const key = subject.toLowerCase() + "::" + subjectCode.toLowerCase();
-            if (seen.has(key)) return;
+            if (seen.has(key)) continue;
 
             seen.add(key);
             academicSubjects.push({ subject, subjectCode });
-        });
+        }
 
         user.academicSubjects = academicSubjects;
     } else {
