@@ -4,7 +4,10 @@ const BookRequest=require("../models/BookRequest");
 const StudentBook=require("../models/StudentBook");
 const { notifyUser } = require("../utils/notificationService");
 const {
-  matchAcademicSubjectPair
+  matchAcademicSubjectPair,
+  subjectSimilarity,
+  subjectCodeSimilarity,
+  normalizeCode
 } = require("../utils/academicMatcher");
 const clean=v=>String(v||"").trim();
 const academicRegex=value=>{
